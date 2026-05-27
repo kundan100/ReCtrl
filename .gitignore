@@ -1,0 +1,5 @@
+node_modules/
+
+*.bak
+__kk__*.*
+__kk__/
