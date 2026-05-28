@@ -11,7 +11,7 @@ SetupTrayIcon() {
 	; Set custom tray icon and custom tooltip.
 	; You can also compile this script to an EXE embedding the same ICO (see README instructions).
 	iconPath := A_ScriptDir "\assets\appIcon\favicon_io\favicon.ico"
-	iconTooltip := "ReCtrl-5"
+	iconTooltip := "ReCtrl (v1.0.0)"
 
 	if FileExist(iconPath) {
 		; MsgBox(iconPath)
