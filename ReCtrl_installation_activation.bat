@@ -104,7 +104,6 @@ exit /b 1
 echo Found AutoHotkey: %AHK_EXE%
 echo Running script: %AHK_SCRIPT%
 echo.
-exit /b 0
 
 REM Launch ReCtrl
 start "" "%AHK_EXE%" "%AHK_SCRIPT%"
