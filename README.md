@@ -20,7 +20,7 @@
 		7. double-click this shortcut to activate your ahk utility.
 2. Verify your running ahk-utility.
    1. System Tray > app-icon > hover to see the tooltip.
-3. To Run: double-press `Ctrl` key.
+3. <mark>To Run: double-press `Ctrl` key.</mark>
 4. Reload your utility (after updating)
 	1. System Tray > app-icon (tooltip showing main-ahk-file-name) > right click > "Reload Script".
 5. Pre-requisites:
