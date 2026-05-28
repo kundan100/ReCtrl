@@ -21,3 +21,21 @@
 	1. Using AHK V2.
 	2. Get/download the lib (AutoHotkey_2.0.19.zip) and extract anywhere (preferably outside project).
 7. Done!
+ 
+
+# Project Structure
+```
+ReCtrl/
+├── index.ahk                   → Entry point (includes src/ReCtrl.ahk)
+├── ReCtrl.ahk                  → Original file (preserved)
+└── src/
+	├── ReCtrl.ahk              → Main coordinator
+	├── sysTraySetup.ahk        → Tray icon & tooltip setup
+	├── hotkeyHandler.ahk       → Double-press Ctrl hotkey (with lastCtrlPress)
+	└── currentWinInfo.ahk      → Window info display logic
+```
+
+# Project Code Flow
+1. Run index.ahk → includes src/ReCtrl.ahk
+2. src/ReCtrl.ahk → includes all modules; calls SetupTrayIcon(); and registers hotkey.
+3. window info logic separated into clean functions
