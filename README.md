@@ -24,15 +24,16 @@
  
 
 # Project Structure
+```
 ReCtrl/
 ├── index.ahk                   → Entry point (includes src/ReCtrl.ahk)
 ├── ReCtrl.ahk                  → Original file (preserved)
 └── src/
-    ├── ReCtrl.ahk              → Main coordinator
-    ├── sysTraySetup.ahk        → Tray icon & tooltip setup
-    ├── hotkeyHandler.ahk       → Double-press Ctrl hotkey (with lastCtrlPress)
-    └── currentWinInfo.ahk      → Window info display logic
-
+	├── ReCtrl.ahk              → Main coordinator
+	├── sysTraySetup.ahk        → Tray icon & tooltip setup
+	├── hotkeyHandler.ahk       → Double-press Ctrl hotkey (with lastCtrlPress)
+	└── currentWinInfo.ahk      → Window info display logic
+```
 
 # Project Code Flow
 1. Run index.ahk → includes src/ReCtrl.ahk
