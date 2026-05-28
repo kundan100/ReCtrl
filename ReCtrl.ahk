@@ -7,16 +7,19 @@
 ; avoiding the ambiguous syntax error
 #Requires AutoHotkey v2
 
-; Try to use a custom tray icon if an ICO named ReCtrl.ico is placed next to this script.
+; Set custom tray icon and custom tooltip.
 ; You can also compile this script to an EXE embedding the same ICO (see README instructions).
 iconPath := A_ScriptDir "\assets\appIcon\favicon_io\favicon.ico"
 if FileExist(iconPath) {
   ; MsgBox(iconPath)
   try {
+    ; set app-icon in system-tray
     TraySetIcon(iconPath)
+    ; set hover tooltip (for system-tray's app-icon)
+    A_IconTip := "ReCtrl"
     MsgBox("iconPath: " iconPath)
   } catch {
-    ; TBD: find a way to pass "e" and print e.Message
+    ; TBD (future): find a way to pass "e" and print e.Message
     MsgBox("Failed to set tray icon!")
   }
 }
