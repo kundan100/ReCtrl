@@ -18,6 +18,10 @@
 		5. Click "Finish".
 		6. right-click (on shortcut) > click "Properties" > assign the shortcut-key (same which has been mentioned in your main-ahk-file).
 		7. double-click this shortcut to activate your ahk utility.
+	4. Activate (Option-3): using core command in terminal:
+        1. Command: `start "" "%AHK_EXE%" "%AHK_SCRIPT%"`
+        2. Replace `%AHK_EXE%` with `D:\path-to\AutoHotkey64.exe`
+        3. Replace `%AHK_SCRIPT%` with `D:\path-to\index.ahk`
 2. Verify your running ahk-utility.
    1. System Tray > app-icon > hover to see the tooltip.
 3. <mark>To Run: double-press `Ctrl` key.</mark>
