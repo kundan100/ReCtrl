@@ -1,3 +1,8 @@
+URL: https://favicon.io/favicon-generator/
+Character: K
+BG color: #F80
+FG color: #000
+
 This favicon was generated using the following font:
 
 - Font Title: Love Light
