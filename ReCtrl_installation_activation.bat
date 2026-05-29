@@ -1,6 +1,4 @@
 @echo off
-REM Enable delayed expansion to properly read variables set by called scripts
-setlocal enabledelayedexpansion
 REM ============================================================
 REM How to run this script from different terminals:
 REM 
@@ -9,6 +7,9 @@ REM PowerShell: .\ReCtrl_installation_activation.bat
 REM Git Bash:   ./ReCtrl_installation_activation.bat
 REM             or cmd.exe //c ReCtrl_installation_activation.bat
 REM ============================================================
+
+REM Enable delayed expansion to properly read variables set by called scripts
+setlocal enabledelayedexpansion
 
 echo Activating/Installing/Starting ReCtrl...
 echo.
