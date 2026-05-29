@@ -12,5 +12,8 @@
  */
 #Requires AutoHotkey v2
 
+; Ensure only one instance of the script runs; automatically replace any previous instance
+#SingleInstance Force
+
 ; Include the main application file
 #Include src\ReCtrl.ahk
