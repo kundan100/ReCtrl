@@ -3,3 +3,6 @@ node_modules/
 *.bak
 __kk__*.*
 __kk__/
+
+# Local environment configuration
+.env
