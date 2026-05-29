@@ -1,4 +1,6 @@
 @echo off
+REM Enable delayed expansion to properly read variables set by called scripts
+setlocal enabledelayedexpansion
 REM ============================================================
 REM How to run this script from different terminals:
 REM 
@@ -14,8 +16,18 @@ echo.
 REM Set script path (relative to this BAT file location)
 set AHK_SCRIPT=%~dp0index.ahk
 
-REM AHK_EXE_MyCustomPath="D:\path-to\AutoHotkey64.exe"
-set AHK_EXE_MyCustomPath=""
+REM Try to load from .env file if it exists
+set AHK_EXE_MyCustomPath=
+if exist "%~dp0.env" (
+    echo Loading configuration from .env file...
+    call "%~dp0scripts\envParser.bat"
+    if not "!AHK_EXE!"=="" (
+        set AHK_EXE_MyCustomPath=!AHK_EXE!
+        echo Loaded AutoHotkey path from .env: !AHK_EXE!
+        echo.
+    )
+)
+
 REM Auto-detect AutoHotkey installation
 set AHK_EXE=
 
@@ -56,11 +68,13 @@ if %ERRORLEVEL% EQU 0 (
     goto :found
 )
 
-REM Check-6: Custom path (fallback for developer)
-if exist %AHK_EXE_MyCustomPath% (
-    set AHK_EXE=%AHK_EXE_MyCustomPath%
-    echo success Check-6
-    goto :found
+REM Check-6: Use path from .env if it was loaded (developer preference)
+if not "%AHK_EXE_MyCustomPath%"=="" (
+    if exist "%AHK_EXE_MyCustomPath%" (
+        set AHK_EXE=%AHK_EXE_MyCustomPath%
+        echo success Check-6 (from .env)
+        goto :found
+    )
 )
 
 REM Check-7: Ask user for custom path
