@@ -32,7 +32,7 @@ if exist "%~dp0.env" (
 REM Auto-detect AutoHotkey installation
 set AHK_EXE=
 
-echo checking if AutoHotkey64.exe exists on your machine or not...
+echo checking if AutoHotkey64.exe exists on your machine (standard paths) or not...
 REM Check-1: Default Program Files installation (AHK v2)
 if exist "C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe" (
     set AHK_EXE=C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe
