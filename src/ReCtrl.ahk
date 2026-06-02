@@ -9,26 +9,61 @@
  * All functions and variables from included files become available in the global scope
  */
 #Include sysTraySetup.ahk
-#Include currentWinInfo.ahk
+; #Include currentWinInfo.ahk  ; Disconnected - keeping for future reference
+#Include mainSearchBox\mainSearchBox.ahk
 
 ; setup system tray icon and tooltip
 SetupTrayIcon()
 
+; Initialize the main searchbox feature
+global mainSearchBoxInstance := MainSearchBox()
+
+/**
+ * Helper function for #HotIf context
+ * Returns true only if main searchbox edit control has focus
+ */
+IsMainSearchBoxEditFocused() {
+    global mainSearchBoxInstance
+    try {
+        if !WinActive("ahk_id " mainSearchBoxInstance.gui.GetHwnd())
+            return false
+        ; Check if messagebox or other dialog is active
+        if WinActive("ahk_class #32770")  ; Standard dialog/messagebox class
+            return false
+        focusedControl := ControlGetFocus("A")
+        return (focusedControl != "")
+    }
+    return false
+}
 
 /**
  * register hotkey (Double-press Ctrl).
  * Detects when Ctrl key is pressed twice within 400ms
+ * Now shows the main searchbox instead of window info
  */
 ; Global variable to track the last Ctrl key press time
 lastCtrlPress := 0
+; ~Ctrl:: → Detects double Ctrl press within 400ms → Calls ShowMainSearchBox()
 ~Ctrl:: {
     global lastCtrlPress
     currentTime := A_TickCount
 
     if (lastCtrlPress > 0 && (currentTime - lastCtrlPress < 400)) {
-        DisplayWindowInfo()
+        ShowMainSearchBox()  ; New main searchbox feature
+        ; DisplayWindowInfo()  ; Old feature - disconnected but available
     }
 
     lastCtrlPress := currentTime
     KeyWait("Ctrl")
 }
+
+/**
+ * Enter key handler for main searchbox
+ * Only active when main searchbox edit control has focus (not messageboxes)
+ */
+#HotIf IsMainSearchBoxEditFocused()
+Enter:: {
+    global mainSearchBoxInstance
+    mainSearchBoxInstance.ProcessSearch()
+}
+#HotIf
