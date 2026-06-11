@@ -63,6 +63,14 @@ class SearchBox {
     ActivateCurrentOption() {
         this.handler.ActivateSelectedOption()
     }
+
+    IsQueryBlank() {
+        return Trim(this.gui.GetSearchText()) = ""
+    }
+
+    OnEmptyEraseKey() {
+        this.handler.OnEmptyEraseKey()
+    }
 }
 
 SearchBox_IsInputFocused() {
@@ -90,6 +98,21 @@ SearchBox_IsInputFocused() {
     }
 }
 
+SearchBox_IsInputFocusedAndBlank() {
+    global gSearchBoxHotkeyTarget
+    if !SearchBox_IsInputFocused() {
+        return false
+    }
+    if !IsObject(gSearchBoxHotkeyTarget) {
+        return false
+    }
+    try {
+        return gSearchBoxHotkeyTarget.IsQueryBlank()
+    } catch {
+        return false
+    }
+}
+
 #HotIf SearchBox_IsInputFocused()
 Up:: {
     global gSearchBoxHotkeyTarget
@@ -104,5 +127,17 @@ Down:: {
 Enter:: {
     global gSearchBoxHotkeyTarget
     gSearchBoxHotkeyTarget.SubmitCurrent()
+}
+#HotIf
+
+#HotIf SearchBox_IsInputFocusedAndBlank()
+Backspace:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.OnEmptyEraseKey()
+}
+
+Delete:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.OnEmptyEraseKey()
 }
 #HotIf
