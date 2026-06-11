@@ -145,10 +145,26 @@ class SearchBoxHandler {
         if (actionType = "messageBox") {
             messageText := action.Has("message") ? action["message"] : action["label"]
             this.ShowOwnedMessage(messageText, "ReCtrl")
+        } else if (actionType = "clipboardWriteText") {
+            result := ClipboardActions.CreateClipboardFileFromText()
+            this.ShowActionResult(result)
+        } else if (actionType = "clipboardReadText") {
+            result := ClipboardActions.LoadClipboardTextFromFile()
+            this.ShowActionResult(result)
         } else {
             this.RunCommandInTerminal(action["command"])
         }
         this.guiInstance.ClearSearch()
+    }
+
+    ShowActionResult(result) {
+        if !IsObject(result) {
+            this.ShowOwnedMessage("Action finished.", "ReCtrl")
+            return
+        }
+        title := result.Has("title") ? result["title"] : "ReCtrl"
+        text := result.Has("message") ? result["message"] : "Done."
+        this.ShowOwnedMessage(text, title)
     }
 
     ShowOwnedMessage(text, title := "ReCtrl") {
