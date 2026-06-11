@@ -10,31 +10,33 @@
  */
 #Include sysTraySetup.ahk
 ; #Include currentWinInfo.ahk  ; Disconnected - keeping for future reference
-#Include mainSearchBox\mainSearchBox.ahk
+; #Include mainSearchBox\mainSearchBox.ahk
+#Include mainApp\mainApp.ahk
 
 ; setup system tray icon and tooltip
 SetupTrayIcon()
 
 ; Initialize the main searchbox feature
-global mainSearchBoxInstance := MainSearchBox()
+; global mainSearchBoxInstance := MainSearchBox()
+global mainAppInstance := MainApp()
 
 /**
  * Helper function for #HotIf context
  * Returns true only if main searchbox edit control has focus
  */
-IsMainSearchBoxEditFocused() {
-    global mainSearchBoxInstance
-    try {
-        if !WinActive("ahk_id " mainSearchBoxInstance.gui.GetHwnd())
-            return false
-        ; Check if messagebox or other dialog is active
-        if WinActive("ahk_class #32770")  ; Standard dialog/messagebox class
-            return false
-        focusedControl := ControlGetFocus("A")
-        return (focusedControl != "")
-    }
-    return false
-}
+; IsMainSearchBoxEditFocused() {
+;     global mainSearchBoxInstance
+;     try {
+;         if !WinActive("ahk_id " mainSearchBoxInstance.gui.GetHwnd())
+;             return false
+;         ; Check if messagebox or other dialog is active
+;         if WinActive("ahk_class #32770")  ; Standard dialog/messagebox class
+;             return false
+;         focusedControl := ControlGetFocus("A")
+;         return (focusedControl != "")
+;     }
+;     return false
+; }
 
 /**
  * register hotkey (Double-press Ctrl).
@@ -49,7 +51,8 @@ lastCtrlPress := 0
     currentTime := A_TickCount
 
     if (lastCtrlPress > 0 && (currentTime - lastCtrlPress < 400)) {
-        ShowMainSearchBox()  ; New main searchbox feature
+        ShowMainApp()
+        ; ShowMainSearchBox()  ; New main searchbox feature
         ; DisplayWindowInfo()  ; Old feature - disconnected but available
     }
 
@@ -61,9 +64,9 @@ lastCtrlPress := 0
  * Enter key handler for main searchbox
  * Only active when main searchbox edit control has focus (not messageboxes)
  */
-#HotIf IsMainSearchBoxEditFocused()
-Enter:: {
-    global mainSearchBoxInstance
-    mainSearchBoxInstance.ProcessSearch()
-}
-#HotIf
+; #HotIf IsMainSearchBoxEditFocused()
+; Enter:: {
+;     global mainSearchBoxInstance
+;     mainSearchBoxInstance.ProcessSearch()
+; }
+; #HotIf

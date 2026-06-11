@@ -40,10 +40,20 @@ ReCtrl/
 ├── assets/
 │   └── appIcon/favicon_io/
 │       └── favicon.ico                → System tray icon
-└── src/
-    ├── ReCtrl.ahk                     → Main coordinator (includes modules, registers hotkey)
-    ├── sysTraySetup.ahk               → Tray icon & tooltip setup
-    └── currentWinInfo.ahk             → Window info display logic
+├── src/
+│	├── appConfig.ahk                      ← app-wide settings (width, colors, title, etc.)
+│	├── ReCtrl.ahk                         ← coordinator only: includes, init, hotkeys
+│	├── sysTraySetup.ahk                   ← unchanged
+│	├── currentWinInfo.ahk             → Window info display logic
+│	│
+│	├── mainApp/                           ← NEW feature (replaces mainSearchBox at runtime)
+│	│   ├── mainApp.ahk                    ← thin orchestrator + ShowMainApp() for hotkey
+│	│   ├── mainAppContainer.ahk           ← owns the single Gui, composes header + content
+│	│   ├── headerContainer.ahk            ← close button, extreme-right layout
+│	│   └── contentContainer.ahk           ← dummy text (placeholder content)
+│	│
+│	└── mainSearchBox/                     ← PARKED — no deletions, left as-is
+│   	└── ...                            ← disconnected only via comments in ReCtrl.ahk
 ├── ReCtrl_installation_activation.bat → Launcher script (cross-terminal compatible)
 ```
 
