@@ -3,10 +3,13 @@
 
 #Requires AutoHotkey v2
 
+#Include ..\searchBox\searchBox.ahk
+
 class AppContentContainer {
     gui := ""
     headerHeight := 0
     contentBg := ""
+    searchBox := ""
 
     __New(parentGui, headerHeight) {
         this.gui := parentGui
@@ -22,10 +25,24 @@ class AppContentContainer {
         this.contentBg := this.gui.Add("Text",
             "x0 y" this.headerHeight " w" w " h" h " Background" cfg.BG_COLOR " Center",
             cfg.DUMMY_TEXT)
+
+        searchW := Min(520, w - 40)
+        searchX := Floor((w - searchW) / 2)
+        searchY := this.headerHeight + 20
+        this.searchBox := SearchBox(this.gui, searchX, searchY, searchW, 32)
     }
 
     Reposition(clientW, clientH) {
         contentH := clientH - this.headerHeight
         this.contentBg.Move(, this.headerHeight, clientW, contentH)
+
+        searchW := Min(520, clientW - 40)
+        searchX := Floor((clientW - searchW) / 2)
+        searchY := this.headerHeight + 20
+        this.searchBox.Reposition(searchX, searchY, searchW, 32)
+    }
+
+    FocusSearchBox() {
+        this.searchBox.Focus()
     }
 }
