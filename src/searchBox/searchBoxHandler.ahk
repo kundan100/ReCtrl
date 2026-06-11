@@ -21,7 +21,7 @@ class SearchBoxHandler {
 
     OnInputFocus(query) {
         if (Trim(query) = "") {
-            this.ShowRecentSuggestions()
+            this.ClearSuggestions()
             return
         }
         this.UpdateSuggestions(query)
@@ -30,7 +30,7 @@ class SearchBoxHandler {
     UpdateSuggestions(query) {
         query := Trim(query)
         if (query = "") {
-            this.ShowRecentSuggestions()
+            this.ClearSuggestions()
             return
         }
 
@@ -105,6 +105,10 @@ class SearchBoxHandler {
         this.ProcessSearch(this.guiInstance.GetSearchText())
     }
 
+    OnEmptyEraseKey() {
+        this.ClearSuggestions()
+    }
+
     ActivateSelectedOption(selectedIndex := 0) {
         if (selectedIndex <= 0) {
             selectedIndex := this.guiInstance.GetSelectedIndex()
@@ -116,7 +120,9 @@ class SearchBoxHandler {
     }
 
     ProcessSearch(searchText) {
-        if (searchText = "" && this.visibleActions.Length = 0) {
+        searchText := Trim(searchText)
+        if (searchText = "") {
+            this.ShowRecentSuggestions()
             return
         }
 
@@ -125,6 +131,11 @@ class SearchBoxHandler {
             this.ExecuteAction(this.visibleActions[selectedIndex])
             return
         }
+    }
+
+    ClearSuggestions() {
+        this.visibleActions := []
+        this.guiInstance.SetSuggestionOptions([])
     }
 
     ExecuteAction(action) {
