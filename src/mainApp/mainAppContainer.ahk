@@ -22,6 +22,7 @@ class MainAppContainer {
         if !AppConfig.WINDOW.SHOW_TITLE_BAR
             options .= " -Caption"
         this.gui := Gui(options, AppConfig.WINDOW.TITLE)
+        this.gui.Opt("+OwnDialogs")
         this.gui.Name := "ReCtrlMainApp"
         this.gui.BackColor := AppConfig.WINDOW.BG_COLOR
         this.gui.MarginX := 0
