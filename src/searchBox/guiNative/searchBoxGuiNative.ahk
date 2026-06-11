@@ -70,6 +70,13 @@ class SearchBoxGuiNative {
         return this.searchEdit.Value
     }
 
+    GetOwnerHwnd() {
+        if this.isEmbedded {
+            return this.parentGui.Hwnd
+        }
+        return this.gui.Hwnd
+    }
+
     ClearSearch() {
         this.searchEdit.Value := ""
     }
