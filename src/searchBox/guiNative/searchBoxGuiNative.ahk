@@ -184,7 +184,15 @@ class SearchBoxGuiNative {
         if !windowHwnd || !ctrl {
             return false
         }
-        focusedClassNN := ControlGetFocus("ahk_id " windowHwnd)
+        if !WinExist("ahk_id " windowHwnd) {
+            return false
+        }
+
+        focusedClassNN := ""
+        try focusedClassNN := ControlGetFocus("ahk_id " windowHwnd)
+        catch {
+            return false
+        }
         if (focusedClassNN = "") {
             return false
         }
