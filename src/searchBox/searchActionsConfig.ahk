@@ -47,6 +47,18 @@ class SearchActionsConfig {
             "actionType", "messageBox",
             "message", "temporary5",
             "keywords", ["temporary5", "temp", "demo"]
+        ),
+        Map(
+            "id", "clipboard-create-file",
+            "label", "create clipboard file",
+            "actionType", "clipboardWriteText",
+            "keywords", ["clipboard", "create", "save", "text", "file", "latest"]
+        ),
+        Map(
+            "id", "clipboard-read-file",
+            "label", "read clipboard file",
+            "actionType", "clipboardReadText",
+            "keywords", ["clipboard", "read", "load", "text", "file", "latest"]
         )
     ]
 }
