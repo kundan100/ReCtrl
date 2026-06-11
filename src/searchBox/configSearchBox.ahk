@@ -25,6 +25,8 @@ class NativeUiConfig {
     static SUBMIT_BUTTON_MIN_WIDTH := 20
     static SUBMIT_BUTTON_GAP := 5
     static SEARCH_INPUT_HEIGHT := 32
+    static SEARCH_PLACEHOLDER_TEXT := "Type to search... (Enter=Recent, Ctrl+Enter=All)"
+    static SEARCH_PLACEHOLDER_SHOW_WHEN_FOCUSED := true
     static SUGGESTION_LIST_GAP := 4
     static SUGGESTION_LIST_HEIGHT := 96
     static SUGGESTION_ITEM_HEIGHT := 22
