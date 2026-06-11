@@ -47,6 +47,7 @@ class MainAppContainer {
         this.gui.Show("w" w " h" h " Center")
         this.gui.GetClientPos(, , &clientW, &clientH)
         this.OnSize(clientW, clientH)
+        this.content.FocusSearchBox()
     }
 
     Hide() {
