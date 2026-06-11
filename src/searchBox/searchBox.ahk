@@ -2,6 +2,7 @@
 
 #Include configSearchBox.ahk
 #Include searchActionsConfig.ahk
+#Include actions\clipboardActions.ahk
 #Include guiNative\searchBoxGuiNative.ahk
 #Include searchBoxHandler.ahk
 
