@@ -66,8 +66,28 @@ class SearchBox {
 }
 
 SearchBox_IsInputFocused() {
-    global gSearchBoxHotkeyTarget
-    return IsObject(gSearchBoxHotkeyTarget) && gSearchBoxHotkeyTarget.IsInputFocused()
+    global gSearchBoxHotkeyTarget, mainAppInstance
+
+    ; Extra guard: do not evaluate search-box focus unless MainApp is visible.
+    if !IsObject(mainAppInstance) || !IsObject(mainAppInstance.container) {
+        return false
+    }
+    try {
+        if !mainAppInstance.container.IsVisible() {
+            return false
+        }
+    } catch {
+        return false
+    }
+
+    if !IsObject(gSearchBoxHotkeyTarget) {
+        return false
+    }
+    try {
+        return gSearchBoxHotkeyTarget.IsInputFocused()
+    } catch {
+        return false
+    }
 }
 
 #HotIf SearchBox_IsInputFocused()
