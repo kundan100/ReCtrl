@@ -2,7 +2,7 @@
 **`personal assistant` in windows, triggered by double-press of `Ctrl` key.**
 
 # <mark>how to use</mark>
-1. for installation / activation, 
+1. for installation / activation / Launching, 
 	1. clone this repo.
 	2. Activate (Option-1): using bat file (ReCtrl_installation_activation.bat):
         1. Run the BAT file from any terminal, as below:
