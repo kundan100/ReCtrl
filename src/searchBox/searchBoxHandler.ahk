@@ -50,6 +50,15 @@ class SearchBoxHandler {
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(recent), 1)
     }
 
+    ShowAllSuggestions() {
+        all := []
+        for action in this.allActions {
+            all.Push(action)
+        }
+        this.visibleActions := all
+        this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(all), 1)
+    }
+
     BuildOptionLabels(actions) {
         labels := []
         for action in actions {
@@ -103,6 +112,10 @@ class SearchBoxHandler {
 
     SubmitCurrent() {
         this.ProcessSearch(this.guiInstance.GetSearchText())
+    }
+
+    ShowAllOptionsShortcut() {
+        this.ShowAllSuggestions()
     }
 
     OnEmptyEraseKey() {
