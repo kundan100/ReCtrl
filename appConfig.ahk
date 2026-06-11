@@ -28,7 +28,7 @@ class AppConfig {
 
     static CONTENT := {
         BG_COLOR: "0xFFFF00",
-        DUMMY_TEXT: "Placeholder — content area"
+        DUMMY_TEXT: "" ; "Placeholder — content area"
     }
 
     static AppHeaderHeight() {

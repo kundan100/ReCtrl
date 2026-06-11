@@ -49,8 +49,8 @@ ReCtrl/
 │	├── mainApp/                           ← NEW feature (replaces mainSearchBox at runtime)
 │	│   ├── mainApp.ahk                    ← thin orchestrator + ShowMainApp() for hotkey
 │	│   ├── mainAppContainer.ahk           ← owns the single Gui, composes header + content
-│	│   ├── headerContainer.ahk            ← close button, extreme-right layout
-│	│   └── contentContainer.ahk           ← dummy text (placeholder content)
+│	│   ├── appHeaderContainer.ahk         ← custom header with icon/title/close
+│	│   └── appContentContainer.ahk        ← content background + embedded searchBox
 │	│
 │	└── mainSearchBox/                     ← PARKED — no deletions, left as-is
 │   	└── ...                            ← disconnected only via comments in ReCtrl.ahk
