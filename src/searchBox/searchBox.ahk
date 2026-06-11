@@ -61,6 +61,10 @@ class SearchBox {
         this.handler.SubmitCurrent()
     }
 
+    ShowAllOptionsShortcut() {
+        this.handler.ShowAllOptionsShortcut()
+    }
+
     ActivateCurrentOption() {
         this.handler.ActivateSelectedOption()
     }
@@ -132,6 +136,11 @@ Enter:: {
 #HotIf
 
 #HotIf SearchBox_IsInputFocusedAndBlank()
+^Enter:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.ShowAllOptionsShortcut()
+}
+
 Backspace:: {
     global gSearchBoxHotkeyTarget
     gSearchBoxHotkeyTarget.OnEmptyEraseKey()
