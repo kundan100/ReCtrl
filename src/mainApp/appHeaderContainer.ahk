@@ -59,9 +59,9 @@ class AppHeaderContainer {
         this.closeBtn.OnEvent("Click", (*) => this.onClose.Call())
 
         if this.icon
-            DragWin.Enable(this.gui, this.headerBg, this.titleText, this.closeBtn, this.icon)
+            DragWin.Enable(this.gui, this.headerBg, this.closeBtn, this.icon)
         else
-            DragWin.Enable(this.gui, this.headerBg, this.titleText, this.closeBtn)
+            DragWin.Enable(this.gui, this.headerBg, this.closeBtn)
     }
 
     ApplyTitleLayout(x, w, headerHeight) {

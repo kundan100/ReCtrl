@@ -28,8 +28,8 @@ class AppContentContainer {
 
         searchW := Min(520, w - 40)
         searchX := Floor((w - searchW) / 2)
-        searchY := this.headerHeight + 20
-        this.searchBox := SearchBox(this.gui, searchX, searchY, searchW, 32)
+        searchY := this.headerHeight + 8
+        this.searchBox := SearchBox(this.gui, searchX, searchY, searchW, NativeUiConfig.SEARCH_INPUT_HEIGHT)
     }
 
     Reposition(clientW, clientH) {
@@ -38,11 +38,15 @@ class AppContentContainer {
 
         searchW := Min(520, clientW - 40)
         searchX := Floor((clientW - searchW) / 2)
-        searchY := this.headerHeight + 20
-        this.searchBox.Reposition(searchX, searchY, searchW, 32)
+        searchY := this.headerHeight + 8
+        this.searchBox.Reposition(searchX, searchY, searchW, NativeUiConfig.SEARCH_INPUT_HEIGHT)
     }
 
     FocusSearchBox() {
         this.searchBox.Focus()
+    }
+
+    HideTransientUi() {
+        this.searchBox.Hide()
     }
 }

@@ -24,4 +24,9 @@ class NativeUiConfig {
     ; Width is auto-sized from button text. This is only a lower bound.
     static SUBMIT_BUTTON_MIN_WIDTH := 20
     static SUBMIT_BUTTON_GAP := 5
+    static SEARCH_INPUT_HEIGHT := 32
+    static SUGGESTION_LIST_GAP := 4
+    static SUGGESTION_LIST_HEIGHT := 96
+    static SUGGESTION_ITEM_HEIGHT := 22
+    static SUGGESTION_MAX_VISIBLE_COUNT := 10
 }

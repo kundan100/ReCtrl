@@ -1,8 +1,11 @@
 #Requires AutoHotkey v2
 
 #Include configSearchBox.ahk
+#Include searchActionsConfig.ahk
 #Include guiNative\searchBoxGuiNative.ahk
 #Include searchBoxHandler.ahk
+
+global gSearchBoxHotkeyTarget := ""
 
 class SearchBox {
     gui := ""
@@ -21,6 +24,8 @@ class SearchBox {
         this.isEmbedded := IsObject(parentGui)
         this.gui := SearchBoxGuiNative(parentGui, x, y, w, h)
         this.handler := SearchBoxHandler(this.gui)
+        global gSearchBoxHotkeyTarget
+        gSearchBoxHotkeyTarget := this
     }
 
     Show() {
@@ -42,4 +47,97 @@ class SearchBox {
     Focus() {
         this.gui.Focus()
     }
+
+    IsInputFocused() {
+        return this.gui.IsInputFocused()
+    }
+
+    SelectRelative(step) {
+        return this.handler.MoveSelection(step)
+    }
+
+    SubmitCurrent() {
+        this.handler.SubmitCurrent()
+    }
+
+    ActivateCurrentOption() {
+        this.handler.ActivateSelectedOption()
+    }
+
+    IsQueryBlank() {
+        return Trim(this.gui.GetSearchText()) = ""
+    }
+
+    OnEmptyEraseKey() {
+        this.handler.OnEmptyEraseKey()
+    }
 }
+
+SearchBox_IsInputFocused() {
+    global gSearchBoxHotkeyTarget, mainAppInstance
+
+    ; Extra guard: do not evaluate search-box focus unless MainApp is visible.
+    if !IsObject(mainAppInstance) || !IsObject(mainAppInstance.container) {
+        return false
+    }
+    try {
+        if !mainAppInstance.container.IsVisible() {
+            return false
+        }
+    } catch {
+        return false
+    }
+
+    if !IsObject(gSearchBoxHotkeyTarget) {
+        return false
+    }
+    try {
+        return gSearchBoxHotkeyTarget.IsInputFocused()
+    } catch {
+        return false
+    }
+}
+
+SearchBox_IsInputFocusedAndBlank() {
+    global gSearchBoxHotkeyTarget
+    if !SearchBox_IsInputFocused() {
+        return false
+    }
+    if !IsObject(gSearchBoxHotkeyTarget) {
+        return false
+    }
+    try {
+        return gSearchBoxHotkeyTarget.IsQueryBlank()
+    } catch {
+        return false
+    }
+}
+
+#HotIf SearchBox_IsInputFocused()
+Up:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.SelectRelative(-1)
+}
+
+Down:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.SelectRelative(1)
+}
+
+Enter:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.SubmitCurrent()
+}
+#HotIf
+
+#HotIf SearchBox_IsInputFocusedAndBlank()
+Backspace:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.OnEmptyEraseKey()
+}
+
+Delete:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.OnEmptyEraseKey()
+}
+#HotIf

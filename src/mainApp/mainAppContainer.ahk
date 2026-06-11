@@ -52,6 +52,7 @@ class MainAppContainer {
     }
 
     Hide() {
+        this.content.HideTransientUi()
         this.gui.Hide()
     }
 
