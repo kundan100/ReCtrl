@@ -17,7 +17,7 @@ class SearchBoxConfig {
 class NativeUiConfig {
     ; Controls whether a visible submit button is rendered next to the input.
     ; Enter key submission works in both modes.
-    static SHOW_SUBMIT_BUTTON := true
+    static SHOW_SUBMIT_BUTTON := false
 
     ; Native submit button styling/layout (used when SHOW_SUBMIT_BUTTON = true)
     static SUBMIT_BUTTON_TEXT := "Search"
