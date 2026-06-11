@@ -1,8 +1,11 @@
 #Requires AutoHotkey v2
 
 #Include configSearchBox.ahk
+#Include searchActionsConfig.ahk
 #Include guiNative\searchBoxGuiNative.ahk
 #Include searchBoxHandler.ahk
+
+global gSearchBoxHotkeyTarget := ""
 
 class SearchBox {
     gui := ""
@@ -21,6 +24,8 @@ class SearchBox {
         this.isEmbedded := IsObject(parentGui)
         this.gui := SearchBoxGuiNative(parentGui, x, y, w, h)
         this.handler := SearchBoxHandler(this.gui)
+        global gSearchBoxHotkeyTarget
+        gSearchBoxHotkeyTarget := this
     }
 
     Show() {
@@ -42,4 +47,42 @@ class SearchBox {
     Focus() {
         this.gui.Focus()
     }
+
+    IsInputFocused() {
+        return this.gui.IsInputFocused()
+    }
+
+    SelectRelative(step) {
+        return this.handler.MoveSelection(step)
+    }
+
+    SubmitCurrent() {
+        this.handler.SubmitCurrent()
+    }
+
+    ActivateCurrentOption() {
+        this.handler.ActivateSelectedOption()
+    }
 }
+
+SearchBox_IsInputFocused() {
+    global gSearchBoxHotkeyTarget
+    return IsObject(gSearchBoxHotkeyTarget) && gSearchBoxHotkeyTarget.IsInputFocused()
+}
+
+#HotIf SearchBox_IsInputFocused()
+Up:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.SelectRelative(-1)
+}
+
+Down:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.SelectRelative(1)
+}
+
+Enter:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.SubmitCurrent()
+}
+#HotIf
