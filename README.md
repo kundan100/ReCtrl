@@ -2,7 +2,7 @@
 **`personal assistant` in windows, triggered by double-press of `Ctrl` key.**
 
 # <mark>how to use</mark>
-1. for installation / activation, 
+1. for installation / activation / Launching, 
 	1. clone this repo.
 	2. Activate (Option-1): using bat file (ReCtrl_installation_activation.bat):
         1. Run the BAT file from any terminal, as below:
@@ -43,8 +43,10 @@ ReCtrl/
 ├── src/
 │	├── appConfig.ahk                      ← app-wide settings (width, colors, title, etc.)
 │	├── ReCtrl.ahk                         ← coordinator only: includes, init, hotkeys
-│	├── sysTraySetup.ahk                   ← unchanged
-│	├── currentWinInfo.ahk             → Window info display logic
+│	├── sysTray/
+│	│   └── sysTraySetup.ahk               ← tray icon + tooltip setup
+│	├── currentWin/
+│	│   └── currentWinInfo.ahk             → Window info display logic
 │	│
 │	├── mainApp/                           ← NEW feature (replaces mainSearchBox at runtime)
 │	│   ├── mainApp.ahk                    ← thin orchestrator + ShowMainApp() for hotkey
@@ -59,5 +61,5 @@ ReCtrl/
 
 # Project Code Flow
 1. Run index.ahk → includes src/ReCtrl.ahk
-2. src/ReCtrl.ahk → includes all modules (sysTraySetup.ahk, currentWinInfo.ahk); calls SetupTrayIcon(); and registers double-press Ctrl hotkey.
+2. src/ReCtrl.ahk → includes all modules (sysTray/sysTraySetup.ahk, currentWin/currentWinInfo.ahk); calls SetupTrayIcon(); and registers double-press Ctrl hotkey.
 3. window info logic separated into clean functions

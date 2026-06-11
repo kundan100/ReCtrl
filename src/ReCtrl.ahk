@@ -8,8 +8,8 @@
  * The #Include essentially merges all the included files into one script at parse time
  * All functions and variables from included files become available in the global scope
  */
-#Include sysTraySetup.ahk
-; #Include currentWinInfo.ahk  ; Disconnected - keeping for future reference
+#Include sysTray\sysTraySetup.ahk
+; #Include currentWin\currentWinInfo.ahk  ; Disconnected - keeping for future reference
 ; #Include mainSearchBox\mainSearchBox.ahk
 #Include mainApp\mainApp.ahk
 
