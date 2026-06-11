@@ -29,6 +29,7 @@ class AppHeaderContainer {
         pad := cfg.PADDING_X
         btnY := (cfg.HEIGHT - btnCfg.HEIGHT) // 2
         contentX := pad
+        closeX := w - btnCfg.WIDTH - pad
 
         this.headerBg := this.gui.Add("Text", "x" pad " y0 w" (w - 2 * pad) " h" cfg.HEIGHT " Background" cfg.BG_COLOR, "")
 
@@ -41,15 +42,18 @@ class AppHeaderContainer {
             contentX := pad + AppHeaderContainer._ICON_SIZE + AppHeaderContainer._ICON_GAP
         }
 
+        maxTitleW := closeX - contentX
+        if (maxTitleW < 0)
+            maxTitleW := 0
+
         this.titleText := this.gui.Add("Text",
-            "x" contentX " y0 BackgroundTrans",
+            "x" contentX " y0 w" maxTitleW " BackgroundTrans",
             AppConfig.WINDOW.TITLE)
         this.titleText.SetFont("s10", "Segoe UI")
-        this.titleText.GetPos(, , &titleW)
-        this.ApplyTitleLayout(contentX, titleW, cfg.HEIGHT)
+        this.ApplyTitleLayout(contentX, maxTitleW, cfg.HEIGHT)
 
         this.closeBtn := this.gui.Add("Text",
-            "x" (w - btnCfg.WIDTH - pad) " y" btnY " w" btnCfg.WIDTH " h" btnCfg.HEIGHT " Border Center 0x200 Background" btnCfg.COLOR,
+            "x" closeX " y" btnY " w" btnCfg.WIDTH " h" btnCfg.HEIGHT " Border Center 0x200 Background" btnCfg.COLOR,
             btnCfg.TEXT)
         this.closeBtn.SetFont(btnCfg.FONT_SIZE)
         this.closeBtn.OnEvent("Click", (*) => this.onClose.Call())
@@ -91,6 +95,7 @@ class AppHeaderContainer {
         pad := cfg.PADDING_X
         btnY := (cfg.HEIGHT - btnCfg.HEIGHT) // 2
         contentX := pad
+        closeX := clientW - btnCfg.WIDTH - pad
 
         this.headerBg.Move(pad, , clientW - 2 * pad)
 
@@ -100,14 +105,11 @@ class AppHeaderContainer {
             contentX := pad + AppHeaderContainer._ICON_SIZE + AppHeaderContainer._ICON_GAP
         }
 
-        this.titleText.GetPos(, , &titleW)
-        maxTitleW := clientW - contentX - btnCfg.WIDTH - pad
-        if (titleW > maxTitleW)
-            titleW := maxTitleW
-        if (titleW < 0)
-            titleW := 0
-        this.ApplyTitleLayout(contentX, titleW, cfg.HEIGHT)
+        maxTitleW := closeX - contentX
+        if (maxTitleW < 0)
+            maxTitleW := 0
+        this.ApplyTitleLayout(contentX, maxTitleW, cfg.HEIGHT)
 
-        this.closeBtn.Move(clientW - btnCfg.WIDTH - pad, btnY)
+        this.closeBtn.Move(closeX, btnY)
     }
 }
