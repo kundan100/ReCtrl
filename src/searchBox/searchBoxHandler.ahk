@@ -17,7 +17,19 @@ class SearchBoxHandler {
             return
         }
 
-        MsgBox("Search functionality coming soon!`nYou searched for: " searchText)
+        ownerHwnd := 0
+        try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+
+        if (ownerHwnd) {
+            MsgBox(
+                "Search functionality coming soon!`nYou searched for: " searchText,
+                "ReCtrl Search",
+                "Owner" ownerHwnd
+            )
+        } else {
+            MsgBox("Search functionality coming soon!`nYou searched for: " searchText)
+        }
+
         this.guiInstance.ClearSearch()
         this.guiInstance.Hide()
     }
