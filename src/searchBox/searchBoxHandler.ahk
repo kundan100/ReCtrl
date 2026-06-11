@@ -134,14 +134,14 @@ class SearchBoxHandler {
 
     ProcessSearch(searchText) {
         searchText := Trim(searchText)
-        if (searchText = "") {
-            this.ShowRecentSuggestions()
-            return
-        }
-
         selectedIndex := this.guiInstance.GetSelectedIndex()
         if (selectedIndex > 0 && selectedIndex <= this.visibleActions.Length) {
             this.ExecuteAction(this.visibleActions[selectedIndex])
+            return
+        }
+
+        if (searchText = "") {
+            this.ShowRecentSuggestions()
             return
         }
     }

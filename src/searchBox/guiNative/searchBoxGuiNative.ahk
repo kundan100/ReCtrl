@@ -54,6 +54,7 @@ class SearchBoxGuiNative {
         editW := this.showSubmitButton ? Max(120, w - btnW - btnGap) : w
         this.searchEdit := hostGui.Add("Edit", "x" x " y" y " w" editW " h" inputH)
         this.searchEdit.SetFont("s12", "Segoe UI")
+        this.ApplySearchPlaceholder()
         this.searchEdit.OnEvent("Change", (*) => this.OnQueryChange())
         this.searchEdit.OnEvent("Focus", (*) => this.OnInputFocus())
 
@@ -138,6 +139,22 @@ class SearchBoxGuiNative {
         if GetKeyState("LButton", "P") {
             this.OnOptionActivate()
         }
+    }
+
+    ApplySearchPlaceholder() {
+        static EM_SETCUEBANNER := 0x1501
+
+        placeholder := NativeUiConfig.SEARCH_PLACEHOLDER_TEXT
+        if (placeholder = "") {
+            return
+        }
+        drawWhenFocused := NativeUiConfig.SEARCH_PLACEHOLDER_SHOW_WHEN_FOCUSED ? 1 : 0
+        SendMessage(
+            EM_SETCUEBANNER,
+            drawWhenFocused,
+            StrPtr(placeholder),
+            this.searchEdit
+        )
     }
 
     GetSearchText() {

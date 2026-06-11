@@ -82,6 +82,9 @@ SearchBox_IsInputFocused() {
     global gSearchBoxHotkeyTarget, mainAppInstance
 
     ; Extra guard: do not evaluate search-box focus unless MainApp is visible.
+    if !IsSet(mainAppInstance) {
+        return false
+    }
     if !IsObject(mainAppInstance) || !IsObject(mainAppInstance.container) {
         return false
     }
@@ -133,10 +136,20 @@ Enter:: {
     global gSearchBoxHotkeyTarget
     gSearchBoxHotkeyTarget.SubmitCurrent()
 }
+
+NumpadEnter:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.SubmitCurrent()
+}
 #HotIf
 
 #HotIf SearchBox_IsInputFocusedAndBlank()
 ^Enter:: {
+    global gSearchBoxHotkeyTarget
+    gSearchBoxHotkeyTarget.ShowAllOptionsShortcut()
+}
+
+^NumpadEnter:: {
     global gSearchBoxHotkeyTarget
     gSearchBoxHotkeyTarget.ShowAllOptionsShortcut()
 }
