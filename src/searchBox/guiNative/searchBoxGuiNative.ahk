@@ -13,14 +13,12 @@ class SearchBoxGuiNative {
     showSubmitButton := false
     submitBtnWidth := 0
     suggestionsList := ""
-    suggestionsPopupGui := ""
     suggestionCount := 0
     inputX := 0
     inputY := 0
     inputW := 0
     inputH := 0
-    popupTrackTimer := ""
-    isPopupTracking := false
+    embeddedBaseClientHeight := 0
 
     __New(parentGui := "", x := 20, y := 20, w := 500, h := 30) {
         this.CreateGui(parentGui, x, y, w, h)
@@ -68,18 +66,9 @@ class SearchBoxGuiNative {
         this.submitBtn.OnEvent("Click", (*) => this.OnSubmit())
 
         listY := y + inputH + NativeUiConfig.SUGGESTION_LIST_GAP
-        if this.isEmbedded {
-            this.suggestionsPopupGui := Gui("+AlwaysOnTop -Caption +Border +ToolWindow", "ReCtrlSearchSuggestions")
-            this.suggestionsPopupGui.Opt("+Owner" this.parentGui.Hwnd)
-            this.suggestionsPopupGui.MarginX := 0
-            this.suggestionsPopupGui.MarginY := 0
-            this.suggestionsPopupGui.SetFont("s10", "Segoe UI")
-            this.suggestionsList := this.suggestionsPopupGui.Add("ListBox",
-                "x0 y0 w" w " h" NativeUiConfig.SUGGESTION_LIST_HEIGHT " Hidden")
-        } else {
-            this.suggestionsList := hostGui.Add("ListBox",
-                "x" x " y" listY " w" w " h" NativeUiConfig.SUGGESTION_LIST_HEIGHT " Hidden")
-        }
+        defaultListH := this.CalculateSuggestionListHeight(1)
+        this.suggestionsList := hostGui.Add("ListBox",
+            "x" x " y" listY " w" w " h" defaultListH " Hidden")
         this.suggestionsList.OnEvent("DoubleClick", (*) => this.OnOptionActivate())
         this.suggestionsList.OnEvent("Change", (*) => this.OnSuggestionChange())
 
@@ -91,6 +80,7 @@ class SearchBoxGuiNative {
         this.inputY := y
         this.inputW := w
         this.inputH := inputH
+        this.CaptureEmbeddedBaseClientHeight()
     }
 
     SetSubmitCallback(callbackFunc) {
@@ -222,9 +212,6 @@ class SearchBoxGuiNative {
     }
 
     GetSuggestionHostHwnd() {
-        if this.isEmbedded {
-            return this.suggestionsPopupGui ? this.suggestionsPopupGui.Hwnd : 0
-        }
         return this.GetOwnerHwnd()
     }
 
@@ -250,18 +237,17 @@ class SearchBoxGuiNative {
         }
 
         listY := y + inputH + NativeUiConfig.SUGGESTION_LIST_GAP
-        if this.isEmbedded {
-            this.suggestionsList.Move(0, 0, w, NativeUiConfig.SUGGESTION_LIST_HEIGHT)
-            if (this.suggestionsPopupGui && this.suggestionCount > 0) {
-                this.PositionSuggestionPopup()
-            }
-        } else {
-            this.suggestionsList.Move(x, listY, w, NativeUiConfig.SUGGESTION_LIST_HEIGHT)
-        }
+        visibleOptionCount := this.suggestionCount > 0 ? this.suggestionCount : 1
+        listH := this.CalculateSuggestionListHeight(visibleOptionCount)
+        this.suggestionsList.Move(x, listY, w, listH)
         this.inputX := x
         this.inputY := y
         this.inputW := w
         this.inputH := inputH
+
+        if this.suggestionCount > 0 {
+            this.UpdateEmbeddedHostHeight(true, listH)
+        }
     }
 
     SetSuggestionOptions(optionLabels, selectedIndex := 1) {
@@ -275,11 +261,9 @@ class SearchBoxGuiNative {
         for label in optionLabels {
             this.suggestionsList.Add([label])
         }
-        maxVisible := Min(this.suggestionCount, NativeUiConfig.SUGGESTION_MAX_VISIBLE_COUNT)
-        listH := (maxVisible * NativeUiConfig.SUGGESTION_ITEM_HEIGHT) + 6
-        if (listH < NativeUiConfig.SUGGESTION_ITEM_HEIGHT + 4)
-            listH := NativeUiConfig.SUGGESTION_ITEM_HEIGHT + 4
-        this.suggestionsList.Move(, , this.inputW, listH)
+        listH := this.CalculateSuggestionListHeight(this.suggestionCount)
+        listY := this.inputY + this.inputH + NativeUiConfig.SUGGESTION_LIST_GAP
+        this.suggestionsList.Move(this.inputX, listY, this.inputW, listH)
         this.ShowSuggestionPopup(listH)
 
         if (selectedIndex < 1)
@@ -290,73 +274,14 @@ class SearchBoxGuiNative {
     }
 
     ShowSuggestionPopup(listH) {
-        if this.isEmbedded {
-            this.PositionSuggestionPopup(listH)
-            this.suggestionsPopupGui.Show("NoActivate")
-            this.suggestionsList.Visible := true
-            this.StartPopupTracking()
-            return
-        }
         this.suggestionsList.Visible := true
+        this.UpdateEmbeddedHostHeight(true, listH)
     }
 
     HideSuggestionPopup() {
-        if this.isEmbedded {
-            this.StopPopupTracking()
-            if this.suggestionsList
-                this.suggestionsList.Visible := false
-            if this.suggestionsPopupGui
-                this.suggestionsPopupGui.Hide()
-            return
-        }
         if this.suggestionsList
             this.suggestionsList.Visible := false
-    }
-
-    PositionSuggestionPopup(listH := 0) {
-        if !this.isEmbedded || !this.suggestionsPopupGui {
-            return
-        }
-        if (listH <= 0) {
-            this.suggestionsList.GetPos(, , , &listH)
-            if (listH <= 0)
-                listH := NativeUiConfig.SUGGESTION_LIST_HEIGHT
-        }
-
-        this.searchEdit.GetPos(&editX, &editY)
-        popupX := editX
-        popupY := editY + this.inputH + NativeUiConfig.SUGGESTION_LIST_GAP
-        pt := Buffer(8, 0)
-        NumPut("Int", popupX, pt, 0)
-        NumPut("Int", popupY, pt, 4)
-        DllCall("ClientToScreen", "Ptr", this.GetOwnerHwnd(), "Ptr", pt)
-        popupScreenX := NumGet(pt, 0, "Int")
-        popupScreenY := NumGet(pt, 4, "Int")
-        this.suggestionsPopupGui.Show("x" popupScreenX " y" popupScreenY " w" this.inputW " h" listH " NoActivate")
-    }
-
-    StartPopupTracking() {
-        if !this.isEmbedded || !this.suggestionsPopupGui || this.isPopupTracking {
-            return
-        }
-        this.popupTrackTimer := ObjBindMethod(this, "TrackPopupPosition")
-        SetTimer(this.popupTrackTimer, 30)
-        this.isPopupTracking := true
-    }
-
-    StopPopupTracking() {
-        if !this.isPopupTracking {
-            return
-        }
-        SetTimer(this.popupTrackTimer, 0)
-        this.isPopupTracking := false
-    }
-
-    TrackPopupPosition() {
-        if !this.suggestionCount {
-            return
-        }
-        this.PositionSuggestionPopup()
+        this.UpdateEmbeddedHostHeight(false)
     }
 
     GetSelectedIndex() {
@@ -394,5 +319,65 @@ class SearchBoxGuiNative {
             return true
         }
         return this.gui.Hwnd && DllCall("IsWindowVisible", "Ptr", this.gui.Hwnd)
+    }
+
+    CaptureEmbeddedBaseClientHeight() {
+        if !this.isEmbedded || this.embeddedBaseClientHeight > 0 {
+            return
+        }
+        try this.parentGui.GetClientPos(, , , &clientH)
+        if (clientH > 0) {
+            this.embeddedBaseClientHeight := clientH
+        }
+    }
+
+    UpdateEmbeddedHostHeight(showSuggestions, listH := 0) {
+        if !this.isEmbedded {
+            return
+        }
+
+        this.CaptureEmbeddedBaseClientHeight()
+        baseClientH := this.embeddedBaseClientHeight
+        if (baseClientH <= 0) {
+            return
+        }
+
+        targetClientH := baseClientH
+        if showSuggestions {
+            if (listH <= 0) {
+                this.suggestionsList.GetPos(, , , &listH)
+            }
+            if (listH <= 0) {
+                fallbackCount := this.suggestionCount > 0 ? this.suggestionCount : 1
+                listH := this.CalculateSuggestionListHeight(fallbackCount)
+            }
+            desiredBottom := this.inputY + this.inputH + NativeUiConfig.SUGGESTION_LIST_GAP + listH + 8
+            targetClientH := Max(baseClientH, desiredBottom)
+        }
+
+        this.SetParentClientHeight(targetClientH)
+    }
+
+    SetParentClientHeight(targetClientH) {
+        if !this.parentGui || (targetClientH <= 0) {
+            return
+        }
+
+        this.parentGui.GetClientPos(, , &clientW, &currentClientH)
+        if (currentClientH = targetClientH) {
+            return
+        }
+
+        this.parentGui.GetPos(&x, &y, &windowW, &windowH)
+        frameH := windowH - currentClientH
+        targetWindowH := targetClientH + frameH
+        this.parentGui.Show("x" x " y" y " w" windowW " h" targetWindowH " NA")
+    }
+
+    CalculateSuggestionListHeight(optionCount) {
+        visibleRows := optionCount < 1 ? 1 : Min(optionCount, NativeUiConfig.SUGGESTION_MAX_VISIBLE_COUNT)
+        listH := (visibleRows * NativeUiConfig.SUGGESTION_ITEM_HEIGHT) + 6
+        minSingleRowH := NativeUiConfig.SUGGESTION_ITEM_HEIGHT + 4
+        return (listH < minSingleRowH) ? minSingleRowH : listH
     }
 }
