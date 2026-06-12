@@ -117,12 +117,6 @@ class MainAppContainer {
 
         ; Main app window
         this.ApplyTransparencyToWindow(hwnd, targetAlpha)
-
-        ; Embedded suggestions popup is a second GUI window; keep it in sync.
-        popupHwnd := this.GetSuggestionPopupHwnd()
-        if popupHwnd {
-            this.ApplyTransparencyToWindow(popupHwnd, targetAlpha)
-        }
     }
 
     ClampAlpha(alpha) {
@@ -139,16 +133,5 @@ class MainAppContainer {
         if !DllCall("IsWindowVisible", "Ptr", hwnd)
             return
         try WinSetTransparent(alpha, "ahk_id " hwnd)
-    }
-
-    GetSuggestionPopupHwnd() {
-        try {
-            if !this.content || !this.content.searchBox || !this.content.searchBox.gui {
-                return 0
-            }
-            return this.content.searchBox.gui.GetSuggestionHostHwnd()
-        } catch {
-            return 0
-        }
     }
 }
