@@ -31,6 +31,18 @@ class AppConfig {
         DUMMY_TEXT: "" ; "Placeholder — content area"
     }
 
+    ; Native window transparency behavior for the main app.
+    ; - Uses WinSetTransparent on the top-level ReCtrl window only.
+    ; - When focused, ACTIVE_ALPHA is used. When visible but unfocused, INACTIVE_ALPHA is used.
+    ; - Alpha range: 0..255 (255 = fully opaque, 0 = fully transparent).
+    ; - Keep INACTIVE_ALPHA high enough for readable text.
+    static TRANSPARENCY := {
+        ENABLED: true,          ; Master switch for focus-based transparency behavior
+        ACTIVE_ALPHA: 245,      ; Opacity while ReCtrl window is focused/active
+        INACTIVE_ALPHA: 190,    ; Opacity while ReCtrl is visible but not focused
+        CHECK_INTERVAL_MS: 120  ; Focus polling interval (lower = faster updates, more CPU wakeups)
+    }
+
     static AppHeaderHeight() {
         return AppConfig.WINDOW.SHOW_TITLE_BAR ? 0 : AppConfig.HEADER.HEIGHT
     }
