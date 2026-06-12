@@ -29,7 +29,7 @@ class MainAppContainer {
         this.gui.BackColor := AppConfig.WINDOW.BG_COLOR
         this.gui.MarginX := 0
         this.gui.MarginY := 0
-        this.gui.OnEvent("Escape", (*) => this.Hide())
+        this.gui.OnEvent("Escape", (*) => this.OnEscapePressed())
         this.gui.OnEvent("Size", (g, minMax, w, h, *) => this.OnSize(w, h))
 
         headerHeight := AppConfig.AppHeaderHeight()
@@ -133,5 +133,16 @@ class MainAppContainer {
         if !DllCall("IsWindowVisible", "Ptr", hwnd)
             return
         try WinSetTransparent(alpha, "ahk_id " hwnd)
+    }
+
+    OnEscapePressed() {
+        ; ESC behavior:
+        ; 1) if suggestions are visible -> dismiss suggestions only
+        ; 2) otherwise -> hide app window
+        if this.content.DismissSuggestionsIfVisible() {
+            this.content.FocusSearchBox()
+            return
+        }
+        this.Hide()
     }
 }
