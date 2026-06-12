@@ -16,13 +16,12 @@
 ; setup system tray icon and tooltip
 SetupTrayIcon()
 
-; Initialize the main searchbox feature
-; global mainSearchBoxInstance := MainSearchBox()
+; Initialize the main app container (header + embedded search box)
 global mainAppInstance := MainApp()
 
 /**
- * Helper function for #HotIf context
- * Returns true only if main searchbox edit control has focus
+ * Legacy helper for old MainSearchBox module.
+ * Kept commented for reference only.
  */
 ; IsMainSearchBoxEditFocused() {
 ;     global mainSearchBoxInstance
@@ -41,11 +40,11 @@ global mainAppInstance := MainApp()
 /**
  * register hotkey (Double-press Ctrl).
  * Detects when Ctrl key is pressed twice within 400ms
- * Now shows the main searchbox instead of window info
+ * Summons the main app window (show or focus, does not hide)
  */
 ; Global variable to track the last Ctrl key press time
 lastCtrlPress := 0
-; ~Ctrl:: → Detects double Ctrl press within 400ms → Calls ShowMainSearchBox()
+; ~Ctrl:: → Detects double Ctrl press within 400ms → Calls ShowMainApp()
 ~Ctrl:: {
     global lastCtrlPress
     currentTime := A_TickCount

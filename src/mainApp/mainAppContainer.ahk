@@ -67,6 +67,22 @@ class MainAppContainer {
             this.Show()
     }
 
+    Summon() {
+        if !this.IsVisible() {
+            this.Show()
+            return
+        }
+
+        hwnd := this.GetHwnd()
+        if hwnd {
+            ; If visible but not focused, bring to foreground.
+            if !WinActive("ahk_id " hwnd) {
+                WinActivate("ahk_id " hwnd)
+            }
+            this.content.FocusSearchBox()
+        }
+    }
+
     GetHwnd() {
         return this.gui.Hwnd
     }
