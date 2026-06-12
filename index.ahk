@@ -1,9 +1,9 @@
 ; ===== ReCtrl - Entry Point =====
 ; Main orchestrator file that loads and initializes the application
 
-; ===== Utility: Window Info Hotkey =====
+; ===== Utility: ReCtrl launcher hotkey =====
 ; how to run: double-press "Ctrl" key.
-; displays active-window's info like exe-name, win-title, class-name, HWND
+; behavior: summon ReCtrl main app (show when hidden, focus when already visible)
 
 /**
  * directive (should be at the top) so the interpreter fails ...
