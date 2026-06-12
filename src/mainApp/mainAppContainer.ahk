@@ -10,9 +10,11 @@ class MainAppContainer {
     gui := ""
     header := ""
     content := ""
+    transparencyTimer := ""
 
     __New() {
         this.CreateGui()
+        this.SetupTransparencyController()
     }
 
     CreateGui() {
@@ -49,6 +51,7 @@ class MainAppContainer {
         this.gui.GetClientPos(, , &clientW, &clientH)
         this.OnSize(clientW, clientH)
         this.content.FocusSearchBox()
+        this.ApplyTransparencyForCurrentFocus()
     }
 
     Hide() {
@@ -85,5 +88,67 @@ class MainAppContainer {
 
     GetHwnd() {
         return this.gui.Hwnd
+    }
+
+    SetupTransparencyController() {
+        if !AppConfig.TRANSPARENCY.ENABLED
+            return
+
+        if (AppConfig.TRANSPARENCY.CHECK_INTERVAL_MS < 50)
+            AppConfig.TRANSPARENCY.CHECK_INTERVAL_MS := 50
+
+        this.transparencyTimer := ObjBindMethod(this, "ApplyTransparencyForCurrentFocus")
+        SetTimer(this.transparencyTimer, AppConfig.TRANSPARENCY.CHECK_INTERVAL_MS)
+    }
+
+    ApplyTransparencyForCurrentFocus(*) {
+        if !AppConfig.TRANSPARENCY.ENABLED
+            return
+
+        if !this.IsVisible()
+            return
+
+        activeAlpha := this.ClampAlpha(AppConfig.TRANSPARENCY.ACTIVE_ALPHA)
+        inactiveAlpha := this.ClampAlpha(AppConfig.TRANSPARENCY.INACTIVE_ALPHA)
+        hwnd := this.GetHwnd()
+        if !hwnd
+            return
+        targetAlpha := WinActive("ahk_id " hwnd) ? activeAlpha : inactiveAlpha
+
+        ; Main app window
+        this.ApplyTransparencyToWindow(hwnd, targetAlpha)
+
+        ; Embedded suggestions popup is a second GUI window; keep it in sync.
+        popupHwnd := this.GetSuggestionPopupHwnd()
+        if popupHwnd {
+            this.ApplyTransparencyToWindow(popupHwnd, targetAlpha)
+        }
+    }
+
+    ClampAlpha(alpha) {
+        if (alpha < 0)
+            return 0
+        if (alpha > 255)
+            return 255
+        return alpha
+    }
+
+    ApplyTransparencyToWindow(hwnd, alpha) {
+        if !hwnd
+            return
+        if !DllCall("IsWindowVisible", "Ptr", hwnd)
+            return
+        try WinSetTransparent(alpha, "ahk_id " hwnd)
+    }
+
+    GetSuggestionPopupHwnd() {
+        try {
+            if !this.content || !this.content.searchBox || !this.content.searchBox.gui {
+                return 0
+            }
+            return this.content.searchBox.gui.GetSuggestionHostHwnd()
+        } catch {
+            return 0
+        }
     }
 }
