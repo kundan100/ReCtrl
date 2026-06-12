@@ -46,6 +46,10 @@ class AppContentContainer {
         this.searchBox.Focus()
     }
 
+    DismissSuggestionsIfVisible() {
+        return this.searchBox.DismissSuggestionsIfVisible()
+    }
+
     HideTransientUi() {
         this.searchBox.Hide()
     }

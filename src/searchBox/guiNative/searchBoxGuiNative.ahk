@@ -281,7 +281,15 @@ class SearchBoxGuiNative {
     HideSuggestionPopup() {
         if this.suggestionsList
             this.suggestionsList.Visible := false
+        this.suggestionCount := 0
         this.UpdateEmbeddedHostHeight(false)
+    }
+
+    DismissSuggestionsIfVisible() {
+        if !this.suggestionsList || !this.suggestionsList.Visible || this.suggestionCount <= 0
+            return false
+        this.SetSuggestionOptions([])
+        return true
     }
 
     GetSelectedIndex() {

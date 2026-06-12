@@ -76,6 +76,10 @@ class SearchBox {
     OnEmptyEraseKey() {
         this.handler.OnEmptyEraseKey()
     }
+
+    DismissSuggestionsIfVisible() {
+        return this.gui.DismissSuggestionsIfVisible()
+    }
 }
 
 SearchBox_IsInputFocused() {
@@ -140,6 +144,17 @@ Enter:: {
 NumpadEnter:: {
     global gSearchBoxHotkeyTarget
     gSearchBoxHotkeyTarget.SubmitCurrent()
+}
+
+Esc:: {
+    global gSearchBoxHotkeyTarget, mainAppInstance
+
+    if gSearchBoxHotkeyTarget.DismissSuggestionsIfVisible() {
+        gSearchBoxHotkeyTarget.Focus()
+        return
+    }
+
+    try mainAppInstance.Hide()
 }
 #HotIf
 
