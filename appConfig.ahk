@@ -3,6 +3,13 @@
 
 #Requires AutoHotkey v2
 
+class AppColors {
+    static BG_WINDOW := "0xC3C3C3"            ; Light gray: main app window background
+    static BG_HEADER := "0xA1A1A1"            ; Medium gray: header bar background
+    static BG_HEADER_CLOSE_BTN := "0xAAAAAA"  ; Gray: header close button background
+    static BG_CONTENT := "0xFFFF00"           ; Yellow: content area background
+}
+
 class AppConfig {
     static WINDOW := {
         WIDTH: 600,
@@ -10,24 +17,24 @@ class AppConfig {
         TITLE: "ReCtrl",
         SHOW_TITLE_BAR: false,
         ALWAYS_ON_TOP: true,
-        BG_COLOR: "0xC3C3C3"
+        BG_COLOR: AppColors.BG_WINDOW
     }
 
     static HEADER := {
         HEIGHT: 28,
         PADDING_X: 1,
-        BG_COLOR: "0xA1A1A1",
+        BG_COLOR: AppColors.BG_HEADER,
         CLOSE_BTN: {
             WIDTH: 20,
             HEIGHT: 20,
-            COLOR: "0xAAAAAA",
+            COLOR: AppColors.BG_HEADER_CLOSE_BTN,
             FONT_SIZE: "s14",
             TEXT: "✕"
         }
     }
 
     static CONTENT := {
-        BG_COLOR: "0xFFFF00",
+        BG_COLOR: AppColors.BG_CONTENT,
         DUMMY_TEXT: "" ; "Placeholder — content area"
     }
 
