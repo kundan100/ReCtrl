@@ -24,9 +24,13 @@ class MainApp {
     Toggle() {
         this.container.Toggle()
     }
+
+    Summon() {
+        this.container.Summon()
+    }
 }
 
 ShowMainApp() {
     global mainAppInstance
-    mainAppInstance.Toggle()
+    mainAppInstance.Summon()
 }
