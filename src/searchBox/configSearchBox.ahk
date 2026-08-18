@@ -28,6 +28,9 @@ class NativeUiConfig {
     static SEARCH_PLACEHOLDER_TEXT := "Type to search... (Enter=Recent, Ctrl+Enter=All)"
     static SEARCH_PLACEHOLDER_SHOW_WHEN_FOCUSED := true
     static SUGGESTION_LIST_GAP := 4
+    static SUGGESTION_BOTTOM_GAP := 0
+    static SUGGESTION_LIST_HEIGHT_PADDING := 0
+    static SUGGESTION_LIST_MIN_EXTRA_HEIGHT := 0
     static SUGGESTION_ITEM_HEIGHT := 22
     static SUGGESTION_MAX_VISIBLE_COUNT := 10
 }

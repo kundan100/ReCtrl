@@ -60,6 +60,11 @@ ReCtrl/
 ```
 
 # Project Code Flow
-1. Run index.ahk → includes src/ReCtrl.ahk
-2. src/ReCtrl.ahk → includes all modules (sysTray/sysTraySetup.ahk, currentWin/currentWinInfo.ahk); calls SetupTrayIcon(); and registers double-press Ctrl hotkey.
+1. Run index.ahk
+	→ includes src/ReCtrl.ahk
+2. src/ReCtrl.ahk
+	→ includes all modules (sysTray/sysTraySetup.ahk, currentWin/currentWinInfo.ahk); 
+	→ Sets system tray icon: by calling SetupTrayIcon();
+	→ Creates the main window object: mainAppInstance := MainApp()
+	→ Registers double-press Ctrl hotkey.
 3. window info logic separated into clean functions

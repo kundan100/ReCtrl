@@ -359,7 +359,7 @@ class SearchBoxGuiNative {
                 fallbackCount := this.suggestionCount > 0 ? this.suggestionCount : 1
                 listH := this.CalculateSuggestionListHeight(fallbackCount)
             }
-            desiredBottom := this.inputY + this.inputH + NativeUiConfig.SUGGESTION_LIST_GAP + listH + 8
+            desiredBottom := this.inputY + this.inputH + NativeUiConfig.SUGGESTION_LIST_GAP + listH + NativeUiConfig.SUGGESTION_BOTTOM_GAP
             targetClientH := Max(baseClientH, desiredBottom)
         }
 
@@ -384,8 +384,8 @@ class SearchBoxGuiNative {
 
     CalculateSuggestionListHeight(optionCount) {
         visibleRows := optionCount < 1 ? 1 : Min(optionCount, NativeUiConfig.SUGGESTION_MAX_VISIBLE_COUNT)
-        listH := (visibleRows * NativeUiConfig.SUGGESTION_ITEM_HEIGHT) + 6
-        minSingleRowH := NativeUiConfig.SUGGESTION_ITEM_HEIGHT + 4
+        listH := (visibleRows * NativeUiConfig.SUGGESTION_ITEM_HEIGHT) + NativeUiConfig.SUGGESTION_LIST_HEIGHT_PADDING
+        minSingleRowH := NativeUiConfig.SUGGESTION_ITEM_HEIGHT + NativeUiConfig.SUGGESTION_LIST_MIN_EXTRA_HEIGHT
         return (listH < minSingleRowH) ? minSingleRowH : listH
     }
 }

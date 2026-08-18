@@ -13,7 +13,7 @@ class AppColors {
 class AppConfig {
     static WINDOW := {
         WIDTH: 600,
-        HEIGHT: 120,
+        HEIGHT: 70,
         TITLE: "ReCtrl",
         SHOW_TITLE_BAR: false,
         ALWAYS_ON_TOP: true,
