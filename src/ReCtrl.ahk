@@ -8,6 +8,17 @@
  * The #Include essentially merges all the included files into one script at parse time
  * All functions and variables from included files become available in the global scope
  */
+#Include shared\jsonParse.ahk
+#Include shared\configAppLoader.ahk
+#Include shared\appContext.ahk
+; Load app name/version before UI modules (single source: config/configApp.json).
+try {
+    ConfigApp.Load()
+} catch as err {
+    MsgBox("Failed to load configApp.json:`n" err.Message "`n`nPath:`n" ConfigApp.CONFIG_JSON_PATH, "ReCtrl")
+    ExitApp
+}
+
 #Include sysTray\sysTraySetup.ahk
 ; #Include currentWin\currentWinInfo.ahk  ; Disconnected - keeping for future reference
 ; #Include mainSearchBox\mainSearchBox.ahk

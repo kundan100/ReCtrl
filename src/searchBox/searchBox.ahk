@@ -1,8 +1,12 @@
 #Requires AutoHotkey v2
 
+; jsonParse.ahk is included once from ReCtrl.ahk (shared by config loaders).
 #Include configSearchBox.ahk
-#Include searchActionsConfig.ahk
+#Include searchActionsLoader.ahk
+#Include contextToggle\contextToggleControl.ahk
 #Include actions\clipboardActions.ahk
+#Include actions\browser\browserActions.ahk
+#Include actions\openInBrowser\openInBrowser__OreoTracker.ahk
 #Include guiNative\searchBoxGuiNative.ahk
 #Include searchBoxHandler.ahk
 
@@ -78,7 +82,8 @@ class SearchBox {
     }
 
     DismissSuggestionsIfVisible() {
-        return this.gui.DismissSuggestionsIfVisible()
+        ; Prefer menu back-navigation, then clear list (keeps window open).
+        return this.handler.DismissOrNavigateBack()
     }
 }
 

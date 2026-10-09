@@ -1,0 +1,137 @@
+{
+  "searchConfig": {
+    "DEFAULT_RECENT_LIMIT": 10,
+    "CONTEXT_ENABLED": true
+  },
+  "searchOptions": [
+    {
+      "id": "menu-help",
+      "label": "Help",
+      "actionType": "messageBox",
+      "message": "ReCtrl — Quick Help\n\nSummon:\n  Double-press Ctrl (within 400ms)\n\nSearch box:\n  Type — filter leaf actions\n  Enter (empty) — recent actions\n  Ctrl+Enter (empty) — menu (JSON first level)\n  Enter on folder — open nested options\n  Esc / Backspace — go up one menu level\n  Up/Down — move selection\n\nTray:\n  Hover icon for tip; right-click → Reload Script after edits\n\nEdit menus in config/searchActions.json (no AHK changes needed).",
+      "context": [],
+      "keywords": ["help", "guide", "usage", "howto", "menu"]
+    },
+    {
+      "id": "menu-context",
+      "label": "Context",
+      "actionType": "showContext",
+      "context": [],
+      "keywords": ["context", "app", "window", "current", "foreground", "under"]
+    },
+    {
+      "id": "menu-settings",
+      "label": "Settings",
+      "actionType": "messageBox",
+      "message": "Settings\n\nApp name/version: config/configApp.json\nWindow/UI settings: appConfig.ahk\nMenu options: config/searchActions.json\n\nEdit those files, then Reload Script from the tray icon.",
+      "context": [],
+      "keywords": ["settings", "config", "preferences", "options", "menu"]
+    },
+    {
+      "id": "separator-1",
+      "itemType": "separator",
+      "label": "────────────",
+      "context": []
+    },
+    {
+      "id": "run-pater",
+      "label": "Run pater command",
+      "actionType": "terminalCommand",
+      "command": "pater",
+      "context": ["terminal"],
+      "keywords": ["pater", "command", "terminal", "npm", "package", "tooling"]
+    },
+    {
+      "id": "browser-demo",
+      "label": "Browser tip",
+      "actionType": "browserActions",
+      "context": ["browser"],
+      "keywords": ["browser", "chrome", "edge", "demo"]
+    },
+    {
+      "id": "open-oreo-tracker",
+      "label": "Open: Oreo tracker",
+      "actionType": "openInBrowser__OreoTracker",
+      "context": [],
+      "keywords": ["open", "oreo", "tracker", "browser"]
+    },
+    {
+      "id": "notepad-demo",
+      "label": "Notepad tip",
+      "actionType": "messageBox",
+      "message": "This option is visible when Context is enabled and the app under ReCtrl is Notepad.",
+      "context": ["notepad"],
+      "keywords": ["notepad", "demo"]
+    },
+    {
+      "id": "group-demo",
+      "label": "Demo messages",
+      "context": [],
+      "keywords": ["demo", "temporary", "message"],
+      "children": [
+        {
+          "id": "temporary-message",
+          "label": "temporary",
+          "actionType": "messageBox",
+          "message": "temporary",
+          "context": [],
+          "keywords": ["temporary", "temp", "demo"]
+        },
+        {
+          "id": "temporary2-message",
+          "label": "temporary2",
+          "actionType": "messageBox",
+          "message": "temporary2",
+          "context": [],
+          "keywords": ["temporary2", "temp", "demo"]
+        },
+        {
+          "id": "temporary3-message",
+          "label": "temporary3",
+          "actionType": "messageBox",
+          "message": "temporary3",
+          "context": [],
+          "keywords": ["temporary3", "temp", "demo"]
+        },
+        {
+          "id": "temporary4-message",
+          "label": "temporary4",
+          "actionType": "messageBox",
+          "message": "temporary4",
+          "context": [],
+          "keywords": ["temporary4", "temp", "demo"]
+        },
+        {
+          "id": "temporary5-message",
+          "label": "temporary5",
+          "actionType": "messageBox",
+          "message": "temporary5",
+          "context": [],
+          "keywords": ["temporary5", "temp", "demo"]
+        }
+      ]
+    },
+    {
+      "id": "group-clipboard",
+      "label": "Clipboard",
+      "context": [],
+      "keywords": ["clipboard", "file", "text"],
+      "children": [
+        {
+          "id": "clipboard-create-file",
+          "label": "create clipboard file",
+          "actionType": "clipboardWriteText",
+          "context": [],
+          "keywords": ["clipboard", "create", "save", "text", "file", "latest"]
+        },
+        {
+          "id": "clipboard-read-file",
+          "label": "read clipboard file",
+          "actionType": "clipboardReadText",
+          "context": [],
+          "keywords": ["clipboard", "read", "load", "text", "file", "latest"]
+        }
+      ]
+    }
+  ]
+}

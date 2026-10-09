@@ -2,14 +2,38 @@
 
 class SearchBoxHandler {
     guiInstance := ""
-    allActions := []
+    menuRoot := []
+    leafActions := []
     visibleActions := []
     recentActionIds := []
+    menuStack := []
+    isBrowsing := false
+    recentLimit := 0
 
     __New(guiInstance) {
         this.guiInstance := guiInstance
-        this.allActions := SearchActionsConfig.ACTIONS
+        this.LoadMenuTree()
         this.SetupHandlers()
+    }
+
+    LoadMenuTree() {
+        try {
+            loaded := SearchActionsLoader.LoadFromFile()
+            this.menuRoot := loaded["searchOptions"]
+            this.recentLimit := loaded["searchConfig"]["DEFAULT_RECENT_LIMIT"]
+            AppContext.ApplySearchConfig(loaded["searchConfig"])
+            this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
+        } catch as err {
+            this.menuRoot := []
+            this.leafActions := []
+            this.recentLimit := 0
+            detail := err.Message
+            try detail .= "`n(" err.What " @ line " err.Line ")"
+            this.ShowOwnedMessage(
+                "Failed to load searchActions.json:`n" detail "`n`nPath:`n" SearchActionsConfig.ACTIONS_JSON_PATH,
+                ConfigApp.APP_NAME
+            )
+        }
     }
 
     SetupHandlers() {
@@ -34,8 +58,11 @@ class SearchBoxHandler {
             return
         }
 
+        ; Typing leaves browse mode; search flattened leaf actions.
+        this.ExitBrowseMode()
+        this.RefreshContextBeforeFilter()
         results := []
-        for action in this.allActions {
+        for action in SearchActionsLoader.FilterByActiveContext(this.leafActions) {
             if this.IsActionMatch(query, action) {
                 results.Push(action)
             }
@@ -45,27 +72,68 @@ class SearchBoxHandler {
     }
 
     ShowRecentSuggestions() {
-        recent := this.GetRecentActions()
+        this.ExitBrowseMode()
+        this.RefreshContextBeforeFilter()
+        recent := SearchActionsLoader.FilterByActiveContext(this.GetRecentActions())
         this.visibleActions := recent
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(recent), 1)
     }
 
+    ; Ctrl+Enter: show first-level items from JSON only (context-filtered when enabled).
     ShowAllSuggestions() {
-        all := []
-        for action in this.allActions {
-            all.Push(action)
-        }
-        this.visibleActions := all
-        this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(all), 1)
+        this.isBrowsing := true
+        this.menuStack := []
+        this.ShowMenuLevel(this.menuRoot)
+    }
+
+    ShowMenuLevel(nodes) {
+        this.RefreshContextBeforeFilter()
+        this.visibleActions := SearchActionsLoader.FilterByActiveContext(nodes)
+        this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(this.visibleActions), 1)
+    }
+
+    ; Re-detect app under ReCtrl so menus don't stick to a closed/minimized window.
+    RefreshContextBeforeFilter() {
+        if !AppContext.IsEnabled()
+            return
+        ownerHwnd := 0
+        try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+        AppContext.RefreshUnderlying(ownerHwnd)
+    }
+
+    DrillInto(node) {
+        this.menuStack.Push(this.visibleActions)
+        this.ShowMenuLevel(node["children"])
+    }
+
+    ; Returns true if navigated up one menu level.
+    TryNavigateBack() {
+        if !this.isBrowsing || this.menuStack.Length = 0
+            return false
+        previous := this.menuStack.Pop()
+        this.ShowMenuLevel(previous)
+        return true
+    }
+
+    ExitBrowseMode() {
+        this.isBrowsing := false
+        this.menuStack := []
     }
 
     BuildOptionLabels(actions) {
         labels := []
         for action in actions {
-            if (action.Has("command") && action["command"] != "") {
-                labels.Push(action["label"] "  [" action["command"] "]")
+            label := action["label"]
+            if SearchActionsLoader.IsSeparator(action) {
+                labels.Push(label)
+            } else if (action.Has("actionType") && action["actionType"] = "showContext") {
+                labels.Push(label " (" (AppContext.IsEnabled() ? "true" : "false") ")")
+            } else if SearchActionsLoader.IsBranch(action) {
+                labels.Push(label "  >")
+            } else if (action.Has("command") && action["command"] != "") {
+                labels.Push(label "  [" action["command"] "]")
             } else {
-                labels.Push(action["label"])
+                labels.Push(label)
             }
         }
         return labels
@@ -119,7 +187,20 @@ class SearchBoxHandler {
     }
 
     OnEmptyEraseKey() {
+        if this.TryNavigateBack()
+            return
         this.ClearSuggestions()
+    }
+
+    ; Esc: up one level if browsing nested menu; else dismiss list.
+    DismissOrNavigateBack() {
+        if this.TryNavigateBack()
+            return true
+        if (this.visibleActions.Length > 0) {
+            this.ClearSuggestions()
+            return true
+        }
+        return false
     }
 
     ActivateSelectedOption(selectedIndex := 0) {
@@ -129,14 +210,23 @@ class SearchBoxHandler {
         if (selectedIndex <= 0 || selectedIndex > this.visibleActions.Length) {
             return
         }
-        this.ExecuteAction(this.visibleActions[selectedIndex])
+        node := this.visibleActions[selectedIndex]
+        if SearchActionsLoader.IsSeparator(node) {
+            return
+        }
+        if SearchActionsLoader.IsBranch(node) {
+            this.isBrowsing := true
+            this.DrillInto(node)
+            return
+        }
+        this.ExecuteAction(node)
     }
 
     ProcessSearch(searchText) {
         searchText := Trim(searchText)
         selectedIndex := this.guiInstance.GetSelectedIndex()
         if (selectedIndex > 0 && selectedIndex <= this.visibleActions.Length) {
-            this.ExecuteAction(this.visibleActions[selectedIndex])
+            this.ActivateSelectedOption(selectedIndex)
             return
         }
 
@@ -147,6 +237,7 @@ class SearchBoxHandler {
     }
 
     ClearSuggestions() {
+        this.ExitBrowseMode()
         this.visibleActions := []
         this.guiInstance.SetSuggestionOptions([])
     }
@@ -157,7 +248,22 @@ class SearchBoxHandler {
 
         if (actionType = "messageBox") {
             messageText := action.Has("message") ? action["message"] : action["label"]
-            this.ShowOwnedMessage(messageText, "ReCtrl")
+            this.ShowOwnedMessage(messageText, ConfigApp.APP_NAME)
+        } else if (actionType = "showContext") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            result := AppContext.PromptToggleEnabled(ownerHwnd)
+            this.ShowActionResult(result)
+        } else if (actionType = "browserActions") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            BrowserActions.Run(action, ownerHwnd)
+        } else if (actionType = "openInBrowser__OreoTracker") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            result := OpenInBrowser__OreoTracker.Run(action, ownerHwnd)
+            if !(IsObject(result) && result.Has("silent") && result["silent"])
+                this.ShowActionResult(result)
         } else if (actionType = "clipboardWriteText") {
             result := ClipboardActions.CreateClipboardFileFromText()
             this.ShowActionResult(result)
@@ -168,19 +274,22 @@ class SearchBoxHandler {
             this.RunCommandInTerminal(action["command"])
         }
         this.guiInstance.ClearSearch()
+        this.ClearSuggestions()
     }
 
     ShowActionResult(result) {
         if !IsObject(result) {
-            this.ShowOwnedMessage("Action finished.", "ReCtrl")
+            this.ShowOwnedMessage("Action finished.", ConfigApp.APP_NAME)
             return
         }
-        title := result.Has("title") ? result["title"] : "ReCtrl"
+        title := result.Has("title") ? result["title"] : ConfigApp.APP_NAME
         text := result.Has("message") ? result["message"] : "Done."
         this.ShowOwnedMessage(text, title)
     }
 
-    ShowOwnedMessage(text, title := "ReCtrl") {
+    ShowOwnedMessage(text, title := unset) {
+        if !IsSet(title)
+            title := ConfigApp.APP_NAME
         ownerHwnd := 0
         try ownerHwnd := this.guiInstance.GetOwnerHwnd()
         if ownerHwnd {
@@ -196,7 +305,7 @@ class SearchBoxHandler {
             if (existingId != actionId) {
                 nextRecent.Push(existingId)
             }
-            if (nextRecent.Length >= SearchActionsConfig.RECENT_LIMIT)
+            if (nextRecent.Length >= this.recentLimit)
                 break
         }
         this.recentActionIds := nextRecent
@@ -214,7 +323,7 @@ class SearchBoxHandler {
     }
 
     FindActionById(actionId) {
-        for action in this.allActions {
+        for action in this.leafActions {
             if (action["id"] = actionId) {
                 return action
             }

@@ -47,10 +47,16 @@ if exist "C:\Program Files\AutoHotkey\AutoHotkey64.exe" (
     goto :found
 )
 
-REM Check-3: User local installation
+REM Check-3a: User local installation
 if exist "%LocalAppData%\Programs\AutoHotkey\v2\AutoHotkey64.exe" (
     set AHK_EXE=%LocalAppData%\Programs\AutoHotkey\v2\AutoHotkey64.exe
-    echo success Check-3
+    echo success Check-3a
+    goto :found
+)
+REM Check-3b: User local installation
+if exist "%LocalAppData%\Programs\AutoHotkey_2.0.19\AutoHotkey64.exe" (
+    set AHK_EXE=%LocalAppData%\Programs\AutoHotkey_2.0.19\AutoHotkey64.exe
+    echo success Check-3b
     goto :found
 )
 
@@ -124,4 +130,5 @@ REM Launch ReCtrl
 start "" "%AHK_EXE%" "%AHK_SCRIPT%"
 
 echo ReCtrl activated! Check system tray for the icon.
+pause
 exit /b 0

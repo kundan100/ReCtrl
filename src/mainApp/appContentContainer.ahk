@@ -9,6 +9,7 @@ class AppContentContainer {
     gui := ""
     headerHeight := 0
     contentBg := ""
+    contextToggle := ""
     searchBox := ""
 
     __New(parentGui, headerHeight) {
@@ -28,7 +29,13 @@ class AppContentContainer {
 
         searchW := Min(520, w - 40)
         searchX := Floor((w - searchW) / 2)
-        searchY := this.headerHeight + 8
+        topPad := NativeUiConfig.CONTENT_TOP_PADDING
+        toggleH := ContextToggleControl.OccupiedHeight()
+
+        toggleY := this.headerHeight + topPad
+        this.contextToggle := ContextToggleControl(this.gui, searchX, toggleY, searchW)
+
+        searchY := this.headerHeight + topPad + toggleH
         this.searchBox := SearchBox(this.gui, searchX, searchY, searchW, NativeUiConfig.SEARCH_INPUT_HEIGHT)
     }
 
@@ -38,7 +45,13 @@ class AppContentContainer {
 
         searchW := Min(520, clientW - 40)
         searchX := Floor((clientW - searchW) / 2)
-        searchY := this.headerHeight + 8
+        topPad := NativeUiConfig.CONTENT_TOP_PADDING
+        toggleH := ContextToggleControl.OccupiedHeight()
+
+        if this.contextToggle
+            this.contextToggle.Reposition(searchX, this.headerHeight + topPad, searchW)
+
+        searchY := this.headerHeight + topPad + toggleH
         this.searchBox.Reposition(searchX, searchY, searchW, NativeUiConfig.SEARCH_INPUT_HEIGHT)
     }
 
@@ -52,5 +65,13 @@ class AppContentContainer {
 
     HideTransientUi() {
         this.searchBox.Hide()
+    }
+
+    ; Preferred content height for collapsed window (header excluded).
+    static PreferredContentHeight() {
+        return NativeUiConfig.CONTENT_TOP_PADDING
+            + ContextToggleControl.OccupiedHeight()
+            + NativeUiConfig.SEARCH_INPUT_HEIGHT
+            + NativeUiConfig.CONTENT_BOTTOM_PADDING
     }
 }
