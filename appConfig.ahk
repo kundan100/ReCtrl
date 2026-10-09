@@ -13,8 +13,9 @@ class AppColors {
 class AppConfig {
     static WINDOW := {
         WIDTH: 600,
+        ; Fallback height; Show() prefers header + content (search + optional context toggle).
         HEIGHT: 70,
-        TITLE: "ReCtrl",
+        TITLE: ConfigApp.DisplayNameWithVersion(),
         SHOW_TITLE_BAR: false,
         ALWAYS_ON_TOP: true,
         BG_COLOR: AppColors.BG_WINDOW

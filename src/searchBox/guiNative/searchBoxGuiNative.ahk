@@ -30,7 +30,7 @@ class SearchBoxGuiNative {
             this.parentGui := parentGui
             hostGui := this.parentGui
         } else {
-            this.gui := Gui("+AlwaysOnTop +Border", "ReCtrl Search")
+            this.gui := Gui("+AlwaysOnTop +Border", ConfigApp.APP_NAME " Search")
             this.gui.Name := "ReCtrlSearchBox"
             this.gui.MarginX := 16
             this.gui.MarginY := 16

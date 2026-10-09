@@ -45,8 +45,10 @@ class MainAppContainer {
     }
 
     Show() {
+        ; Capture the app underneath before this window takes focus.
+        this.CaptureUnderlyingContext()
         w := AppConfig.WINDOW.WIDTH
-        h := AppConfig.WINDOW.HEIGHT
+        h := AppConfig.AppHeaderHeight() + AppContentContainer.PreferredContentHeight()
         this.gui.Show("w" w " h" h " Center")
         this.gui.GetClientPos(, , &clientW, &clientH)
         this.OnSize(clientW, clientH)
@@ -71,6 +73,9 @@ class MainAppContainer {
     }
 
     Summon() {
+        ; Always try to remember the focused app before ReCtrl steals focus.
+        this.CaptureUnderlyingContext()
+
         if !this.IsVisible() {
             this.Show()
             return
@@ -84,6 +89,11 @@ class MainAppContainer {
             }
             this.content.FocusSearchBox()
         }
+    }
+
+    CaptureUnderlyingContext() {
+        ; Prefer live window under ReCtrl (skips minimized / closed apps).
+        AppContext.RefreshUnderlying(this.GetHwnd())
     }
 
     GetHwnd() {
