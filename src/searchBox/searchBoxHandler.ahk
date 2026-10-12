@@ -282,6 +282,16 @@ class SearchBoxHandler {
         }
         this.guiInstance.ClearSearch()
         this.ClearSuggestions()
+        this.FocusOwner()
+    }
+
+    ; Bring ReCtrl back after an action that may have focused another window (browser, terminal, …).
+    FocusOwner() {
+        ownerHwnd := 0
+        try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+        if ownerHwnd {
+            try WinActivate("ahk_id " ownerHwnd)
+        }
     }
 
     ; Prefer nested action.actionType (JSON-driven); fall back to top-level actionType.
