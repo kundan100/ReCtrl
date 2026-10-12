@@ -2,7 +2,8 @@
   "searchConfig": {
     "DEFAULT_RECENT_LIMIT": 10,
     "CONTEXT_ENABLED": true,
-    "TYPING_RESPECTS_CONTEXT": false
+    "TYPING_RESPECTS_CONTEXT": false,
+    "RECENTS_RESPECTS_CONTEXT": false
   },
   "searchOptions": [
     {

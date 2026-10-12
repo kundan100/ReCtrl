@@ -9,7 +9,8 @@ class SearchBoxHandler {
     menuStack := []
     isBrowsing := false
     recentLimit := 0
-    typingRespectsContext := false
+    typingRespectsContext := true
+    recentsRespectsContext := true
 
     __New(guiInstance) {
         this.guiInstance := guiInstance
@@ -23,13 +24,15 @@ class SearchBoxHandler {
             this.menuRoot := loaded["searchOptions"]
             this.recentLimit := loaded["searchConfig"]["DEFAULT_RECENT_LIMIT"]
             this.typingRespectsContext := loaded["searchConfig"]["TYPING_RESPECTS_CONTEXT"]
+            this.recentsRespectsContext := loaded["searchConfig"]["RECENTS_RESPECTS_CONTEXT"]
             AppContext.ApplySearchConfig(loaded["searchConfig"])
             this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
         } catch as err {
             this.menuRoot := []
             this.leafActions := []
             this.recentLimit := 0
-            this.typingRespectsContext := false
+            this.typingRespectsContext := true
+            this.recentsRespectsContext := true
             detail := err.Message
             try detail .= "`n(" err.What " @ line " err.Line ")"
             this.ShowOwnedMessage(
@@ -80,8 +83,11 @@ class SearchBoxHandler {
 
     ShowRecentSuggestions() {
         this.ExitBrowseMode()
-        this.RefreshContextBeforeFilter()
-        recent := SearchActionsLoader.FilterByActiveContext(this.GetRecentActions())
+        recent := this.GetRecentActions()
+        if this.recentsRespectsContext {
+            this.RefreshContextBeforeFilter()
+            recent := SearchActionsLoader.FilterByActiveContext(recent)
+        }
         this.visibleActions := recent
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(recent), 1)
     }

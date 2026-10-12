@@ -54,6 +54,9 @@ class SearchActionsLoader {
         if !configNode.Has("TYPING_RESPECTS_CONTEXT") {
             throw Error("searchConfig.TYPING_RESPECTS_CONTEXT is required in searchActions.json.")
         }
+        if !configNode.Has("RECENTS_RESPECTS_CONTEXT") {
+            throw Error("searchConfig.RECENTS_RESPECTS_CONTEXT is required in searchActions.json.")
+        }
 
         config := Map()
         for key, value in configNode {
@@ -76,6 +79,10 @@ class SearchActionsLoader {
         config["TYPING_RESPECTS_CONTEXT"] := SearchActionsLoader.NormalizeBool(
             config["TYPING_RESPECTS_CONTEXT"],
             "searchConfig.TYPING_RESPECTS_CONTEXT"
+        )
+        config["RECENTS_RESPECTS_CONTEXT"] := SearchActionsLoader.NormalizeBool(
+            config["RECENTS_RESPECTS_CONTEXT"],
+            "searchConfig.RECENTS_RESPECTS_CONTEXT"
         )
         return config
     }
