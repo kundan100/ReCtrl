@@ -126,7 +126,7 @@ class SearchBoxHandler {
             label := action["label"]
             if SearchActionsLoader.IsSeparator(action) {
                 labels.Push(label)
-            } else if (action.Has("actionType") && action["actionType"] = "showContext") {
+            } else if (this.ResolveActionType(action) = "showContext") {
                 labels.Push(label " (" (AppContext.IsEnabled() ? "true" : "false") ")")
             } else if SearchActionsLoader.IsBranch(action) {
                 labels.Push(label "  >")
@@ -244,7 +244,7 @@ class SearchBoxHandler {
 
     ExecuteAction(action) {
         this.MarkActionAsRecent(action["id"])
-        actionType := action.Has("actionType") ? action["actionType"] : "terminalCommand"
+        actionType := this.ResolveActionType(action)
 
         if (actionType = "messageBox") {
             messageText := action.Has("message") ? action["message"] : action["label"]
@@ -257,13 +257,13 @@ class SearchBoxHandler {
         } else if (actionType = "browserActions") {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-            BrowserActions.Run(action, ownerHwnd)
-        } else if (actionType = "openInBrowser__OreoTracker") {
-            ownerHwnd := 0
-            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-            result := OpenInBrowser__OreoTracker.Run(action, ownerHwnd)
-            if !(IsObject(result) && result.Has("silent") && result["silent"])
-                this.ShowActionResult(result)
+            try {
+                result := BrowserActions.Run(action, ownerHwnd)
+                if !(IsObject(result) && result.Has("silent") && result["silent"])
+                    this.ShowActionResult(result)
+            } catch as err {
+                this.ShowOwnedMessage(err.Message, ConfigApp.APP_NAME " — Browser")
+            }
         } else if (actionType = "clipboardWriteText") {
             result := ClipboardActions.CreateClipboardFileFromText()
             this.ShowActionResult(result)
@@ -275,6 +275,18 @@ class SearchBoxHandler {
         }
         this.guiInstance.ClearSearch()
         this.ClearSuggestions()
+    }
+
+    ; Prefer nested action.actionType (JSON-driven); fall back to top-level actionType.
+    ResolveActionType(menuItem) {
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("actionType") && Trim(String(nested["actionType"])) != ""
+                return Trim(String(nested["actionType"]))
+        }
+        if menuItem.Has("actionType") && Trim(String(menuItem["actionType"])) != ""
+            return Trim(String(menuItem["actionType"]))
+        return "terminalCommand"
     }
 
     ShowActionResult(result) {
