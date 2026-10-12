@@ -9,6 +9,7 @@ class SearchBoxHandler {
     menuStack := []
     isBrowsing := false
     recentLimit := 0
+    typingRespectsContext := false
 
     __New(guiInstance) {
         this.guiInstance := guiInstance
@@ -21,12 +22,14 @@ class SearchBoxHandler {
             loaded := SearchActionsLoader.LoadFromFile()
             this.menuRoot := loaded["searchOptions"]
             this.recentLimit := loaded["searchConfig"]["DEFAULT_RECENT_LIMIT"]
+            this.typingRespectsContext := loaded["searchConfig"]["TYPING_RESPECTS_CONTEXT"]
             AppContext.ApplySearchConfig(loaded["searchConfig"])
             this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
         } catch as err {
             this.menuRoot := []
             this.leafActions := []
             this.recentLimit := 0
+            this.typingRespectsContext := false
             detail := err.Message
             try detail .= "`n(" err.What " @ line " err.Line ")"
             this.ShowOwnedMessage(
@@ -60,9 +63,13 @@ class SearchBoxHandler {
 
         ; Typing leaves browse mode; search flattened leaf actions.
         this.ExitBrowseMode()
-        this.RefreshContextBeforeFilter()
         results := []
-        for action in SearchActionsLoader.FilterByActiveContext(this.leafActions) {
+        leafActionsTemp := this.leafActions
+        if this.typingRespectsContext {
+            this.RefreshContextBeforeFilter()
+            leafActionsTemp := SearchActionsLoader.FilterByActiveContext(this.leafActions)
+        }
+        for action in leafActionsTemp {
             if this.IsActionMatch(query, action) {
                 results.Push(action)
             }

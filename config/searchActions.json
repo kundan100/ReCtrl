@@ -1,7 +1,8 @@
 {
   "searchConfig": {
     "DEFAULT_RECENT_LIMIT": 10,
-    "CONTEXT_ENABLED": true
+    "CONTEXT_ENABLED": true,
+    "TYPING_RESPECTS_CONTEXT": false
   },
   "searchOptions": [
     {
@@ -53,7 +54,7 @@
     },
     {
       "id": "open-oreo-tracker",
-      "label": "Open: Oreo tracker",
+      "label": "Oreo tracker",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -67,7 +68,7 @@
     },
     {
       "id": "open-oreo-scrumBoard",
-      "label": "Open: Oreo scrumBoard",
+      "label": "Oreo scrumBoard",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -81,7 +82,7 @@
     },
     {
       "id": "open-oreo-roadmap",
-      "label": "Open: Oreo roadmap",
+      "label": "Oreo roadmap",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -92,6 +93,20 @@
       },
       "context": [],
       "keywords": ["open", "oreo", "roadmap", "timeline", "browser"]
+    },
+    {
+      "id": "open-oreo-jiraTicket",
+      "label": "Oreo jiraTicket",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome",
+        "multiWinIdentifier": "kkundancybage2.com@gmail.com",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": [],
+      "keywords": ["open", "oreo", "jiraTicket", "browser"]
     },
     {
       "id": "notepad-demo",
