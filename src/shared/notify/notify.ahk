@@ -1,13 +1,33 @@
 #Requires AutoHotkey v2
 
 ; Lightweight top-right toast notifications (Teams-like).
-; Public API: Notify.Show(title, message, durationMs := unset)
+; Public API:
+;   Notify.Show(title, message, durationMs := unset)
+;   Notify.Feedback(title, message, ownerHwnd := 0)  ; respects NotifyConfig.RESULT_FEEDBACK
 class Notify {
     static gui := ""
     static hideTimer := ""
     static titleCtrl := ""
     static bodyCtrl := ""
     static closeCtrl := ""
+
+    ; Route message via NotifyConfig.RESULT_FEEDBACK (toast vs MsgBox).
+    ; ownerHwnd is used only for the popup path (owned dialog).
+    static Feedback(title, message, ownerHwnd := 0) {
+        title := Trim(String(title))
+        if (title = "")
+            title := ConfigApp.APP_NAME
+        mode := ""
+        try mode := StrLower(Trim(String(NotifyConfig.RESULT_FEEDBACK)))
+        if (mode = "show-in-notification") {
+            Notify.Show(title, message)
+            return
+        }
+        if ownerHwnd
+            MsgBox(message, title, "Owner" ownerHwnd)
+        else
+            MsgBox(message, title)
+    }
 
     ; Show a toast at the top-right of the primary work area.
     ; Does not activate/steal focus. Replaces any currently visible toast.

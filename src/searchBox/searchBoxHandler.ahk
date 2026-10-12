@@ -343,13 +343,9 @@ class SearchBoxHandler {
     ShowResultFeedback(text, title := unset) {
         if !IsSet(title)
             title := ConfigApp.APP_NAME
-        mode := ""
-        try mode := StrLower(Trim(String(NotifyConfig.RESULT_FEEDBACK)))
-        if (mode = "show-in-notification") {
-            Notify.Show(title, text)
-            return
-        }
-        this.ShowOwnedMessage(text, title)
+        ownerHwnd := 0
+        try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+        Notify.Feedback(title, text, ownerHwnd)
     }
 
     ShowOwnedMessage(text, title := unset) {
