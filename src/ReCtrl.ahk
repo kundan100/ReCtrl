@@ -25,6 +25,8 @@ try {
 ; #Include currentWin\currentWinInfo.ahk  ; Disconnected - keeping for future reference
 ; #Include mainSearchBox\mainSearchBox.ahk
 #Include mainApp\mainApp.ahk
+; Toast API (needs NotifyConfig from appConfig, included by mainApp).
+#Include shared\notify\notify.ahk
 
 ; setup system tray icon and tooltip
 SetupTrayIcon()

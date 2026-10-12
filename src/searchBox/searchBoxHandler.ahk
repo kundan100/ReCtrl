@@ -331,11 +331,24 @@ class SearchBoxHandler {
 
     ShowActionResult(result) {
         if !IsObject(result) {
-            this.ShowOwnedMessage("Action finished.", ConfigApp.APP_NAME)
+            this.ShowResultFeedback("Action finished.", ConfigApp.APP_NAME)
             return
         }
         title := result.Has("title") ? result["title"] : ConfigApp.APP_NAME
         text := result.Has("message") ? result["message"] : "Done."
+        this.ShowResultFeedback(text, title)
+    }
+
+    ; Route action result via NotifyConfig.RESULT_FEEDBACK (popup vs toast).
+    ShowResultFeedback(text, title := unset) {
+        if !IsSet(title)
+            title := ConfigApp.APP_NAME
+        mode := ""
+        try mode := StrLower(Trim(String(NotifyConfig.RESULT_FEEDBACK)))
+        if (mode = "show-in-notification") {
+            Notify.Show(title, text)
+            return
+        }
         this.ShowOwnedMessage(text, title)
     }
 

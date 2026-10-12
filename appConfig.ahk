@@ -55,3 +55,32 @@ class AppConfig {
         return AppConfig.WINDOW.SHOW_TITLE_BAR ? 0 : AppConfig.HEADER.HEIGHT
     }
 }
+
+; Settings-toggle + toast notification UI gates (code constants; not written to JSON).
+class NotifyConfig {
+    ; When true: keep Yes/No MsgBox before flipping a searchConfig session flag.
+    ; When false: flip immediately on option select (Yes/No code path stays in AppContext).
+    static PROMPT_BEFORE_TOGGLE := false
+
+    ; How to show the post-toggle / action result message:
+    ;   "show-in-popup"        → owned MsgBox (existing)
+    ;   "show-in-notification" → top-right toast via Notify.Show
+    static RESULT_FEEDBACK := "show-in-notification"
+
+    ; Auto-dismiss duration for toast notifications (ms).
+    static TOAST_DURATION_MS := 10000
+
+    static TOAST := {
+        WIDTH: 320,
+        MIN_HEIGHT: 72,
+        MARGIN: 16,
+        PADDING: 12,
+        BG_COLOR: "0x2D2D30",
+        TITLE_COLOR: "0xFFFFFF",
+        BODY_COLOR: "0xD0D0D0",
+        CLOSE_COLOR: "0xC8C8C8",
+        TITLE_FONT: "s10 Bold",
+        BODY_FONT: "s9",
+        CLOSE_FONT: "s12"
+    }
+}
