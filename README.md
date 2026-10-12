@@ -71,33 +71,34 @@ ReCtrl/
 
 # Examples to add a new searchBox's option
 ## Open: Oreo tracker
-1. In file (`config/searchActions.json`), add the option as below:
-{
-	"id": "open-oreo-tracker",
-	"label": "Open: Oreo tracker",
-	"actionType": "openInBrowser__OreoTracker",
-	"context": [],
-	"keywords": ["open", "oreo", "tracker", "browser"]
-},
-2. In file (`src/searchBox/actions/openInBrowser/openInBrowser__OreoTracker.ahk`), create a new ahk file to achive the functionality:
-#Requires AutoHotkey v2
-; Open Oreo tracker in browser (actionType: openInBrowser__OreoTracker).
-class OpenInBrowser__OreoTracker {
-    static Run(action := unset, ownerHwnd := 0) {
-        return Map(
-            "ok", true,
-            "title", ConfigApp.APP_NAME,
-            "message", "work in progress"
-        )
-    }
-}
-3. In file (`src/searchBox/searchBox.ahk`), include the newly created ahk file (as in above step)
-#Include actions\openInBrowser\openInBrowser__OreoTracker.ahk
-4. In file (`src/searchBox/searchBoxHandler.ahk`), add the trigger block for `actionType = "openInBrowser__OreoTracker"`
-else if (actionType = "openInBrowser__OreoTracker") {
-	ownerHwnd := 0
-	try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-	result := OpenInBrowser__OreoTracker.Run(action, ownerHwnd)
-	this.ShowActionResult(result)
-}
+1. Load JSON (startup)
+	- `config/searchActions.json` (data)
+	- `searchActionsLoader.ahk` > `SearchActionsLoader.LoadFromFile`
+	- `searchActionsLoader.ahk` > `NormalizeSearchConfig`
+	- `searchActionsLoader.ahk` > `NormalizeNodes → NormalizeNode (keeps nested action)`
+	- `searchBoxHandler.ahk` > `SearchBoxHandler.__New → LoadMenuTree`
+	- `searchBoxHandler.ahk` > `FlattenLeaves`
+2. User selects the option
+	- `searchBoxHandler.ahk` > `ActivateSelectedOption`
+	- `searchBoxHandler.ahk` > `ExecuteAction`
+	- `searchBoxHandler.ahk` > `BrowserActions.Run (when actionType = browserActions)`
+3. Facade routes by JSON operation
+	- `browserActions.ahk` > `BrowserActions.Run`
+	- `browserActions.ahk` > `GetActionConfig / CfgStr`
+	- `browserActions.ahk` > `OpenOrFocusByTitle`
+4. Focus tab (if found)
+	- `browserActions.ahk` > `FocusTabByTitle`
+	- `browserTabs.ahk` > `BrowserTabs.FocusByTitle`
+	- `browserWindows.ahk` > `ListByBrowserAndLabel`
+	- `browserWindows.ahk` > `WindowMatchesPrimaryLabel`
+	- `browserProfile.ahk` > `CollectBrowserProfile (+ helpers: GuessBrowserName, ResolveProfileIdentity, …)`
+	- `browserTabs.ahk` > `TryFocusTabViaUia or FocusTabByCycling`
+	- `browserWindows.ahk` > `Activate`
+5. Else open URL
+	- `browserActions.ahk` > `OpenUrl`
+	- `browserLaunch.ahk` > `BrowserLaunch.OpenUrl`
+	- `browserLaunch.ahk` > `ResolveExe`
+	- `browserProfile.ahk` > `ResolveDirectoryByPrimaryLabel`
+	- `browserLaunch.ahk` > `Run(...) (launch Chrome with profile + URL)`
+
 

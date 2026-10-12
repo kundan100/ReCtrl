@@ -60,9 +60,13 @@ class SearchBoxHandler {
 
         ; Typing leaves browse mode; search flattened leaf actions.
         this.ExitBrowseMode()
-        this.RefreshContextBeforeFilter()
         results := []
-        for action in SearchActionsLoader.FilterByActiveContext(this.leafActions) {
+        leafActionsTemp := this.leafActions
+        if AppContext.GetSearchConfigFlag("TYPING_RESPECTS_CONTEXT") {
+            this.RefreshContextBeforeFilter()
+            leafActionsTemp := SearchActionsLoader.FilterByActiveContext(this.leafActions)
+        }
+        for action in leafActionsTemp {
             if this.IsActionMatch(query, action) {
                 results.Push(action)
             }
@@ -73,8 +77,11 @@ class SearchBoxHandler {
 
     ShowRecentSuggestions() {
         this.ExitBrowseMode()
-        this.RefreshContextBeforeFilter()
-        recent := SearchActionsLoader.FilterByActiveContext(this.GetRecentActions())
+        recent := this.GetRecentActions()
+        if AppContext.GetSearchConfigFlag("RECENTS_RESPECTS_CONTEXT") {
+            this.RefreshContextBeforeFilter()
+            recent := SearchActionsLoader.FilterByActiveContext(recent)
+        }
         this.visibleActions := recent
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(recent), 1)
     }
@@ -126,14 +133,17 @@ class SearchBoxHandler {
             label := action["label"]
             if SearchActionsLoader.IsSeparator(action) {
                 labels.Push(label)
-            } else if (action.Has("actionType") && action["actionType"] = "showContext") {
-                labels.Push(label " (" (AppContext.IsEnabled() ? "true" : "false") ")")
-            } else if SearchActionsLoader.IsBranch(action) {
-                labels.Push(label "  >")
-            } else if (action.Has("command") && action["command"] != "") {
-                labels.Push(label "  [" action["command"] "]")
             } else {
-                labels.Push(label)
+                flagKey := this.ResolveSearchConfigFlagKey(action)
+                if (flagKey != "") {
+                    labels.Push(label " (" (AppContext.GetSearchConfigFlag(flagKey) ? "true" : "false") ")")
+                } else if SearchActionsLoader.IsBranch(action) {
+                    labels.Push(label "  >")
+                } else if (action.Has("command") && action["command"] != "") {
+                    labels.Push(label "  [" action["command"] "]")
+                } else {
+                    labels.Push(label)
+                }
             }
         }
         return labels
@@ -244,26 +254,29 @@ class SearchBoxHandler {
 
     ExecuteAction(action) {
         this.MarkActionAsRecent(action["id"])
-        actionType := action.Has("actionType") ? action["actionType"] : "terminalCommand"
+        actionType := this.ResolveActionType(action)
 
         if (actionType = "messageBox") {
             messageText := action.Has("message") ? action["message"] : action["label"]
             this.ShowOwnedMessage(messageText, ConfigApp.APP_NAME)
-        } else if (actionType = "showContext") {
+        } else if (actionType = "showContext" || actionType = "toggleSearchConfig") {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-            result := AppContext.PromptToggleEnabled(ownerHwnd)
+            flagKey := this.ResolveSearchConfigFlagKey(action)
+            if (flagKey = "")
+                flagKey := "CONTEXT_ENABLED"
+            result := AppContext.PromptToggleSearchConfigFlag(flagKey, ownerHwnd)
             this.ShowActionResult(result)
         } else if (actionType = "browserActions") {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-            BrowserActions.Run(action, ownerHwnd)
-        } else if (actionType = "openInBrowser__OreoTracker") {
-            ownerHwnd := 0
-            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-            result := OpenInBrowser__OreoTracker.Run(action, ownerHwnd)
-            if !(IsObject(result) && result.Has("silent") && result["silent"])
-                this.ShowActionResult(result)
+            try {
+                result := BrowserActions.Run(action, ownerHwnd)
+                if !(IsObject(result) && result.Has("silent") && result["silent"])
+                    this.ShowActionResult(result)
+            } catch as err {
+                this.ShowOwnedMessage(err.Message, ConfigApp.APP_NAME " — Browser")
+            }
         } else if (actionType = "clipboardWriteText") {
             result := ClipboardActions.CreateClipboardFileFromText()
             this.ShowActionResult(result)
@@ -275,6 +288,45 @@ class SearchBoxHandler {
         }
         this.guiInstance.ClearSearch()
         this.ClearSuggestions()
+        this.FocusOwner()
+    }
+
+    ; Bring ReCtrl back after an action that may have focused another window (browser, terminal, …).
+    FocusOwner() {
+        ownerHwnd := 0
+        try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+        if ownerHwnd {
+            try WinActivate("ahk_id " ownerHwnd)
+        }
+    }
+
+    ; Prefer nested action.actionType (JSON-driven); fall back to top-level actionType.
+    ResolveActionType(menuItem) {
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("actionType") && Trim(String(nested["actionType"])) != ""
+                return Trim(String(nested["actionType"]))
+        }
+        if menuItem.Has("actionType") && Trim(String(menuItem["actionType"])) != ""
+            return Trim(String(menuItem["actionType"]))
+        return "terminalCommand"
+    }
+
+    ; For toggleSearchConfig / showContext: which searchConfig flag to show/toggle.
+    ResolveSearchConfigFlagKey(menuItem) {
+        actionType := this.ResolveActionType(menuItem)
+        if (actionType = "showContext")
+            return "CONTEXT_ENABLED"
+        if (actionType != "toggleSearchConfig")
+            return ""
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("key") && Trim(String(nested["key"])) != ""
+                return Trim(String(nested["key"]))
+        }
+        if menuItem.Has("key") && Trim(String(menuItem["key"])) != ""
+            return Trim(String(menuItem["key"]))
+        return ""
     }
 
     ShowActionResult(result) {

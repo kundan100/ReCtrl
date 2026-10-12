@@ -5,8 +5,12 @@
 #Include searchActionsLoader.ahk
 #Include contextToggle\contextToggleControl.ahk
 #Include actions\clipboardActions.ahk
+; browserProfile.ahk is included once from ReCtrl.ahk (used by AppContext + browser modules).
+#Include actions\browser\browserWindows.ahk
+#Include actions\browser\browserTabs.ahk
+#Include actions\browser\browserLaunch.ahk
+#Include actions\browser\browserDetails.ahk
 #Include actions\browser\browserActions.ahk
-#Include actions\openInBrowser\openInBrowser__OreoTracker.ahk
 #Include guiNative\searchBoxGuiNative.ahk
 #Include searchBoxHandler.ahk
 
