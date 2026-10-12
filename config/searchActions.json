@@ -44,14 +44,24 @@
     {
       "id": "browser-demo",
       "label": "Browser tip",
-      "actionType": "browserActions",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "showTip"
+      },
       "context": ["browser"],
       "keywords": ["browser", "chrome", "edge", "demo"]
     },
     {
       "id": "open-oreo-tracker",
       "label": "Open: Oreo tracker",
-      "actionType": "openInBrowser__OreoTracker",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome",
+        "multiWinIdentifier": "kkundancybage2.com@gmail.com",
+        "filePath": "https://zebra-my.sharepoint.com/:x:/r/personal/sc5394_zebra_com/Documents/Sync%20Oreo/Oreo__action_tracker.xlsx?d=w5f2cdd3ddb184770a587a8387bfc8e33&csf=1&web=1&e=yAQSMO",
+        "fileTitle": "Oreo__action_tracker.xlsx"
+      },
       "context": [],
       "keywords": ["open", "oreo", "tracker", "browser"]
     },

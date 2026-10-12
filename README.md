@@ -71,7 +71,12 @@ ReCtrl/
 
 # Examples to add a new searchBox's option
 ## Open: Oreo tracker
-1. In file (`config/searchActions.json`), add the option as below:
+1. In file (`searchActions.json`) 
+	- action object + params
+2. In file (`browserActions.ahk`) (facade), 
+	- try FocusTabByTitle
+	- else OpenUrl
+3. In file (`config/searchActions.json`), add the option as below:
 {
 	"id": "open-oreo-tracker",
 	"label": "Open: Oreo tracker",
@@ -79,7 +84,14 @@ ReCtrl/
 	"context": [],
 	"keywords": ["open", "oreo", "tracker", "browser"]
 },
-2. In file (`src/searchBox/actions/openInBrowser/openInBrowser__OreoTracker.ahk`), create a new ahk file to achive the functionality:
+4. In file (`src/searchBox/searchBoxHandler.ahk`), add the trigger block for `actionType = "openInBrowser__OreoTracker"`
+else if (actionType = "openInBrowser__OreoTracker") {
+	ownerHwnd := 0
+	try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+	result := OpenInBrowser__OreoTracker.Run(action, ownerHwnd)
+	this.ShowActionResult(result)
+}
+5. In file (`src/searchBox/actions/openInBrowser/openInBrowser__OreoTracker.ahk`), create a new ahk file to achive the functionality:
 #Requires AutoHotkey v2
 ; Open Oreo tracker in browser (actionType: openInBrowser__OreoTracker).
 class OpenInBrowser__OreoTracker {
@@ -91,13 +103,7 @@ class OpenInBrowser__OreoTracker {
         )
     }
 }
-3. In file (`src/searchBox/searchBox.ahk`), include the newly created ahk file (as in above step)
+6. In file (`src/searchBox/searchBox.ahk`), include the newly created ahk file (as in above step)
 #Include actions\openInBrowser\openInBrowser__OreoTracker.ahk
-4. In file (`src/searchBox/searchBoxHandler.ahk`), add the trigger block for `actionType = "openInBrowser__OreoTracker"`
-else if (actionType = "openInBrowser__OreoTracker") {
-	ownerHwnd := 0
-	try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-	result := OpenInBrowser__OreoTracker.Run(action, ownerHwnd)
-	this.ShowActionResult(result)
-}
+
 

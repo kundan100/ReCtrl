@@ -1,186 +1,360 @@
 #Requires AutoHotkey v2
 
-; jsonParse.ahk is included once from ReCtrl.ahk (shared by config loaders).
-#Include configSearchBox.ahk
-#Include searchActionsLoader.ahk
-#Include contextToggle\contextToggleControl.ahk
-#Include actions\clipboardActions.ahk
-#Include actions\browser\browserActions.ahk
-#Include actions\openInBrowser\openInBrowser__OreoTracker.ahk
-#Include guiNative\searchBoxGuiNative.ahk
-#Include searchBoxHandler.ahk
+class SearchBoxHandler {
+    guiInstance := ""
+    menuRoot := []
+    leafActions := []
+    visibleActions := []
+    recentActionIds := []
+    menuStack := []
+    isBrowsing := false
+    recentLimit := 0
 
-global gSearchBoxHotkeyTarget := ""
-
-class SearchBox {
-    gui := ""
-    handler := ""
-    isEmbedded := false
-
-    __New(parentGui := "", x := 20, y := 20, w := 500, h := 30) {
-        this.Initialize(parentGui, x, y, w, h)
+    __New(guiInstance) {
+        this.guiInstance := guiInstance
+        this.LoadMenuTree()
+        this.SetupHandlers()
     }
 
-    Initialize(parentGui, x, y, w, h) {
-        if (SearchBoxConfig.UI_MODE != "NATIVE") {
-            throw Error("Only NATIVE UI_MODE is currently supported in searchBox module.")
+    LoadMenuTree() {
+        try {
+            loaded := SearchActionsLoader.LoadFromFile()
+            this.menuRoot := loaded["searchOptions"]
+            this.recentLimit := loaded["searchConfig"]["DEFAULT_RECENT_LIMIT"]
+            AppContext.ApplySearchConfig(loaded["searchConfig"])
+            this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
+        } catch as err {
+            this.menuRoot := []
+            this.leafActions := []
+            this.recentLimit := 0
+            detail := err.Message
+            try detail .= "`n(" err.What " @ line " err.Line ")"
+            this.ShowOwnedMessage(
+                "Failed to load searchActions.json:`n" detail "`n`nPath:`n" SearchActionsConfig.ACTIONS_JSON_PATH,
+                ConfigApp.APP_NAME
+            )
+        }
+    }
+
+    SetupHandlers() {
+        this.guiInstance.SetSubmitCallback((searchText) => this.ProcessSearch(searchText))
+        this.guiInstance.SetQueryChangeCallback((query) => this.UpdateSuggestions(query))
+        this.guiInstance.SetInputFocusCallback((query) => this.OnInputFocus(query))
+        this.guiInstance.SetOptionActivateCallback((selectedIndex) => this.ActivateSelectedOption(selectedIndex))
+    }
+
+    OnInputFocus(query) {
+        if (Trim(query) = "") {
+            this.ClearSuggestions()
+            return
+        }
+        this.UpdateSuggestions(query)
+    }
+
+    UpdateSuggestions(query) {
+        query := Trim(query)
+        if (query = "") {
+            this.ClearSuggestions()
+            return
         }
 
-        this.isEmbedded := IsObject(parentGui)
-        this.gui := SearchBoxGuiNative(parentGui, x, y, w, h)
-        this.handler := SearchBoxHandler(this.gui)
-        global gSearchBoxHotkeyTarget
-        gSearchBoxHotkeyTarget := this
+        ; Typing leaves browse mode; search flattened leaf actions.
+        this.ExitBrowseMode()
+        this.RefreshContextBeforeFilter()
+        results := []
+        for action in SearchActionsLoader.FilterByActiveContext(this.leafActions) {
+            if this.IsActionMatch(query, action) {
+                results.Push(action)
+            }
+        }
+        this.visibleActions := results
+        this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(results), 1)
     }
 
-    Show() {
-        this.gui.Show()
+    ShowRecentSuggestions() {
+        this.ExitBrowseMode()
+        this.RefreshContextBeforeFilter()
+        recent := SearchActionsLoader.FilterByActiveContext(this.GetRecentActions())
+        this.visibleActions := recent
+        this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(recent), 1)
     }
 
-    Hide() {
-        this.gui.Hide()
+    ; Ctrl+Enter: show first-level items from JSON only (context-filtered when enabled).
+    ShowAllSuggestions() {
+        this.isBrowsing := true
+        this.menuStack := []
+        this.ShowMenuLevel(this.menuRoot)
     }
 
-    Toggle() {
-        this.gui.Toggle()
+    ShowMenuLevel(nodes) {
+        this.RefreshContextBeforeFilter()
+        this.visibleActions := SearchActionsLoader.FilterByActiveContext(nodes)
+        this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(this.visibleActions), 1)
     }
 
-    Reposition(x, y, w, h) {
-        this.gui.Reposition(x, y, w, h)
+    ; Re-detect app under ReCtrl so menus don't stick to a closed/minimized window.
+    RefreshContextBeforeFilter() {
+        if !AppContext.IsEnabled()
+            return
+        ownerHwnd := 0
+        try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+        AppContext.RefreshUnderlying(ownerHwnd)
     }
 
-    Focus() {
-        this.gui.Focus()
+    DrillInto(node) {
+        this.menuStack.Push(this.visibleActions)
+        this.ShowMenuLevel(node["children"])
     }
 
-    IsInputFocused() {
-        return this.gui.IsInputFocused()
+    ; Returns true if navigated up one menu level.
+    TryNavigateBack() {
+        if !this.isBrowsing || this.menuStack.Length = 0
+            return false
+        previous := this.menuStack.Pop()
+        this.ShowMenuLevel(previous)
+        return true
     }
 
-    SelectRelative(step) {
-        return this.handler.MoveSelection(step)
+    ExitBrowseMode() {
+        this.isBrowsing := false
+        this.menuStack := []
+    }
+
+    BuildOptionLabels(actions) {
+        labels := []
+        for action in actions {
+            label := action["label"]
+            if SearchActionsLoader.IsSeparator(action) {
+                labels.Push(label)
+            } else if (this.ResolveActionType(action) = "showContext") {
+                labels.Push(label " (" (AppContext.IsEnabled() ? "true" : "false") ")")
+            } else if SearchActionsLoader.IsBranch(action) {
+                labels.Push(label "  >")
+            } else if (action.Has("command") && action["command"] != "") {
+                labels.Push(label "  [" action["command"] "]")
+            } else {
+                labels.Push(label)
+            }
+        }
+        return labels
+    }
+
+    IsActionMatch(query, action) {
+        haystacks := [StrLower(action["label"])]
+        if action.Has("command") {
+            haystacks.Push(StrLower(action["command"]))
+        }
+        if action.Has("keywords") {
+            for kw in action["keywords"] {
+                haystacks.Push(StrLower(kw))
+            }
+        }
+
+        q := StrLower(query)
+        for h in haystacks {
+            if InStr(h, q) || this.IsFuzzyMatch(q, h)
+                return true
+        }
+        return false
+    }
+
+    IsFuzzyMatch(query, target) {
+        qi := 1
+        qLen := StrLen(query)
+        if (qLen = 0)
+            return true
+
+        Loop Parse, target {
+            if (SubStr(query, qi, 1) = A_LoopField) {
+                qi += 1
+                if (qi > qLen)
+                    return true
+            }
+        }
+        return false
+    }
+
+    MoveSelection(step) {
+        return this.guiInstance.MoveSelection(step)
     }
 
     SubmitCurrent() {
-        this.handler.SubmitCurrent()
+        this.ProcessSearch(this.guiInstance.GetSearchText())
     }
 
     ShowAllOptionsShortcut() {
-        this.handler.ShowAllOptionsShortcut()
-    }
-
-    ActivateCurrentOption() {
-        this.handler.ActivateSelectedOption()
-    }
-
-    IsQueryBlank() {
-        return Trim(this.gui.GetSearchText()) = ""
+        this.ShowAllSuggestions()
     }
 
     OnEmptyEraseKey() {
-        this.handler.OnEmptyEraseKey()
+        if this.TryNavigateBack()
+            return
+        this.ClearSuggestions()
     }
 
-    DismissSuggestionsIfVisible() {
-        ; Prefer menu back-navigation, then clear list (keeps window open).
-        return this.handler.DismissOrNavigateBack()
-    }
-}
-
-SearchBox_IsInputFocused() {
-    global gSearchBoxHotkeyTarget, mainAppInstance
-
-    ; Extra guard: do not evaluate search-box focus unless MainApp is visible.
-    if !IsSet(mainAppInstance) {
-        return false
-    }
-    if !IsObject(mainAppInstance) || !IsObject(mainAppInstance.container) {
-        return false
-    }
-    try {
-        if !mainAppInstance.container.IsVisible() {
-            return false
+    ; Esc: up one level if browsing nested menu; else dismiss list.
+    DismissOrNavigateBack() {
+        if this.TryNavigateBack()
+            return true
+        if (this.visibleActions.Length > 0) {
+            this.ClearSuggestions()
+            return true
         }
-    } catch {
         return false
     }
 
-    if !IsObject(gSearchBoxHotkeyTarget) {
-        return false
-    }
-    try {
-        return gSearchBoxHotkeyTarget.IsInputFocused()
-    } catch {
-        return false
-    }
-}
-
-SearchBox_IsInputFocusedAndBlank() {
-    global gSearchBoxHotkeyTarget
-    if !SearchBox_IsInputFocused() {
-        return false
-    }
-    if !IsObject(gSearchBoxHotkeyTarget) {
-        return false
-    }
-    try {
-        return gSearchBoxHotkeyTarget.IsQueryBlank()
-    } catch {
-        return false
-    }
-}
-
-#HotIf SearchBox_IsInputFocused()
-Up:: {
-    global gSearchBoxHotkeyTarget
-    gSearchBoxHotkeyTarget.SelectRelative(-1)
-}
-
-Down:: {
-    global gSearchBoxHotkeyTarget
-    gSearchBoxHotkeyTarget.SelectRelative(1)
-}
-
-Enter:: {
-    global gSearchBoxHotkeyTarget
-    gSearchBoxHotkeyTarget.SubmitCurrent()
-}
-
-NumpadEnter:: {
-    global gSearchBoxHotkeyTarget
-    gSearchBoxHotkeyTarget.SubmitCurrent()
-}
-
-Esc:: {
-    global gSearchBoxHotkeyTarget, mainAppInstance
-
-    if gSearchBoxHotkeyTarget.DismissSuggestionsIfVisible() {
-        gSearchBoxHotkeyTarget.Focus()
-        return
+    ActivateSelectedOption(selectedIndex := 0) {
+        if (selectedIndex <= 0) {
+            selectedIndex := this.guiInstance.GetSelectedIndex()
+        }
+        if (selectedIndex <= 0 || selectedIndex > this.visibleActions.Length) {
+            return
+        }
+        node := this.visibleActions[selectedIndex]
+        if SearchActionsLoader.IsSeparator(node) {
+            return
+        }
+        if SearchActionsLoader.IsBranch(node) {
+            this.isBrowsing := true
+            this.DrillInto(node)
+            return
+        }
+        this.ExecuteAction(node)
     }
 
-    try mainAppInstance.Hide()
-}
-#HotIf
+    ProcessSearch(searchText) {
+        searchText := Trim(searchText)
+        selectedIndex := this.guiInstance.GetSelectedIndex()
+        if (selectedIndex > 0 && selectedIndex <= this.visibleActions.Length) {
+            this.ActivateSelectedOption(selectedIndex)
+            return
+        }
 
-#HotIf SearchBox_IsInputFocusedAndBlank()
-^Enter:: {
-    global gSearchBoxHotkeyTarget
-    gSearchBoxHotkeyTarget.ShowAllOptionsShortcut()
-}
+        if (searchText = "") {
+            this.ShowRecentSuggestions()
+            return
+        }
+    }
 
-^NumpadEnter:: {
-    global gSearchBoxHotkeyTarget
-    gSearchBoxHotkeyTarget.ShowAllOptionsShortcut()
-}
+    ClearSuggestions() {
+        this.ExitBrowseMode()
+        this.visibleActions := []
+        this.guiInstance.SetSuggestionOptions([])
+    }
 
-Backspace:: {
-    global gSearchBoxHotkeyTarget
-    gSearchBoxHotkeyTarget.OnEmptyEraseKey()
-}
+    ExecuteAction(action) {
+        this.MarkActionAsRecent(action["id"])
+        actionType := this.ResolveActionType(action)
 
-Delete:: {
-    global gSearchBoxHotkeyTarget
-    gSearchBoxHotkeyTarget.OnEmptyEraseKey()
+        if (actionType = "messageBox") {
+            messageText := action.Has("message") ? action["message"] : action["label"]
+            this.ShowOwnedMessage(messageText, ConfigApp.APP_NAME)
+        } else if (actionType = "showContext") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            result := AppContext.PromptToggleEnabled(ownerHwnd)
+            this.ShowActionResult(result)
+        } else if (actionType = "browserActions") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            try {
+                result := BrowserActions.Run(action, ownerHwnd)
+                if !(IsObject(result) && result.Has("silent") && result["silent"])
+                    this.ShowActionResult(result)
+            } catch as err {
+                this.ShowOwnedMessage(err.Message, ConfigApp.APP_NAME " — Browser")
+            }
+        } else if (actionType = "clipboardWriteText") {
+            result := ClipboardActions.CreateClipboardFileFromText()
+            this.ShowActionResult(result)
+        } else if (actionType = "clipboardReadText") {
+            result := ClipboardActions.LoadClipboardTextFromFile()
+            this.ShowActionResult(result)
+        } else {
+            this.RunCommandInTerminal(action["command"])
+        }
+        this.guiInstance.ClearSearch()
+        this.ClearSuggestions()
+    }
+
+    ; Prefer nested action.actionType (JSON-driven); fall back to top-level actionType.
+    ResolveActionType(menuItem) {
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("actionType") && Trim(String(nested["actionType"])) != ""
+                return Trim(String(nested["actionType"]))
+        }
+        if menuItem.Has("actionType") && Trim(String(menuItem["actionType"])) != ""
+            return Trim(String(menuItem["actionType"]))
+        return "terminalCommand"
+    }
+
+    ShowActionResult(result) {
+        if !IsObject(result) {
+            this.ShowOwnedMessage("Action finished.", ConfigApp.APP_NAME)
+            return
+        }
+        title := result.Has("title") ? result["title"] : ConfigApp.APP_NAME
+        text := result.Has("message") ? result["message"] : "Done."
+        this.ShowOwnedMessage(text, title)
+    }
+
+    ShowOwnedMessage(text, title := unset) {
+        if !IsSet(title)
+            title := ConfigApp.APP_NAME
+        ownerHwnd := 0
+        try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+        if ownerHwnd {
+            MsgBox(text, title, "Owner" ownerHwnd)
+        } else {
+            MsgBox(text, title)
+        }
+    }
+
+    MarkActionAsRecent(actionId) {
+        nextRecent := [actionId]
+        for existingId in this.recentActionIds {
+            if (existingId != actionId) {
+                nextRecent.Push(existingId)
+            }
+            if (nextRecent.Length >= this.recentLimit)
+                break
+        }
+        this.recentActionIds := nextRecent
+    }
+
+    GetRecentActions() {
+        results := []
+        for recentId in this.recentActionIds {
+            action := this.FindActionById(recentId)
+            if IsObject(action) {
+                results.Push(action)
+            }
+        }
+        return results
+    }
+
+    FindActionById(actionId) {
+        for action in this.leafActions {
+            if (action["id"] = actionId) {
+                return action
+            }
+        }
+        return ""
+    }
+
+    RunCommandInTerminal(command) {
+        ownerHwnd := 0
+        try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+        if ownerHwnd {
+            WinActivate("ahk_id " ownerHwnd)
+        }
+
+        cmdLine := StrReplace(command, '"', '\"')
+        try {
+            Run('wt.exe new-tab cmd /k "' cmdLine '"')
+        } catch {
+            Run(A_ComSpec ' /k "' cmdLine '"')
+        }
+    }
 }
-#HotIf
