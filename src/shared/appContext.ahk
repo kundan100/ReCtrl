@@ -28,6 +28,20 @@ class AppContext {
         return AppContext.last["kind"]
     }
 
+    ; Browser display name (e.g. "Google Chrome"), or "".
+    static GetCurrentAppIdentifier() {
+        if !IsObject(AppContext.last) || !AppContext.last.Has("appIdentifier")
+            return ""
+        return AppContext.last["appIdentifier"]
+    }
+
+    ; Primary label / signed-in account for current browser profile, or "".
+    static GetCurrentMultiWinIdentifier() {
+        if !IsObject(AppContext.last) || !AppContext.last.Has("multiWinIdentifier")
+            return ""
+        return AppContext.last["multiWinIdentifier"]
+    }
+
     static SetEnabled(enabled) {
         next := !!enabled
         if (AppContext.enabled = next)
@@ -58,12 +72,34 @@ class AppContext {
             exeName := WinGetProcessName(hwnd)
             title := WinGetTitle(hwnd)
             className := WinGetClass(hwnd)
+            kind := AppContext.GuessKind(exeName)
+            processPath := ""
+            try processPath := WinGetProcessPath(hwnd)
+            pid := 0
+            try pid := WinGetPID(hwnd)
+
+            appIdentifier := ""
+            multiWinIdentifier := ""
+            if (kind = "browser") {
+                try {
+                    appIdentifier := BrowserProfile.GuessBrowserName(exeName, processPath)
+                    profile := BrowserProfile.CollectBrowserProfile(pid, exeName, processPath, hwnd)
+                    multiWinIdentifier := profile.Has("profileDisplayName") ? profile["profileDisplayName"] : ""
+                    if (multiWinIdentifier = "" && profile.Has("profileAccount"))
+                        multiWinIdentifier := profile["profileAccount"]
+                } catch {
+                    ; BrowserProfile may be unavailable; keep coarse kind only.
+                }
+            }
+
             AppContext.last := Map(
                 "hwnd", hwnd,
                 "exe", exeName,
                 "title", title,
                 "class", className,
-                "kind", AppContext.GuessKind(exeName)
+                "kind", kind,
+                "appIdentifier", appIdentifier,
+                "multiWinIdentifier", multiWinIdentifier
             )
             return true
         } catch {
@@ -230,10 +266,18 @@ class AppContext {
         kindLine := ""
         if (info.Has("kind") && info["kind"] != "")
             kindLine := "Kind: " info["kind"] "`n"
+        appLine := ""
+        if (info.Has("appIdentifier") && info["appIdentifier"] != "")
+            appLine := "App: " info["appIdentifier"] "`n"
+        profileLine := ""
+        if (info.Has("multiWinIdentifier") && info["multiWinIdentifier"] != "")
+            profileLine := "Primary label: " info["multiWinIdentifier"] "`n"
 
         text :=
             "App currently under " ConfigApp.APP_NAME ":`n`n"
             . kindLine
+            . appLine
+            . profileLine
             . "Exe: " info["exe"] "`n"
             . "Title: " info["title"] "`n"
             . "Class: " info["class"]

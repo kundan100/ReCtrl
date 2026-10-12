@@ -53,8 +53,8 @@
       "keywords": ["browser", "chrome", "edge", "demo"]
     },
     {
-      "id": "open-oreo-tracker",
-      "label": "Oreo tracker",
+      "id": "open-oreo-jira",
+      "label": "Oreo jira",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -63,8 +63,8 @@
         "filePath": "",
         "fileTitle": ""
       },
-      "context": [],
-      "keywords": ["open", "oreo", "tracker", "browser"]
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "jiraTicket", "browser", "jira"]
     },
     {
       "id": "open-oreo-scrumBoard",
@@ -77,8 +77,8 @@
         "filePath": "",
         "fileTitle": ""
       },
-      "context": [],
-      "keywords": ["open", "oreo", "scrumBoard", "sprintBoard", "browser"]
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "scrumBoard", "sprintBoard", "browser", "jira"]
     },
     {
       "id": "open-oreo-roadmap",
@@ -91,12 +91,12 @@
         "filePath": "",
         "fileTitle": ""
       },
-      "context": [],
-      "keywords": ["open", "oreo", "roadmap", "timeline", "browser"]
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "roadmap", "timeline", "browser", "jira"]
     },
     {
-      "id": "open-oreo-jiraTicket",
-      "label": "Oreo jiraTicket",
+      "id": "open-oreo-tracker",
+      "label": "Oreo tracker",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -105,8 +105,8 @@
         "filePath": "",
         "fileTitle": ""
       },
-      "context": [],
-      "keywords": ["open", "oreo", "jiraTicket", "browser"]
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "tracker", "browser"]
     },
     {
       "id": "notepad-demo",

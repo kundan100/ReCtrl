@@ -11,6 +11,8 @@
 #Include shared\jsonParse.ahk
 #Include shared\configAppLoader.ahk
 #Include shared\appContext.ahk
+; Browser profile helpers used by AppContext capture (must load before mainApp/searchBox).
+#Include searchBox\actions\browser\browserProfile.ahk
 ; Load app name/version before UI modules (single source: config/configApp.json).
 try {
     ConfigApp.Load()

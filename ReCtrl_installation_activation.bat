@@ -20,7 +20,7 @@ set "colorError=!ESC![91m"
 set "colorDefault=!ESC![0m"
 
 REM Seconds to wait before this window closes automatically (change as needed).
-set CLOSE_DELAY_SECONDS__FOR_PAUSE=10
+set CLOSE_DELAY_SECONDS__FOR_PAUSE=5
 
 REM ---------- ---------- start
 echo Activating/Installing/Starting ReCtrl...

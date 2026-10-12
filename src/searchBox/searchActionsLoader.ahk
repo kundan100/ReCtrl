@@ -179,32 +179,90 @@ class SearchActionsLoader {
     }
 
     ; When context filtering is on:
-    ; - "context": [] (or missing) => always visible (context-independent)
-    ; - "context": ["browser", ...] => only when current kind matches
+    ; - "context": [] (or missing) => always visible
+    ; - "browser" / "browser__all" => any browser
+    ; - "browser__specific" => browser matching this item's action.appIdentifier + multiWinIdentifier
+    ; - other kinds (terminal, notepad, ...) => exact kind match
     static FilterByActiveContext(nodes) {
         if !AppContext.IsEnabled() {
             return SearchActionsLoader.CloneNodeList(nodes)
         }
-        kind := StrLower(Trim(AppContext.GetCurrentKind()))
         out := []
         for node in nodes {
-            if SearchActionsLoader.IsVisibleForKind(node, kind)
+            if SearchActionsLoader.IsVisibleForCurrentContext(node)
                 out.Push(node)
         }
         return out
     }
 
-    static IsVisibleForKind(node, kind) {
-        ; Empty context list = option is irrespective of specific app context.
+    static IsVisibleForCurrentContext(node) {
         if !node.Has("context") || !(node["context"] is Array) || node["context"].Length = 0
             return true
+
+        kind := StrLower(Trim(AppContext.GetCurrentKind()))
         if (kind = "")
             return false
+
         for ctx in node["context"] {
-            if (ctx = kind)
+            if SearchActionsLoader.MatchesContextToken(ctx, kind, node)
                 return true
         }
         return false
+    }
+
+    static MatchesContextToken(ctx, kind, node) {
+        ctx := StrLower(Trim(String(ctx)))
+        if (ctx = "")
+            return false
+
+        ; browser / browser__all → any browser (legacy "browser" kept as alias of __all)
+        if (ctx = "browser" || ctx = "browser__all")
+            return (kind = "browser")
+
+        ; browser__specific → match action.appIdentifier (+ multiWinIdentifier when set)
+        if (ctx = "browser__specific") {
+            if (kind != "browser")
+                return false
+            return SearchActionsLoader.MatchesBrowserSpecific(node)
+        }
+
+        ; Future pattern: kind__all / kind__specific; for now exact kind match.
+        if InStr(ctx, "__") {
+            parts := StrSplit(ctx, "__")
+            baseKind := parts.Length >= 1 ? parts[1] : ""
+            mode := parts.Length >= 2 ? parts[2] : ""
+            if (mode = "all")
+                return (kind = baseKind)
+            if (mode = "specific")
+                return false  ; only browser__specific implemented for now
+        }
+
+        return (ctx = kind)
+    }
+
+    static MatchesBrowserSpecific(node) {
+        wantedApp := ""
+        wantedProfile := ""
+        if node.Has("action") && IsObject(node["action"]) {
+            act := node["action"]
+            if act.Has("appIdentifier")
+                wantedApp := Trim(String(act["appIdentifier"]))
+            if act.Has("multiWinIdentifier")
+                wantedProfile := Trim(String(act["multiWinIdentifier"]))
+        }
+
+        currentApp := Trim(AppContext.GetCurrentAppIdentifier())
+        currentProfile := Trim(AppContext.GetCurrentMultiWinIdentifier())
+
+        if (wantedApp != "" && StrLower(wantedApp) != StrLower(currentApp))
+            return false
+        ; Blank multiWinIdentifier => any profile for that browser.
+        if (wantedProfile != "" && StrLower(wantedProfile) != StrLower(currentProfile))
+            return false
+        ; Specific with neither identifier set is meaningless; treat as no match.
+        if (wantedApp = "" && wantedProfile = "")
+            return false
+        return true
     }
 
     static CloneNodeList(nodes) {
