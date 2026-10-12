@@ -9,8 +9,6 @@ class SearchBoxHandler {
     menuStack := []
     isBrowsing := false
     recentLimit := 0
-    typingRespectsContext := true
-    recentsRespectsContext := true
 
     __New(guiInstance) {
         this.guiInstance := guiInstance
@@ -23,16 +21,12 @@ class SearchBoxHandler {
             loaded := SearchActionsLoader.LoadFromFile()
             this.menuRoot := loaded["searchOptions"]
             this.recentLimit := loaded["searchConfig"]["DEFAULT_RECENT_LIMIT"]
-            this.typingRespectsContext := loaded["searchConfig"]["TYPING_RESPECTS_CONTEXT"]
-            this.recentsRespectsContext := loaded["searchConfig"]["RECENTS_RESPECTS_CONTEXT"]
             AppContext.ApplySearchConfig(loaded["searchConfig"])
             this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
         } catch as err {
             this.menuRoot := []
             this.leafActions := []
             this.recentLimit := 0
-            this.typingRespectsContext := true
-            this.recentsRespectsContext := true
             detail := err.Message
             try detail .= "`n(" err.What " @ line " err.Line ")"
             this.ShowOwnedMessage(
@@ -68,7 +62,7 @@ class SearchBoxHandler {
         this.ExitBrowseMode()
         results := []
         leafActionsTemp := this.leafActions
-        if this.typingRespectsContext {
+        if AppContext.GetSearchConfigFlag("TYPING_RESPECTS_CONTEXT") {
             this.RefreshContextBeforeFilter()
             leafActionsTemp := SearchActionsLoader.FilterByActiveContext(this.leafActions)
         }
@@ -84,7 +78,7 @@ class SearchBoxHandler {
     ShowRecentSuggestions() {
         this.ExitBrowseMode()
         recent := this.GetRecentActions()
-        if this.recentsRespectsContext {
+        if AppContext.GetSearchConfigFlag("RECENTS_RESPECTS_CONTEXT") {
             this.RefreshContextBeforeFilter()
             recent := SearchActionsLoader.FilterByActiveContext(recent)
         }
@@ -139,14 +133,17 @@ class SearchBoxHandler {
             label := action["label"]
             if SearchActionsLoader.IsSeparator(action) {
                 labels.Push(label)
-            } else if (this.ResolveActionType(action) = "showContext") {
-                labels.Push(label " (" (AppContext.IsEnabled() ? "true" : "false") ")")
-            } else if SearchActionsLoader.IsBranch(action) {
-                labels.Push(label "  >")
-            } else if (action.Has("command") && action["command"] != "") {
-                labels.Push(label "  [" action["command"] "]")
             } else {
-                labels.Push(label)
+                flagKey := this.ResolveSearchConfigFlagKey(action)
+                if (flagKey != "") {
+                    labels.Push(label " (" (AppContext.GetSearchConfigFlag(flagKey) ? "true" : "false") ")")
+                } else if SearchActionsLoader.IsBranch(action) {
+                    labels.Push(label "  >")
+                } else if (action.Has("command") && action["command"] != "") {
+                    labels.Push(label "  [" action["command"] "]")
+                } else {
+                    labels.Push(label)
+                }
             }
         }
         return labels
@@ -262,10 +259,13 @@ class SearchBoxHandler {
         if (actionType = "messageBox") {
             messageText := action.Has("message") ? action["message"] : action["label"]
             this.ShowOwnedMessage(messageText, ConfigApp.APP_NAME)
-        } else if (actionType = "showContext") {
+        } else if (actionType = "showContext" || actionType = "toggleSearchConfig") {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-            result := AppContext.PromptToggleEnabled(ownerHwnd)
+            flagKey := this.ResolveSearchConfigFlagKey(action)
+            if (flagKey = "")
+                flagKey := "CONTEXT_ENABLED"
+            result := AppContext.PromptToggleSearchConfigFlag(flagKey, ownerHwnd)
             this.ShowActionResult(result)
         } else if (actionType = "browserActions") {
             ownerHwnd := 0
@@ -310,6 +310,23 @@ class SearchBoxHandler {
         if menuItem.Has("actionType") && Trim(String(menuItem["actionType"])) != ""
             return Trim(String(menuItem["actionType"]))
         return "terminalCommand"
+    }
+
+    ; For toggleSearchConfig / showContext: which searchConfig flag to show/toggle.
+    ResolveSearchConfigFlagKey(menuItem) {
+        actionType := this.ResolveActionType(menuItem)
+        if (actionType = "showContext")
+            return "CONTEXT_ENABLED"
+        if (actionType != "toggleSearchConfig")
+            return ""
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("key") && Trim(String(nested["key"])) != ""
+                return Trim(String(nested["key"]))
+        }
+        if menuItem.Has("key") && Trim(String(menuItem["key"])) != ""
+            return Trim(String(menuItem["key"]))
+        return ""
     }
 
     ShowActionResult(result) {

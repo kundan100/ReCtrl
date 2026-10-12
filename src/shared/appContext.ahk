@@ -1,22 +1,56 @@
 #Requires AutoHotkey v2
 
 ; Tracks the app currently under ReCtrl for context-aware menus.
-; CONTEXT_ENABLED starts from searchActions.json and can be toggled for this session only.
+; searchConfig flags start from searchActions.json and can be toggled for this session only.
 class AppContext {
     static last := ""
     static enabled := true
+    static typingRespectsContext := true
+    static recentsRespectsContext := true
     static enabledListeners := []
     static GW_HWNDNEXT := 2
 
-    ; Apply launch default from searchConfig (fresh each script start).
+    ; Apply launch defaults from searchConfig (fresh each script start).
     static ApplySearchConfig(searchConfig) {
-        if IsObject(searchConfig) && searchConfig.Has("CONTEXT_ENABLED") {
+        if !IsObject(searchConfig)
+            return
+        if searchConfig.Has("CONTEXT_ENABLED")
             AppContext.SetEnabled(!!searchConfig["CONTEXT_ENABLED"])
-        }
+        if searchConfig.Has("TYPING_RESPECTS_CONTEXT")
+            AppContext.typingRespectsContext := !!searchConfig["TYPING_RESPECTS_CONTEXT"]
+        if searchConfig.Has("RECENTS_RESPECTS_CONTEXT")
+            AppContext.recentsRespectsContext := !!searchConfig["RECENTS_RESPECTS_CONTEXT"]
     }
 
     static IsEnabled() {
         return AppContext.enabled
+    }
+
+    ; Session flag for CONTEXT_ENABLED / TYPING_RESPECTS_CONTEXT / RECENTS_RESPECTS_CONTEXT.
+    static GetSearchConfigFlag(key) {
+        switch Trim(String(key)) {
+            case "CONTEXT_ENABLED":
+                return AppContext.IsEnabled()
+            case "TYPING_RESPECTS_CONTEXT":
+                return AppContext.typingRespectsContext
+            case "RECENTS_RESPECTS_CONTEXT":
+                return AppContext.recentsRespectsContext
+            default:
+                throw Error("Unknown searchConfig flag: " key)
+        }
+    }
+
+    static SetSearchConfigFlag(key, value) {
+        switch Trim(String(key)) {
+            case "CONTEXT_ENABLED":
+                AppContext.SetEnabled(!!value)
+            case "TYPING_RESPECTS_CONTEXT":
+                AppContext.typingRespectsContext := !!value
+            case "RECENTS_RESPECTS_CONTEXT":
+                AppContext.recentsRespectsContext := !!value
+            default:
+                throw Error("Unknown searchConfig flag: " key)
+        }
     }
 
     ; Current captured kind (browser, notepad, terminal, ...), or "" if none.
@@ -217,10 +251,17 @@ class AppContext {
 
     ; Context menu: show CONTEXT_ENABLED and offer to flip for this session only.
     static PromptToggleEnabled(ownerHwnd := 0) {
-        currentText := AppContext.enabled ? "true" : "false"
-        nextText := AppContext.enabled ? "false" : "true"
+        return AppContext.PromptToggleSearchConfigFlag("CONTEXT_ENABLED", ownerHwnd)
+    }
+
+    ; Toggle a searchConfig session flag (does not write JSON; resets on relaunch).
+    static PromptToggleSearchConfigFlag(key, ownerHwnd := 0) {
+        key := Trim(String(key))
+        current := AppContext.GetSearchConfigFlag(key)
+        currentText := current ? "true" : "false"
+        nextText := current ? "false" : "true"
         prompt :=
-            "CONTEXT_ENABLED: " currentText "`n`n"
+            key ": " currentText "`n`n"
             . "Set it to " nextText " for this session?`n"
             . "(Resets to config/searchActions.json when you relaunch " ConfigApp.APP_NAME ".)"
 
@@ -228,21 +269,21 @@ class AppContext {
         if ownerHwnd
             options .= " Owner" ownerHwnd
 
-        answer := MsgBox(prompt, ConfigApp.APP_NAME " — Context", options)
+        answer := MsgBox(prompt, ConfigApp.APP_NAME " — Settings", options)
         if (answer = "Yes") {
-            AppContext.SetEnabled(!AppContext.enabled)
+            AppContext.SetSearchConfigFlag(key, !current)
             return Map(
                 "ok", true,
-                "title", ConfigApp.APP_NAME " — Context",
-                "message", "CONTEXT_ENABLED is now " (AppContext.enabled ? "true" : "false")
+                "title", ConfigApp.APP_NAME " — Settings",
+                "message", key " is now " (AppContext.GetSearchConfigFlag(key) ? "true" : "false")
                     . "`n`nThis lasts until you relaunch " ConfigApp.APP_NAME "."
             )
         }
 
         return Map(
             "ok", true,
-            "title", ConfigApp.APP_NAME " — Context",
-            "message", "CONTEXT_ENABLED left as " currentText
+            "title", ConfigApp.APP_NAME " — Settings",
+            "message", key " left as " currentText
         )
     }
 

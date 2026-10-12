@@ -15,19 +15,58 @@
       "keywords": ["help", "guide", "usage", "howto", "menu"]
     },
     {
-      "id": "menu-context",
-      "label": "Context",
-      "actionType": "showContext",
-      "context": [],
-      "keywords": ["context", "app", "window", "current", "foreground", "under"]
-    },
-    {
-      "id": "menu-settings",
+      "id": "group-settings",
       "label": "Settings",
-      "actionType": "messageBox",
-      "message": "Settings\n\nApp name/version: config/configApp.json\nWindow/UI settings: appConfig.ahk\nMenu options: config/searchActions.json\n\nEdit those files, then Reload Script from the tray icon.",
       "context": [],
-      "keywords": ["settings", "config", "preferences", "options", "menu"]
+      "keywords": ["settings", "config", "preferences", "options", "menu"],
+      "children": [
+        {
+          "id": "group-settings-context",
+          "label": "Context",
+          "context": [],
+          "keywords": ["context", "typing", "recents", "settings", "toggle"],
+          "children": [
+            {
+              "id": "settings-context-enabled",
+              "label": "Context",
+              "action": {
+                "actionType": "toggleSearchConfig",
+                "key": "CONTEXT_ENABLED"
+              },
+              "context": [],
+              "keywords": ["context", "enabled", "toggle", "app", "window"]
+            },
+            {
+              "id": "settings-typing-respects-context",
+              "label": "Typing respects context",
+              "action": {
+                "actionType": "toggleSearchConfig",
+                "key": "TYPING_RESPECTS_CONTEXT"
+              },
+              "context": [],
+              "keywords": ["typing", "respects", "context", "search", "toggle"]
+            },
+            {
+              "id": "settings-recents-respects-context",
+              "label": "Recents respects context",
+              "action": {
+                "actionType": "toggleSearchConfig",
+                "key": "RECENTS_RESPECTS_CONTEXT"
+              },
+              "context": [],
+              "keywords": ["recents", "recent", "respects", "context", "toggle"]
+            }
+          ]
+        },
+        {
+          "id": "settings-config-files",
+          "label": "Config files",
+          "actionType": "messageBox",
+          "message": "Settings\n\nApp name/version: config/configApp.json\nWindow/UI settings: appConfig.ahk\nMenu options: config/searchActions.json\n\nEdit those files, then Reload Script from the tray icon.",
+          "context": [],
+          "keywords": ["settings", "config", "files", "preferences", "options"]
+        }
+      ]
     },
     {
       "id": "separator-1",
