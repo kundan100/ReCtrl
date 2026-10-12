@@ -43,16 +43,6 @@
       "keywords": ["pater", "command", "terminal", "npm", "package", "tooling"]
     },
     {
-      "id": "browser-demo",
-      "label": "Browser tip",
-      "action": {
-        "actionType": "browserActions",
-        "operation": "showTip"
-      },
-      "context": ["browser"],
-      "keywords": ["browser", "chrome", "edge", "demo"]
-    },
-    {
       "id": "open-oreo-jira",
       "label": "Oreo jira",
       "action": {
@@ -109,19 +99,51 @@
       "keywords": ["open", "oreo", "tracker", "browser"]
     },
     {
-      "id": "notepad-demo",
-      "label": "Notepad tip",
-      "actionType": "messageBox",
-      "message": "This option is visible when Context is enabled and the app under ReCtrl is Notepad.",
-      "context": ["notepad"],
-      "keywords": ["notepad", "demo"]
+      "id": "group-clipboard",
+      "label": "Clipboard",
+      "context": [],
+      "keywords": ["clipboard", "file", "text"],
+      "children": [
+        {
+          "id": "clipboard-create-file",
+          "label": "create clipboard file",
+          "actionType": "clipboardWriteText",
+          "context": [],
+          "keywords": ["clipboard", "create", "save", "text", "file", "latest"]
+        },
+        {
+          "id": "clipboard-read-file",
+          "label": "read clipboard file",
+          "actionType": "clipboardReadText",
+          "context": [],
+          "keywords": ["clipboard", "read", "load", "text", "file", "latest"]
+        }
+      ]
     },
     {
-      "id": "group-demo",
-      "label": "Demo messages",
+      "id": "group-demos-and-tips",
+      "label": "demos and tips",
       "context": [],
-      "keywords": ["demo", "temporary", "message"],
+      "keywords": ["demos", "tips", "demo", "temporary", "message"],
       "children": [
+        {
+          "id": "browser-demo",
+          "label": "Browser tip",
+          "action": {
+            "actionType": "browserActions",
+            "operation": "showTip"
+          },
+          "context": ["browser"],
+          "keywords": ["browser", "chrome", "edge", "demo"]
+        },
+        {
+          "id": "notepad-demo",
+          "label": "Notepad tip",
+          "actionType": "messageBox",
+          "message": "This option is visible when Context is enabled and the app under ReCtrl is Notepad.",
+          "context": ["notepad"],
+          "keywords": ["notepad", "demo"]
+        },
         {
           "id": "temporary-message",
           "label": "temporary",
@@ -161,28 +183,6 @@
           "message": "temporary5",
           "context": [],
           "keywords": ["temporary5", "temp", "demo"]
-        }
-      ]
-    },
-    {
-      "id": "group-clipboard",
-      "label": "Clipboard",
-      "context": [],
-      "keywords": ["clipboard", "file", "text"],
-      "children": [
-        {
-          "id": "clipboard-create-file",
-          "label": "create clipboard file",
-          "actionType": "clipboardWriteText",
-          "context": [],
-          "keywords": ["clipboard", "create", "save", "text", "file", "latest"]
-        },
-        {
-          "id": "clipboard-read-file",
-          "label": "read clipboard file",
-          "actionType": "clipboardReadText",
-          "context": [],
-          "keywords": ["clipboard", "read", "load", "text", "file", "latest"]
         }
       ]
     }
