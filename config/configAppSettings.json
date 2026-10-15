@@ -1,7 +1,7 @@
 {
   "info": {
     "APP_NAME": "ReCtrl",
-    "APP_VERSION": "3.0.0"
+    "APP_VERSION": "3.1.0"
   },
   "view": {
     "WINDOW": {
@@ -30,7 +30,7 @@
     "TRANSPARENCY": {
       "ENABLED": true,
       "ACTIVE_ALPHA": 245,
-      "INACTIVE_ALPHA": 190,
+      "INACTIVE_ALPHA": 100,
       "CHECK_INTERVAL_MS": 120
     }
   },

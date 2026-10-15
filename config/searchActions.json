@@ -106,6 +106,21 @@
       "keywords": ["cursor", "agent", "open", "app"]
     },
     {
+      "id": "open-ms-teams",
+      "label": "MS Teams",
+      "action": {
+        "actionType": "desktopAppActions",
+        "operation": "openOrFocus",
+        "appIdentifier": "Microsoft Teams",
+        "multiWinIdentifier": "",
+        "fileTitle": "",
+        "filePath": "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\ms-teams.exe",
+        "focusThisWinIfMainOverideALlows": true
+      },
+      "context": [],
+      "keywords": ["teams", "ms", "chat", "open", "app"]
+    },
+    {
       "id": "run-pater",
       "label": "Run pater command",
       "actionType": "terminalCommand",

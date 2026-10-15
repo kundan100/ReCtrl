@@ -162,24 +162,8 @@ class SearchBoxHandler {
 
         q := StrLower(query)
         for h in haystacks {
-            if InStr(h, q) || this.IsFuzzyMatch(q, h)
+            if InStr(h, q)
                 return true
-        }
-        return false
-    }
-
-    IsFuzzyMatch(query, target) {
-        qi := 1
-        qLen := StrLen(query)
-        if (qLen = 0)
-            return true
-
-        Loop Parse, target {
-            if (SubStr(query, qi, 1) = A_LoopField) {
-                qi += 1
-                if (qi > qLen)
-                    return true
-            }
         }
         return false
     }
