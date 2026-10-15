@@ -75,6 +75,34 @@
       "context": []
     },
     {
+      "id": "open-cursor-ide",
+      "label": "Cursor IDE",
+      "action": {
+        "actionType": "desktopAppActions",
+        "operation": "openOrFocus",
+        "appIdentifier": "Cursor",
+        "multiWinIdentifier": "ide",
+        "fileTitle": "",
+        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe"
+      },
+      "context": [],
+      "keywords": ["cursor", "ide", "editor", "open", "app"]
+    },
+    {
+      "id": "open-cursor-agent",
+      "label": "Cursor Agent",
+      "action": {
+        "actionType": "desktopAppActions",
+        "operation": "openOrFocus",
+        "appIdentifier": "Cursor",
+        "multiWinIdentifier": "agent",
+        "fileTitle": "",
+        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe"
+      },
+      "context": [],
+      "keywords": ["cursor", "agent", "open", "app"]
+    },
+    {
       "id": "run-pater",
       "label": "Run pater command",
       "actionType": "terminalCommand",
@@ -122,7 +150,35 @@
         "fileTitle": ""
       },
       "context": ["browser__specific"],
-      "keywords": ["open", "oreo", "roadmap", "timeline", "browser", "jira"]
+      "keywords": ["open", "oreo", "roadmap", "browser", "jira"]
+    },
+    {
+      "id": "open-oreo-ATL",
+      "label": "Oreo ATL",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Microsoft Edge",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "atl", "browser", "jira"]
+    },
+    {
+      "id": "open-oreo-release-plan",
+      "label": "Oreo release plan",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Microsoft Edge",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "release", "timeline", "browser"]
     },
     {
       "id": "open-oreo-tracker",
@@ -137,6 +193,34 @@
       },
       "context": ["browser__specific"],
       "keywords": ["open", "oreo", "tracker", "browser"]
+    },
+    {
+      "id": "open-oreo-figma-stars",
+      "label": "Oreo figma stars",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Microsoft Edge",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "figma stars", "browser"]
+    },
+    {
+      "id": "login-localhost-shellapp",
+      "label": "login localhost shellapp",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "kumar@CybClients_Apps",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["login", "localhost", "shellapp", "browser"]
     },
     {
       "id": "group-clipboard",

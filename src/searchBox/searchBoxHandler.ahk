@@ -255,6 +255,7 @@ class SearchBoxHandler {
     ExecuteAction(action) {
         this.MarkActionAsRecent(action["id"])
         actionType := this.ResolveActionType(action)
+        result := ""
 
         if (actionType = "messageBox") {
             messageText := action.Has("message") ? action["message"] : action["label"]
@@ -277,6 +278,16 @@ class SearchBoxHandler {
             } catch as err {
                 this.ShowOwnedMessage(err.Message, ConfigApp.APP_NAME " — Browser")
             }
+        } else if (actionType = "desktopAppActions") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            try {
+                result := DesktopAppActions.Run(action, ownerHwnd)
+                if !(IsObject(result) && result.Has("silent") && result["silent"])
+                    this.ShowActionResult(result)
+            } catch as err {
+                this.ShowOwnedMessage(err.Message, ConfigApp.APP_NAME " — Desktop App")
+            }
         } else if (actionType = "clipboardWriteText") {
             result := ClipboardActions.CreateClipboardFileFromText()
             this.ShowActionResult(result)
@@ -288,7 +299,9 @@ class SearchBoxHandler {
         }
         this.guiInstance.ClearSearch()
         this.ClearSuggestions()
-        this.FocusOwner()
+        ; openOrFocus-style actions leave focus on the target window.
+        if !(IsObject(result) && result.Has("handoffFocus") && result["handoffFocus"])
+            this.FocusOwner()
     }
 
     ; Bring ReCtrl back after an action that may have focused another window (browser, terminal, …).

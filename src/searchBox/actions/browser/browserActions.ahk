@@ -25,8 +25,10 @@ class BrowserActions {
                 if (tabTitle = "" && filePath = "")
                     throw Error("browserActions openOrFocusByTitle requires action.fileTitle and/or action.filePath.")
 
-                BrowserActions.OpenOrFocusByTitle(tabTitle, filePath, browserName, primaryLabel)
-                return Map("ok", true, "silent", true)
+                result := BrowserActions.OpenOrFocusByTitle(tabTitle, filePath, browserName, primaryLabel)
+                result["silent"] := true
+                result["handoffFocus"] := true
+                return result
 
             default:
                 throw Error("Unknown browserActions operation: " operation)
