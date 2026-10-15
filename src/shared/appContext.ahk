@@ -255,35 +255,48 @@ class AppContext {
     }
 
     ; Toggle a searchConfig session flag (does not write JSON; resets on relaunch).
+    ; Yes/No confirm is gated by NotifyConfig.PROMPT_BEFORE_TOGGLE (code kept when false).
     static PromptToggleSearchConfigFlag(key, ownerHwnd := 0) {
         key := Trim(String(key))
         current := AppContext.GetSearchConfigFlag(key)
         currentText := current ? "true" : "false"
         nextText := current ? "false" : "true"
-        prompt :=
-            key ": " currentText "`n`n"
-            . "Set it to " nextText " for this session?`n"
-            . "(Resets to config/searchActions.json when you relaunch " ConfigApp.APP_NAME ".)"
 
-        options := "YesNo"
-        if ownerHwnd
-            options .= " Owner" ownerHwnd
+        if NotifyConfig.PROMPT_BEFORE_TOGGLE {
+            prompt :=
+                key ": " currentText "`n`n"
+                . "Set it to " nextText " for this session?`n"
+                . "(Resets to config/searchActions.json when you relaunch " ConfigApp.APP_NAME ".)"
 
-        answer := MsgBox(prompt, ConfigApp.APP_NAME " — Settings", options)
-        if (answer = "Yes") {
-            AppContext.SetSearchConfigFlag(key, !current)
+            options := "YesNo"
+            if ownerHwnd
+                options .= " Owner" ownerHwnd
+
+            answer := MsgBox(prompt, ConfigApp.APP_NAME " — Settings", options)
+            if (answer = "Yes") {
+                AppContext.SetSearchConfigFlag(key, !current)
+                return Map(
+                    "ok", true,
+                    "title", ConfigApp.APP_NAME " — Settings",
+                    "message", key " is now " (AppContext.GetSearchConfigFlag(key) ? "true" : "false")
+                        . "`n`nThis lasts until you relaunch " ConfigApp.APP_NAME "."
+                )
+            }
+
             return Map(
                 "ok", true,
                 "title", ConfigApp.APP_NAME " — Settings",
-                "message", key " is now " (AppContext.GetSearchConfigFlag(key) ? "true" : "false")
-                    . "`n`nThis lasts until you relaunch " ConfigApp.APP_NAME "."
+                "message", key " left as " currentText
             )
         }
 
+        ; Confirm gate off: flip immediately, then let caller show result feedback.
+        AppContext.SetSearchConfigFlag(key, !current)
         return Map(
             "ok", true,
             "title", ConfigApp.APP_NAME " — Settings",
-            "message", key " left as " currentText
+            "message", key " is now " (AppContext.GetSearchConfigFlag(key) ? "true" : "false")
+                . "`n`nThis lasts until you relaunch " ConfigApp.APP_NAME "."
         )
     }
 
