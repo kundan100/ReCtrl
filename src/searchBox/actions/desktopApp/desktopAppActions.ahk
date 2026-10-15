@@ -21,9 +21,7 @@ class DesktopAppActions {
                     throw Error("desktopAppActions openOrFocus requires action.appIdentifier.")
 
                 result := DesktopAppActions.OpenOrFocus(appIdentifier, multiWinIdentifier, fileTitle, filePath)
-                ; Handoff focus to the target app; handler must not FocusOwner afterward.
                 result["silent"] := true
-                result["handoffFocus"] := true
                 return result
 
             default:

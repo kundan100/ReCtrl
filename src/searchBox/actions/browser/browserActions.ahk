@@ -27,7 +27,6 @@ class BrowserActions {
 
                 result := BrowserActions.OpenOrFocusByTitle(tabTitle, filePath, browserName, primaryLabel)
                 result["silent"] := true
-                result["handoffFocus"] := true
                 return result
 
             default:

@@ -299,8 +299,7 @@ class SearchBoxHandler {
         }
         this.guiInstance.ClearSearch()
         this.ClearSuggestions()
-        ; openOrFocus-style actions leave focus on the target window.
-        if !(IsObject(result) && result.Has("handoffFocus") && result["handoffFocus"])
+        if !this.ShouldKeepFocusOnTargetWindow(action)
             this.FocusOwner()
     }
 
@@ -311,6 +310,30 @@ class SearchBoxHandler {
         if ownerHwnd {
             try WinActivate("ahk_id " ownerHwnd)
         }
+    }
+
+    ; true = leave focus on target; false = FocusOwner (ReCtrl).
+    ; Built-in default is always ReCtrl. Per-task focusThisWinIfMainOverideALlows
+    ; is honored only when FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK is true.
+    ShouldKeepFocusOnTargetWindow(menuItem) {
+        if !AppContext.GetSearchConfigFlag("FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK")
+            return false
+        override := this.ResolveFocusThisWinIfMainOverideALlows(menuItem)
+        if (override = "")
+            return false
+        return !!override
+    }
+
+    ; Explicit focusThisWinIfMainOverideALlows from nested action or top-level; "" if unset.
+    ResolveFocusThisWinIfMainOverideALlows(menuItem) {
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("focusThisWinIfMainOverideALlows")
+                return !!nested["focusThisWinIfMainOverideALlows"]
+        }
+        if IsObject(menuItem) && menuItem.Has("focusThisWinIfMainOverideALlows")
+            return !!menuItem["focusThisWinIfMainOverideALlows"]
+        return ""
     }
 
     ; Prefer nested action.actionType (JSON-driven); fall back to top-level actionType.

@@ -7,6 +7,7 @@ class AppContext {
     static enabled := true
     static typingRespectsContext := true
     static recentsRespectsContext := true
+    static focusOverrideAllowedByIndividualTask := false
     static enabledListeners := []
     static GW_HWNDNEXT := 2
 
@@ -20,13 +21,15 @@ class AppContext {
             AppContext.typingRespectsContext := !!searchConfig["TYPING_RESPECTS_CONTEXT"]
         if searchConfig.Has("RECENTS_RESPECTS_CONTEXT")
             AppContext.recentsRespectsContext := !!searchConfig["RECENTS_RESPECTS_CONTEXT"]
+        if searchConfig.Has("FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK")
+            AppContext.focusOverrideAllowedByIndividualTask := !!searchConfig["FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK"]
     }
 
     static IsEnabled() {
         return AppContext.enabled
     }
 
-    ; Session flag for CONTEXT_ENABLED / TYPING_RESPECTS_CONTEXT / RECENTS_RESPECTS_CONTEXT.
+    ; Session flag for searchConfig booleans (CONTEXT_ENABLED, TYPING_…, FOCUS_OVERRIDE_…).
     static GetSearchConfigFlag(key) {
         switch Trim(String(key)) {
             case "CONTEXT_ENABLED":
@@ -35,6 +38,8 @@ class AppContext {
                 return AppContext.typingRespectsContext
             case "RECENTS_RESPECTS_CONTEXT":
                 return AppContext.recentsRespectsContext
+            case "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK":
+                return AppContext.focusOverrideAllowedByIndividualTask
             default:
                 throw Error("Unknown searchConfig flag: " key)
         }
@@ -48,6 +53,8 @@ class AppContext {
                 AppContext.typingRespectsContext := !!value
             case "RECENTS_RESPECTS_CONTEXT":
                 AppContext.recentsRespectsContext := !!value
+            case "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK":
+                AppContext.focusOverrideAllowedByIndividualTask := !!value
             default:
                 throw Error("Unknown searchConfig flag: " key)
         }

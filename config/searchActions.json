@@ -3,7 +3,8 @@
     "DEFAULT_RECENT_LIMIT": 10,
     "CONTEXT_ENABLED": true,
     "TYPING_RESPECTS_CONTEXT": false,
-    "RECENTS_RESPECTS_CONTEXT": false
+    "RECENTS_RESPECTS_CONTEXT": false,
+    "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK": false
   },
   "searchOptions": [
     {
@@ -83,7 +84,8 @@
         "appIdentifier": "Cursor",
         "multiWinIdentifier": "ide",
         "fileTitle": "",
-        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe"
+        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
+        "focusThisWinIfMainOverideALlows": true
       },
       "context": [],
       "keywords": ["cursor", "ide", "editor", "open", "app"]
@@ -97,7 +99,8 @@
         "appIdentifier": "Cursor",
         "multiWinIdentifier": "agent",
         "fileTitle": "",
-        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe"
+        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
+        "focusThisWinIfMainOverideALlows": true
       },
       "context": [],
       "keywords": ["cursor", "agent", "open", "app"]
