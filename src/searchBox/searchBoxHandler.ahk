@@ -31,7 +31,7 @@ class SearchBoxHandler {
             try detail .= "`n(" err.What " @ line " err.Line ")"
             this.ShowOwnedMessage(
                 "Failed to load searchActions.json:`n" detail "`n`nPath:`n" SearchActionsConfig.ACTIONS_JSON_PATH,
-                ConfigApp.APP_NAME
+                ConfigAppSettings.APP_NAME
             )
         }
     }
@@ -162,24 +162,8 @@ class SearchBoxHandler {
 
         q := StrLower(query)
         for h in haystacks {
-            if InStr(h, q) || this.IsFuzzyMatch(q, h)
+            if InStr(h, q)
                 return true
-        }
-        return false
-    }
-
-    IsFuzzyMatch(query, target) {
-        qi := 1
-        qLen := StrLen(query)
-        if (qLen = 0)
-            return true
-
-        Loop Parse, target {
-            if (SubStr(query, qi, 1) = A_LoopField) {
-                qi += 1
-                if (qi > qLen)
-                    return true
-            }
         }
         return false
     }
@@ -255,10 +239,11 @@ class SearchBoxHandler {
     ExecuteAction(action) {
         this.MarkActionAsRecent(action["id"])
         actionType := this.ResolveActionType(action)
+        result := ""
 
         if (actionType = "messageBox") {
             messageText := action.Has("message") ? action["message"] : action["label"]
-            this.ShowOwnedMessage(messageText, ConfigApp.APP_NAME)
+            this.ShowOwnedMessage(messageText, ConfigAppSettings.APP_NAME)
         } else if (actionType = "showContext" || actionType = "toggleSearchConfig") {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
@@ -275,7 +260,17 @@ class SearchBoxHandler {
                 if !(IsObject(result) && result.Has("silent") && result["silent"])
                     this.ShowActionResult(result)
             } catch as err {
-                this.ShowOwnedMessage(err.Message, ConfigApp.APP_NAME " — Browser")
+                this.ShowOwnedMessage(err.Message, ConfigAppSettings.APP_NAME " — Browser")
+            }
+        } else if (actionType = "desktopAppActions") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            try {
+                result := DesktopAppActions.Run(action, ownerHwnd)
+                if !(IsObject(result) && result.Has("silent") && result["silent"])
+                    this.ShowActionResult(result)
+            } catch as err {
+                this.ShowOwnedMessage(err.Message, ConfigAppSettings.APP_NAME " — Desktop App")
             }
         } else if (actionType = "clipboardWriteText") {
             result := ClipboardActions.CreateClipboardFileFromText()
@@ -288,7 +283,8 @@ class SearchBoxHandler {
         }
         this.guiInstance.ClearSearch()
         this.ClearSuggestions()
-        this.FocusOwner()
+        if !this.ShouldKeepFocusOnTargetWindow(action)
+            this.FocusOwner()
     }
 
     ; Bring ReCtrl back after an action that may have focused another window (browser, terminal, …).
@@ -298,6 +294,30 @@ class SearchBoxHandler {
         if ownerHwnd {
             try WinActivate("ahk_id " ownerHwnd)
         }
+    }
+
+    ; true = leave focus on target; false = FocusOwner (ReCtrl).
+    ; Built-in default is always ReCtrl. Per-task focusThisWinIfMainOverideALlows
+    ; is honored only when FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK is true.
+    ShouldKeepFocusOnTargetWindow(menuItem) {
+        if !AppContext.GetSearchConfigFlag("FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK")
+            return false
+        override := this.ResolveFocusThisWinIfMainOverideALlows(menuItem)
+        if (override = "")
+            return false
+        return !!override
+    }
+
+    ; Explicit focusThisWinIfMainOverideALlows from nested action or top-level; "" if unset.
+    ResolveFocusThisWinIfMainOverideALlows(menuItem) {
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("focusThisWinIfMainOverideALlows")
+                return !!nested["focusThisWinIfMainOverideALlows"]
+        }
+        if IsObject(menuItem) && menuItem.Has("focusThisWinIfMainOverideALlows")
+            return !!menuItem["focusThisWinIfMainOverideALlows"]
+        return ""
     }
 
     ; Prefer nested action.actionType (JSON-driven); fall back to top-level actionType.
@@ -331,18 +351,18 @@ class SearchBoxHandler {
 
     ShowActionResult(result) {
         if !IsObject(result) {
-            this.ShowResultFeedback("Action finished.", ConfigApp.APP_NAME)
+            this.ShowResultFeedback("Action finished.", ConfigAppSettings.APP_NAME)
             return
         }
-        title := result.Has("title") ? result["title"] : ConfigApp.APP_NAME
+        title := result.Has("title") ? result["title"] : ConfigAppSettings.APP_NAME
         text := result.Has("message") ? result["message"] : "Done."
         this.ShowResultFeedback(text, title)
     }
 
-    ; Route action result via NotifyConfig.RESULT_FEEDBACK (popup vs toast).
+    ; Route action result via ConfigAppSettings.FUNCTIONAL.NOTIFY.RESULT_FEEDBACK (popup vs toast).
     ShowResultFeedback(text, title := unset) {
         if !IsSet(title)
-            title := ConfigApp.APP_NAME
+            title := ConfigAppSettings.APP_NAME
         ownerHwnd := 0
         try ownerHwnd := this.guiInstance.GetOwnerHwnd()
         Notify.Feedback(title, text, ownerHwnd)
@@ -350,7 +370,7 @@ class SearchBoxHandler {
 
     ShowOwnedMessage(text, title := unset) {
         if !IsSet(title)
-            title := ConfigApp.APP_NAME
+            title := ConfigAppSettings.APP_NAME
         ownerHwnd := 0
         try ownerHwnd := this.guiInstance.GetOwnerHwnd()
         if ownerHwnd {

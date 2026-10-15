@@ -19,9 +19,9 @@ class AppContentContainer {
     }
 
     Build() {
-        cfg := AppConfig.CONTENT
-        w := AppConfig.WINDOW.WIDTH
-        h := AppConfig.WINDOW.HEIGHT - this.headerHeight
+        cfg := ConfigAppSettings.CONTENT
+        w := ConfigAppSettings.WINDOW.WIDTH
+        h := ConfigAppSettings.WINDOW.HEIGHT - this.headerHeight
 
         this.contentBg := this.gui.Add("Text",
             "x0 y" this.headerHeight " w" w " h" h " Background" cfg.BG_COLOR " Center",

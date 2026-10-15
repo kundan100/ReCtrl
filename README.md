@@ -41,8 +41,9 @@ ReCtrl/
 │   └── appIcon/favicon_io/
 │       └── favicon.ico                → System tray icon
 ├── src/
-│	├── appConfig.ahk                      ← app-wide settings (width, colors, title, etc.)
 │	├── ReCtrl.ahk                         ← coordinator only: includes, init, hotkeys
+│	├── shared/
+│	│   └── configAppSettingsLoader.ahk    ← config/configAppSettings.json (info/view/functional)
 │	├── sysTray/
 │	│   └── sysTraySetup.ahk               ← tray icon + tooltip setup
 │	├── currentWin/

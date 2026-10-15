@@ -3,7 +3,7 @@
 ; Lightweight top-right toast notifications (Teams-like).
 ; Public API:
 ;   Notify.Show(title, message, durationMs := unset)
-;   Notify.Feedback(title, message, ownerHwnd := 0)  ; respects NotifyConfig.RESULT_FEEDBACK
+;   Notify.Feedback(title, message, ownerHwnd := 0)  ; respects FUNCTIONAL.NOTIFY.RESULT_FEEDBACK
 class Notify {
     static gui := ""
     static hideTimer := ""
@@ -11,14 +11,14 @@ class Notify {
     static bodyCtrl := ""
     static closeCtrl := ""
 
-    ; Route message via NotifyConfig.RESULT_FEEDBACK (toast vs MsgBox).
+    ; Route message via ConfigAppSettings.FUNCTIONAL.NOTIFY.RESULT_FEEDBACK (toast vs MsgBox).
     ; ownerHwnd is used only for the popup path (owned dialog).
     static Feedback(title, message, ownerHwnd := 0) {
         title := Trim(String(title))
         if (title = "")
-            title := ConfigApp.APP_NAME
+            title := ConfigAppSettings.APP_NAME
         mode := ""
-        try mode := StrLower(Trim(String(NotifyConfig.RESULT_FEEDBACK)))
+        try mode := StrLower(Trim(String(ConfigAppSettings.FUNCTIONAL.NOTIFY.RESULT_FEEDBACK)))
         if (mode = "show-in-notification") {
             Notify.Show(title, message)
             return
@@ -33,7 +33,7 @@ class Notify {
     ; Does not activate/steal focus. Replaces any currently visible toast.
     static Show(title, message, durationMs := unset) {
         if !IsSet(durationMs)
-            durationMs := NotifyConfig.TOAST_DURATION_MS
+            durationMs := ConfigAppSettings.FUNCTIONAL.NOTIFY.TOAST_DURATION_MS
         if (durationMs < 0)
             durationMs := 0
 
@@ -69,8 +69,8 @@ class Notify {
     }
 
     static CreateGui(title, message) {
-        cfg := NotifyConfig.TOAST
-        g := Gui("+AlwaysOnTop -Caption +ToolWindow +Border", ConfigApp.APP_NAME " — Notice")
+        cfg := ConfigAppSettings.FUNCTIONAL.NOTIFY.TOAST
+        g := Gui("+AlwaysOnTop -Caption +ToolWindow +Border", ConfigAppSettings.APP_NAME " — Notice")
         g.BackColor := cfg.BG_COLOR
         g.MarginX := cfg.PADDING
         g.MarginY := cfg.PADDING
@@ -82,7 +82,7 @@ class Notify {
         g.SetFont(cfg.TITLE_FONT, "Segoe UI")
         Notify.titleCtrl := g.AddText(
             "x" cfg.PADDING " y" cfg.PADDING " w" contentW " c" cfg.TITLE_COLOR,
-            title != "" ? title : ConfigApp.APP_NAME
+            title != "" ? title : ConfigAppSettings.APP_NAME
         )
 
         g.SetFont(cfg.CLOSE_FONT, "Segoe UI")
@@ -113,7 +113,7 @@ class Notify {
     static PositionTopRight() {
         if !Notify.gui
             return
-        cfg := NotifyConfig.TOAST
+        cfg := ConfigAppSettings.FUNCTIONAL.NOTIFY.TOAST
         Notify.gui.GetPos(, , &w, &h)
         MonitorGetWorkArea(MonitorGetPrimary(), &waLeft, &waTop, &waRight, &waBottom)
         x := waRight - w - cfg.MARGIN

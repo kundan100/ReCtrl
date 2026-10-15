@@ -25,8 +25,9 @@ class BrowserActions {
                 if (tabTitle = "" && filePath = "")
                     throw Error("browserActions openOrFocusByTitle requires action.fileTitle and/or action.filePath.")
 
-                BrowserActions.OpenOrFocusByTitle(tabTitle, filePath, browserName, primaryLabel)
-                return Map("ok", true, "silent", true)
+                result := BrowserActions.OpenOrFocusByTitle(tabTitle, filePath, browserName, primaryLabel)
+                result["silent"] := true
+                return result
 
             default:
                 throw Error("Unknown browserActions operation: " operation)
@@ -53,7 +54,7 @@ class BrowserActions {
 
         details := BrowserDetails.CollectBrowserDetails(ownerHwnd)
         text := BrowserDetails.FormatBrowserDetails(details)
-        BrowserDetails.ShowOwnedMessage(text, ConfigApp.APP_NAME " — Browser", ownerHwnd)
+        BrowserDetails.ShowOwnedMessage(text, ConfigAppSettings.APP_NAME " — Browser", ownerHwnd)
     }
 
     ; Focus an open tab whose title contains tabTitle (target browser + optional primary label).

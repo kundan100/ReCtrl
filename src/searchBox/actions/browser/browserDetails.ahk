@@ -358,7 +358,7 @@ class BrowserDetails {
 
     static ShowOwnedMessage(text, title := unset, ownerHwnd := 0) {
         if !IsSet(title)
-            title := ConfigApp.APP_NAME
+            title := ConfigAppSettings.APP_NAME
         if ownerHwnd {
             MsgBox(text, title, "Owner" ownerHwnd)
         } else {

@@ -11,6 +11,9 @@
 #Include actions\browser\browserLaunch.ahk
 #Include actions\browser\browserDetails.ahk
 #Include actions\browser\browserActions.ahk
+#Include actions\desktopApp\desktopAppWindows.ahk
+#Include actions\desktopApp\desktopAppLaunch.ahk
+#Include actions\desktopApp\desktopAppActions.ahk
 #Include guiNative\searchBoxGuiNative.ahk
 #Include searchBoxHandler.ahk
 

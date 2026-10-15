@@ -26,7 +26,7 @@ index.ahk
     ├─ [include] src/sysTray/sysTraySetup.ahk     {SetupTrayIcon}
     │
     ├─ [include] src/mainApp/mainApp.ahk          {MainApp} {ShowMainApp}
-    │   ├─ [include] appConfig.ahk                {AppConfig} {AppColors}
+    │   ├─ [include] shared/configAppSettingsLoader.ahk  {ConfigAppSettings}
     │   └─ [include] src/mainApp/mainAppContainer.ahk     {MainAppContainer}
     │       ├─ [include] src/mainApp/appHeaderContainer.ahk     {AppHeaderContainer}
     │       │   └─ [include] src/shared/dragWin.ahk      {DragWin}
@@ -161,7 +161,7 @@ src/mainApp/appHeaderContainer.ahk
 src/mainApp/mainAppContainer.ahk
 └─ {transparency timer}
     └─ (call) ApplyTransparencyForCurrentFocus()
-        └─ WinSetTransparent(active / inactive alpha from appConfig.ahk)
+        └─ WinSetTransparent(active / inactive alpha from configAppSettings.json)
 
 User sees: suggestions dismissed, or window hidden; dimmer when unfocused.
 ```
@@ -213,7 +213,7 @@ flowchart TB
         incTray --> defTray["define SetupTrayIcon"]
 
         rc --> incApp["include src/mainApp/mainApp.ahk"]
-        incApp --> incCfg["include appConfig.ahk"]
+        incApp --> incCfg["include configAppSettingsLoader.ahk"]
         incApp --> incContainer["include mainAppContainer.ahk"]
         incContainer --> incHeader["include appHeaderContainer + dragWin"]
         incContainer --> incContent["include appContentContainer"]
