@@ -63,7 +63,7 @@
           "id": "settings-config-files",
           "label": "Config files",
           "actionType": "messageBox",
-          "message": "Settings\n\nApp name/version: config/configApp.json\nWindow/UI settings: appConfig.ahk\nMenu options: config/searchActions.json\n\nEdit those files, then Reload Script from the tray icon.",
+          "message": "Settings\n\nApp settings (name/version/UI/notify): config/configAppSettings.json\nMenu options: config/searchActions.json\n\nEdit those files, then Reload Script from the tray icon.",
           "context": [],
           "keywords": ["settings", "config", "files", "preferences", "options"]
         }

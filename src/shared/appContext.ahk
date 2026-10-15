@@ -262,37 +262,37 @@ class AppContext {
     }
 
     ; Toggle a searchConfig session flag (does not write JSON; resets on relaunch).
-    ; Yes/No confirm is gated by NotifyConfig.PROMPT_BEFORE_TOGGLE (code kept when false).
+    ; Yes/No confirm is gated by ConfigAppSettings.FUNCTIONAL.NOTIFY.PROMPT_BEFORE_TOGGLE (code kept when false).
     static PromptToggleSearchConfigFlag(key, ownerHwnd := 0) {
         key := Trim(String(key))
         current := AppContext.GetSearchConfigFlag(key)
         currentText := current ? "true" : "false"
         nextText := current ? "false" : "true"
 
-        if NotifyConfig.PROMPT_BEFORE_TOGGLE {
+        if ConfigAppSettings.FUNCTIONAL.NOTIFY.PROMPT_BEFORE_TOGGLE {
             prompt :=
                 key ": " currentText "`n`n"
                 . "Set it to " nextText " for this session?`n"
-                . "(Resets to config/searchActions.json when you relaunch " ConfigApp.APP_NAME ".)"
+                . "(Resets to config/searchActions.json when you relaunch " ConfigAppSettings.APP_NAME ".)"
 
             options := "YesNo"
             if ownerHwnd
                 options .= " Owner" ownerHwnd
 
-            answer := MsgBox(prompt, ConfigApp.APP_NAME " — Settings", options)
+            answer := MsgBox(prompt, ConfigAppSettings.APP_NAME " — Settings", options)
             if (answer = "Yes") {
                 AppContext.SetSearchConfigFlag(key, !current)
                 return Map(
                     "ok", true,
-                    "title", ConfigApp.APP_NAME " — Settings",
+                    "title", ConfigAppSettings.APP_NAME " — Settings",
                     "message", key " is now " (AppContext.GetSearchConfigFlag(key) ? "true" : "false")
-                        . "`n`nThis lasts until you relaunch " ConfigApp.APP_NAME "."
+                        . "`n`nThis lasts until you relaunch " ConfigAppSettings.APP_NAME "."
                 )
             }
 
             return Map(
                 "ok", true,
-                "title", ConfigApp.APP_NAME " — Settings",
+                "title", ConfigAppSettings.APP_NAME " — Settings",
                 "message", key " left as " currentText
             )
         }
@@ -301,9 +301,9 @@ class AppContext {
         AppContext.SetSearchConfigFlag(key, !current)
         return Map(
             "ok", true,
-            "title", ConfigApp.APP_NAME " — Settings",
+            "title", ConfigAppSettings.APP_NAME " — Settings",
             "message", key " is now " (AppContext.GetSearchConfigFlag(key) ? "true" : "false")
-                . "`n`nThis lasts until you relaunch " ConfigApp.APP_NAME "."
+                . "`n`nThis lasts until you relaunch " ConfigAppSettings.APP_NAME "."
         )
     }
 
@@ -311,15 +311,15 @@ class AppContext {
         if !AppContext.enabled {
             return Map(
                 "ok", false,
-                "title", ConfigApp.APP_NAME " — Context",
+                "title", ConfigAppSettings.APP_NAME " — Context",
                 "message", "CONTEXT_ENABLED is false.`nContext capture is off for this session."
             )
         }
         if !IsObject(AppContext.last) {
             return Map(
                 "ok", false,
-                "title", ConfigApp.APP_NAME " — Context",
-                "message", "No context captured yet.`n`nFocus another app, then open " ConfigApp.APP_NAME " with double-Ctrl."
+                "title", ConfigAppSettings.APP_NAME " — Context",
+                "message", "No context captured yet.`n`nFocus another app, then open " ConfigAppSettings.APP_NAME " with double-Ctrl."
             )
         }
 
@@ -335,7 +335,7 @@ class AppContext {
             profileLine := "Primary label: " info["multiWinIdentifier"] "`n"
 
         text :=
-            "App currently under " ConfigApp.APP_NAME ":`n`n"
+            "App currently under " ConfigAppSettings.APP_NAME ":`n`n"
             . kindLine
             . appLine
             . profileLine
@@ -345,7 +345,7 @@ class AppContext {
 
         return Map(
             "ok", true,
-            "title", ConfigApp.APP_NAME " — Context",
+            "title", ConfigAppSettings.APP_NAME " — Context",
             "message", text
         )
     }

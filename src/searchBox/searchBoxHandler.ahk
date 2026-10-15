@@ -31,7 +31,7 @@ class SearchBoxHandler {
             try detail .= "`n(" err.What " @ line " err.Line ")"
             this.ShowOwnedMessage(
                 "Failed to load searchActions.json:`n" detail "`n`nPath:`n" SearchActionsConfig.ACTIONS_JSON_PATH,
-                ConfigApp.APP_NAME
+                ConfigAppSettings.APP_NAME
             )
         }
     }
@@ -259,7 +259,7 @@ class SearchBoxHandler {
 
         if (actionType = "messageBox") {
             messageText := action.Has("message") ? action["message"] : action["label"]
-            this.ShowOwnedMessage(messageText, ConfigApp.APP_NAME)
+            this.ShowOwnedMessage(messageText, ConfigAppSettings.APP_NAME)
         } else if (actionType = "showContext" || actionType = "toggleSearchConfig") {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
@@ -276,7 +276,7 @@ class SearchBoxHandler {
                 if !(IsObject(result) && result.Has("silent") && result["silent"])
                     this.ShowActionResult(result)
             } catch as err {
-                this.ShowOwnedMessage(err.Message, ConfigApp.APP_NAME " — Browser")
+                this.ShowOwnedMessage(err.Message, ConfigAppSettings.APP_NAME " — Browser")
             }
         } else if (actionType = "desktopAppActions") {
             ownerHwnd := 0
@@ -286,7 +286,7 @@ class SearchBoxHandler {
                 if !(IsObject(result) && result.Has("silent") && result["silent"])
                     this.ShowActionResult(result)
             } catch as err {
-                this.ShowOwnedMessage(err.Message, ConfigApp.APP_NAME " — Desktop App")
+                this.ShowOwnedMessage(err.Message, ConfigAppSettings.APP_NAME " — Desktop App")
             }
         } else if (actionType = "clipboardWriteText") {
             result := ClipboardActions.CreateClipboardFileFromText()
@@ -367,18 +367,18 @@ class SearchBoxHandler {
 
     ShowActionResult(result) {
         if !IsObject(result) {
-            this.ShowResultFeedback("Action finished.", ConfigApp.APP_NAME)
+            this.ShowResultFeedback("Action finished.", ConfigAppSettings.APP_NAME)
             return
         }
-        title := result.Has("title") ? result["title"] : ConfigApp.APP_NAME
+        title := result.Has("title") ? result["title"] : ConfigAppSettings.APP_NAME
         text := result.Has("message") ? result["message"] : "Done."
         this.ShowResultFeedback(text, title)
     }
 
-    ; Route action result via NotifyConfig.RESULT_FEEDBACK (popup vs toast).
+    ; Route action result via ConfigAppSettings.FUNCTIONAL.NOTIFY.RESULT_FEEDBACK (popup vs toast).
     ShowResultFeedback(text, title := unset) {
         if !IsSet(title)
-            title := ConfigApp.APP_NAME
+            title := ConfigAppSettings.APP_NAME
         ownerHwnd := 0
         try ownerHwnd := this.guiInstance.GetOwnerHwnd()
         Notify.Feedback(title, text, ownerHwnd)
@@ -386,7 +386,7 @@ class SearchBoxHandler {
 
     ShowOwnedMessage(text, title := unset) {
         if !IsSet(title)
-            title := ConfigApp.APP_NAME
+            title := ConfigAppSettings.APP_NAME
         ownerHwnd := 0
         try ownerHwnd := this.guiInstance.GetOwnerHwnd()
         if ownerHwnd {

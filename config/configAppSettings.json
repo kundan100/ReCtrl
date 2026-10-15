@@ -1,0 +1,57 @@
+{
+  "info": {
+    "APP_NAME": "ReCtrl",
+    "APP_VERSION": "3.0.0"
+  },
+  "view": {
+    "WINDOW": {
+      "WIDTH": 600,
+      "HEIGHT": 70,
+      "SHOW_TITLE_BAR": false,
+      "ALWAYS_ON_TOP": true,
+      "BG_COLOR": "0xC3C3C3"
+    },
+    "HEADER": {
+      "HEIGHT": 28,
+      "PADDING_X": 1,
+      "BG_COLOR": "0xA1A1A1",
+      "CLOSE_BTN": {
+        "WIDTH": 20,
+        "HEIGHT": 20,
+        "COLOR": "0xAAAAAA",
+        "FONT_SIZE": "s14",
+        "TEXT": "✕"
+      }
+    },
+    "CONTENT": {
+      "BG_COLOR": "0xFFFF00",
+      "DUMMY_TEXT": ""
+    },
+    "TRANSPARENCY": {
+      "ENABLED": true,
+      "ACTIVE_ALPHA": 245,
+      "INACTIVE_ALPHA": 190,
+      "CHECK_INTERVAL_MS": 120
+    }
+  },
+  "functional": {
+    "NOTIFY": {
+      "PROMPT_BEFORE_TOGGLE": false,
+      "RESULT_FEEDBACK": "show-in-notification",
+      "TOAST_DURATION_MS": 10000,
+      "TOAST": {
+        "WIDTH": 320,
+        "MIN_HEIGHT": 72,
+        "MARGIN": 16,
+        "PADDING": 12,
+        "BG_COLOR": "0x2D2D30",
+        "TITLE_COLOR": "0xFFFFFF",
+        "BODY_COLOR": "0xD0D0D0",
+        "CLOSE_COLOR": "0xC8C8C8",
+        "TITLE_FONT": "s10 Bold",
+        "BODY_FONT": "s9",
+        "CLOSE_FONT": "s12"
+      }
+    }
+  }
+}

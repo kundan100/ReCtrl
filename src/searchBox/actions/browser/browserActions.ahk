@@ -54,7 +54,7 @@ class BrowserActions {
 
         details := BrowserDetails.CollectBrowserDetails(ownerHwnd)
         text := BrowserDetails.FormatBrowserDetails(details)
-        BrowserDetails.ShowOwnedMessage(text, ConfigApp.APP_NAME " — Browser", ownerHwnd)
+        BrowserDetails.ShowOwnedMessage(text, ConfigAppSettings.APP_NAME " — Browser", ownerHwnd)
     }
 
     ; Focus an open tab whose title contains tabTitle (target browser + optional primary label).

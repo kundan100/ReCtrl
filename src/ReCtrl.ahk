@@ -9,15 +9,15 @@
  * All functions and variables from included files become available in the global scope
  */
 #Include shared\jsonParse.ahk
-#Include shared\configAppLoader.ahk
+#Include shared\configAppSettingsLoader.ahk
 #Include shared\appContext.ahk
 ; Browser profile helpers used by AppContext capture (must load before mainApp/searchBox).
 #Include searchBox\actions\browser\browserProfile.ahk
-; Load app name/version before UI modules (single source: config/configApp.json).
+; Load info/view/functional settings before UI modules (single source: configAppSettings.json).
 try {
-    ConfigApp.Load()
+    ConfigAppSettings.Load()
 } catch as err {
-    MsgBox("Failed to load configApp.json:`n" err.Message "`n`nPath:`n" ConfigApp.CONFIG_JSON_PATH, "ReCtrl")
+    MsgBox("Failed to load configAppSettings.json:`n" err.Message "`n`nPath:`n" ConfigAppSettings.CONFIG_JSON_PATH, "ReCtrl")
     ExitApp
 }
 
@@ -25,7 +25,7 @@ try {
 ; #Include currentWin\currentWinInfo.ahk  ; Disconnected - keeping for future reference
 ; #Include mainSearchBox\mainSearchBox.ahk
 #Include mainApp\mainApp.ahk
-; Toast API (needs NotifyConfig from appConfig, included by mainApp).
+; Toast API (uses ConfigAppSettings.FUNCTIONAL).
 #Include shared\notify\notify.ahk
 
 ; setup system tray icon and tooltip

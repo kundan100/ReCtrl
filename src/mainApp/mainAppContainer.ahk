@@ -19,21 +19,21 @@ class MainAppContainer {
 
     CreateGui() {
         options := "+Border"
-        if (AppConfig.WINDOW.ALWAYS_ON_TOP)
+        if (ConfigAppSettings.WINDOW.ALWAYS_ON_TOP)
             options .= " +AlwaysOnTop"
-        if !AppConfig.WINDOW.SHOW_TITLE_BAR
+        if !ConfigAppSettings.WINDOW.SHOW_TITLE_BAR
             options .= " -Caption"
-        this.gui := Gui(options, AppConfig.WINDOW.TITLE)
+        this.gui := Gui(options, ConfigAppSettings.WINDOW.TITLE)
         this.gui.Opt("+OwnDialogs")
         this.gui.Name := "ReCtrlMainApp"
-        this.gui.BackColor := AppConfig.WINDOW.BG_COLOR
+        this.gui.BackColor := ConfigAppSettings.WINDOW.BG_COLOR
         this.gui.MarginX := 0
         this.gui.MarginY := 0
         this.gui.OnEvent("Escape", (*) => this.OnEscapePressed())
         this.gui.OnEvent("Size", (g, minMax, w, h, *) => this.OnSize(w, h))
 
-        headerHeight := AppConfig.AppHeaderHeight()
-        if !AppConfig.WINDOW.SHOW_TITLE_BAR
+        headerHeight := ConfigAppSettings.AppHeaderHeight()
+        if !ConfigAppSettings.WINDOW.SHOW_TITLE_BAR
             this.header := AppHeaderContainer(this.gui, ObjBindMethod(this, "Hide"))
         this.content := AppContentContainer(this.gui, headerHeight)
     }
@@ -47,8 +47,8 @@ class MainAppContainer {
     Show() {
         ; Capture the app underneath before this window takes focus.
         this.CaptureUnderlyingContext()
-        w := AppConfig.WINDOW.WIDTH
-        h := AppConfig.AppHeaderHeight() + AppContentContainer.PreferredContentHeight()
+        w := ConfigAppSettings.WINDOW.WIDTH
+        h := ConfigAppSettings.AppHeaderHeight() + AppContentContainer.PreferredContentHeight()
         this.gui.Show("w" w " h" h " Center")
         this.gui.GetClientPos(, , &clientW, &clientH)
         this.OnSize(clientW, clientH)
@@ -101,25 +101,25 @@ class MainAppContainer {
     }
 
     SetupTransparencyController() {
-        if !AppConfig.TRANSPARENCY.ENABLED
+        if !ConfigAppSettings.TRANSPARENCY.ENABLED
             return
 
-        if (AppConfig.TRANSPARENCY.CHECK_INTERVAL_MS < 50)
-            AppConfig.TRANSPARENCY.CHECK_INTERVAL_MS := 50
+        if (ConfigAppSettings.TRANSPARENCY.CHECK_INTERVAL_MS < 50)
+            ConfigAppSettings.TRANSPARENCY.CHECK_INTERVAL_MS := 50
 
         this.transparencyTimer := ObjBindMethod(this, "ApplyTransparencyForCurrentFocus")
-        SetTimer(this.transparencyTimer, AppConfig.TRANSPARENCY.CHECK_INTERVAL_MS)
+        SetTimer(this.transparencyTimer, ConfigAppSettings.TRANSPARENCY.CHECK_INTERVAL_MS)
     }
 
     ApplyTransparencyForCurrentFocus(*) {
-        if !AppConfig.TRANSPARENCY.ENABLED
+        if !ConfigAppSettings.TRANSPARENCY.ENABLED
             return
 
         if !this.IsVisible()
             return
 
-        activeAlpha := this.ClampAlpha(AppConfig.TRANSPARENCY.ACTIVE_ALPHA)
-        inactiveAlpha := this.ClampAlpha(AppConfig.TRANSPARENCY.INACTIVE_ALPHA)
+        activeAlpha := this.ClampAlpha(ConfigAppSettings.TRANSPARENCY.ACTIVE_ALPHA)
+        inactiveAlpha := this.ClampAlpha(ConfigAppSettings.TRANSPARENCY.INACTIVE_ALPHA)
         hwnd := this.GetHwnd()
         if !hwnd
             return

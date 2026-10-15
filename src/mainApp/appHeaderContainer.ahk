@@ -23,9 +23,9 @@ class AppHeaderContainer {
     }
 
     Build() {
-        cfg := AppConfig.HEADER
+        cfg := ConfigAppSettings.HEADER
         btnCfg := cfg.CLOSE_BTN
-        w := AppConfig.WINDOW.WIDTH
+        w := ConfigAppSettings.WINDOW.WIDTH
         pad := cfg.PADDING_X
         btnY := (cfg.HEIGHT - btnCfg.HEIGHT) // 2
         contentX := pad
@@ -48,7 +48,7 @@ class AppHeaderContainer {
 
         this.titleText := this.gui.Add("Text",
             "x" contentX " y0 w" maxTitleW " BackgroundTrans",
-            AppConfig.WINDOW.TITLE)
+            ConfigAppSettings.WINDOW.TITLE)
         this.titleText.SetFont("s10", "Segoe UI")
         this.ApplyTitleLayout(contentX, maxTitleW, cfg.HEIGHT)
 
@@ -86,11 +86,11 @@ class AppHeaderContainer {
     }
 
     GetHeight() {
-        return AppConfig.HEADER.HEIGHT
+        return ConfigAppSettings.HEADER.HEIGHT
     }
 
     Reposition(clientW) {
-        cfg := AppConfig.HEADER
+        cfg := ConfigAppSettings.HEADER
         btnCfg := cfg.CLOSE_BTN
         pad := cfg.PADDING_X
         btnY := (cfg.HEIGHT - btnCfg.HEIGHT) // 2

@@ -3,7 +3,6 @@
 
 #Requires AutoHotkey v2
 
-#Include ..\..\appConfig.ahk
 #Include mainAppContainer.ahk
 
 class MainApp {
