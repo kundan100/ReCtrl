@@ -22,11 +22,17 @@ class SearchBoxHandler {
             this.menuRoot := loaded["searchOptions"]
             this.recentLimit := loaded["searchConfig"]["DEFAULT_RECENT_LIMIT"]
             AppContext.ApplySearchConfig(loaded["searchConfig"])
+            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig(
+                loaded["searchConfig"]["HIGHLIGHT_MATCHED_SEARCH_TOKEN"]
+            )
             this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
         } catch as err {
             this.menuRoot := []
             this.leafActions := []
             this.recentLimit := 0
+            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig(
+                Map("ENABLED", false)
+            )
             detail := err.Message
             try detail .= "`n(" err.What " @ line " err.Line ")"
             this.ShowOwnedMessage(
@@ -41,6 +47,7 @@ class SearchBoxHandler {
         this.guiInstance.SetQueryChangeCallback((query) => this.UpdateSuggestions(query))
         this.guiInstance.SetInputFocusCallback((query) => this.OnInputFocus(query))
         this.guiInstance.SetOptionActivateCallback((selectedIndex) => this.ActivateSelectedOption(selectedIndex))
+        this.guiInstance.SetSelectionChangeCallback((selectedIndex) => this.RefreshHighlightMatchedSearchToken(selectedIndex))
     }
 
     OnInputFocus(query) {
@@ -73,6 +80,7 @@ class SearchBoxHandler {
         }
         this.visibleActions := results
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(results), 1)
+        this.RefreshHighlightMatchedSearchToken(1)
     }
 
     ShowRecentSuggestions() {
@@ -84,6 +92,7 @@ class SearchBoxHandler {
         }
         this.visibleActions := recent
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(recent), 1)
+        this.guiInstance.ClearHighlightMatchedSearchToken()
     }
 
     ; Ctrl+Enter: show first-level items from JSON only (context-filtered when enabled).
@@ -97,6 +106,7 @@ class SearchBoxHandler {
         this.RefreshContextBeforeFilter()
         this.visibleActions := SearchActionsLoader.FilterByActiveContext(nodes)
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(this.visibleActions), 1)
+        this.guiInstance.ClearHighlightMatchedSearchToken()
     }
 
     ; Re-detect app under ReCtrl so menus don't stick to a closed/minimized window.
@@ -150,6 +160,7 @@ class SearchBoxHandler {
     }
 
     IsActionMatch(query, action) {
+        q := StrLower(query)
         haystacks := [StrLower(action["label"])]
         if action.Has("command") {
             haystacks.Push(StrLower(action["command"]))
@@ -159,8 +170,6 @@ class SearchBoxHandler {
                 haystacks.Push(StrLower(kw))
             }
         }
-
-        q := StrLower(query)
         for h in haystacks {
             if InStr(h, q)
                 return true
@@ -168,8 +177,35 @@ class SearchBoxHandler {
         return false
     }
 
+    ; Thin consumer of HighlightMatchedSearchTokenControl.
+    RefreshHighlightMatchedSearchToken(selectedIndex := 0) {
+        query := Trim(this.guiInstance.GetSearchText())
+        if (query = "") {
+            this.guiInstance.ClearHighlightMatchedSearchToken()
+            return
+        }
+        if (selectedIndex <= 0) {
+            selectedIndex := this.guiInstance.GetSelectedIndex()
+        }
+        if (selectedIndex <= 0 || selectedIndex > this.visibleActions.Length) {
+            this.guiInstance.ClearHighlightMatchedSearchToken()
+            return
+        }
+
+        action := this.visibleActions[selectedIndex]
+        if SearchActionsLoader.IsSeparator(action) {
+            this.guiInstance.ClearHighlightMatchedSearchToken()
+            return
+        }
+        this.guiInstance.ShowHighlightMatchedSearchToken(query, action)
+    }
+
     MoveSelection(step) {
-        return this.guiInstance.MoveSelection(step)
+        moved := this.guiInstance.MoveSelection(step)
+        if moved {
+            this.RefreshHighlightMatchedSearchToken()
+        }
+        return moved
     }
 
     SubmitCurrent() {
@@ -233,6 +269,7 @@ class SearchBoxHandler {
     ClearSuggestions() {
         this.ExitBrowseMode()
         this.visibleActions := []
+        this.guiInstance.ClearHighlightMatchedSearchToken()
         this.guiInstance.SetSuggestionOptions([])
     }
 

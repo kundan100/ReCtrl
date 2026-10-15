@@ -9,11 +9,13 @@ class SearchBoxGuiNative {
     queryChangeCallback := ""
     inputFocusCallback := ""
     optionActivateCallback := ""
+    selectionChangeCallback := ""
     isEmbedded := false
     showSubmitButton := false
     submitBtnWidth := 0
     suggestionsList := ""
     suggestionCount := 0
+    highlightMatchedSearchToken := ""
     inputX := 0
     inputY := 0
     inputW := 0
@@ -72,6 +74,9 @@ class SearchBoxGuiNative {
         this.suggestionsList.OnEvent("DoubleClick", (*) => this.OnOptionActivate())
         this.suggestionsList.OnEvent("Change", (*) => this.OnSuggestionChange())
 
+        hintY := listY + defaultListH + HighlightMatchedSearchTokenControl.GAP
+        this.highlightMatchedSearchToken := HighlightMatchedSearchTokenControl(hostGui, x, hintY, w)
+
         if !this.isEmbedded {
             this.gui.OnEvent("Escape", (*) => this.Hide())
         }
@@ -99,6 +104,40 @@ class SearchBoxGuiNative {
         this.optionActivateCallback := callbackFunc
     }
 
+    SetSelectionChangeCallback(callbackFunc) {
+        this.selectionChangeCallback := callbackFunc
+    }
+
+    ApplyHighlightMatchedSearchTokenConfig(config) {
+        if this.highlightMatchedSearchToken
+            this.highlightMatchedSearchToken.ApplyConfig(config)
+    }
+
+    ShowHighlightMatchedSearchToken(query, action) {
+        if !this.highlightMatchedSearchToken || this.suggestionCount <= 0 {
+            this.ClearHighlightMatchedSearchToken()
+            return
+        }
+        if this.highlightMatchedSearchToken.ShowFor(query, action) {
+            this.LayoutHighlightMatchedSearchToken()
+        }
+    }
+
+    ClearHighlightMatchedSearchToken() {
+        if !this.highlightMatchedSearchToken {
+            return
+        }
+        this.highlightMatchedSearchToken.Clear()
+    }
+
+    LayoutHighlightMatchedSearchToken() {
+        if !this.highlightMatchedSearchToken {
+            return
+        }
+        this.suggestionsList.GetPos(&listX, &listY, &listW, &listH)
+        this.highlightMatchedSearchToken.LayoutBelow(listX, listY, listW, listH)
+    }
+
     OnSubmit() {
         if (this.submitCallback) {
             this.submitCallback.Call(this.GetSearchText())
@@ -124,6 +163,9 @@ class SearchBoxGuiNative {
     }
 
     OnSuggestionChange() {
+        if (this.selectionChangeCallback) {
+            this.selectionChangeCallback.Call(this.GetSelectedIndex())
+        }
         ; ListBox has no "Click" event in AHK v2.
         ; Trigger activation only for mouse selection changes.
         if GetKeyState("LButton", "P") {
@@ -220,6 +262,7 @@ class SearchBoxGuiNative {
             this.HideSuggestionPopup()
             return
         }
+        this.ClearHighlightMatchedSearchToken()
         this.suggestionsList.Visible := false
         this.gui.Hide()
     }
@@ -240,6 +283,7 @@ class SearchBoxGuiNative {
         visibleOptionCount := this.suggestionCount > 0 ? this.suggestionCount : 1
         listH := this.CalculateSuggestionListHeight(visibleOptionCount)
         this.suggestionsList.Move(x, listY, w, listH)
+        this.LayoutHighlightMatchedSearchToken()
         this.inputX := x
         this.inputY := y
         this.inputW := w
@@ -275,10 +319,12 @@ class SearchBoxGuiNative {
 
     ShowSuggestionPopup(listH) {
         this.suggestionsList.Visible := true
+        this.LayoutHighlightMatchedSearchToken()
         this.UpdateEmbeddedHostHeight(true, listH)
     }
 
     HideSuggestionPopup() {
+        this.ClearHighlightMatchedSearchToken()
         if this.suggestionsList
             this.suggestionsList.Visible := false
         this.suggestionCount := 0
@@ -359,7 +405,11 @@ class SearchBoxGuiNative {
                 fallbackCount := this.suggestionCount > 0 ? this.suggestionCount : 1
                 listH := this.CalculateSuggestionListHeight(fallbackCount)
             }
-            desiredBottom := this.inputY + this.inputH + NativeUiConfig.SUGGESTION_LIST_GAP + listH + NativeUiConfig.SUGGESTION_BOTTOM_GAP
+            highlightH := 0
+            if this.highlightMatchedSearchToken
+                highlightH := this.highlightMatchedSearchToken.OccupiedHeight()
+            desiredBottom := this.inputY + this.inputH + NativeUiConfig.SUGGESTION_LIST_GAP
+                + listH + highlightH + NativeUiConfig.SUGGESTION_BOTTOM_GAP
             targetClientH := Max(baseClientH, desiredBottom)
         }
 
