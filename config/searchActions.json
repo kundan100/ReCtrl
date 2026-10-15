@@ -4,7 +4,12 @@
     "CONTEXT_ENABLED": true,
     "TYPING_RESPECTS_CONTEXT": false,
     "RECENTS_RESPECTS_CONTEXT": false,
-    "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK": false
+    "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK": false,
+    "HIGHLIGHT_MATCHED_SEARCH_TOKEN": {
+      "ENABLED": true,
+      "BG_COLOR": "FFFF00",
+      "TEXT_COLOR": "000000"
+    }
   },
   "searchOptions": [
     {

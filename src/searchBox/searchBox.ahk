@@ -2,6 +2,7 @@
 
 ; jsonParse.ahk is included once from ReCtrl.ahk (shared by config loaders).
 #Include configSearchBox.ahk
+#Include highlightMatchedSearchToken\highlightMatchedSearchTokenControl.ahk
 #Include searchActionsLoader.ahk
 #Include contextToggle\contextToggleControl.ahk
 #Include actions\clipboardActions.ahk
