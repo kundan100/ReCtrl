@@ -315,6 +315,13 @@ class SearchBoxHandler {
         } else if (actionType = "clipboardReadText") {
             result := ClipboardActions.LoadClipboardTextFromFile()
             this.ShowActionResult(result)
+        } else if (actionType = "checkVersionAndReload") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            result := ScriptReloadActions.CheckAndPrompt(ownerHwnd)
+            ; Reload exits this instance; only show feedback when not reloading.
+            if !(IsObject(result) && result.Has("reloaded") && result["reloaded"])
+                this.ShowActionResult(result)
         } else {
             this.RunCommandInTerminal(action["command"])
         }

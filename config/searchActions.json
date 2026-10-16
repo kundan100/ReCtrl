@@ -33,7 +33,7 @@
           "id": "settings-config-files",
           "label": "Config files",
           "actionType": "messageBox",
-          "message": "Settings\n\n # App settings (name/version/UI/notify): config/configAppSettings.json\n # Menu options: config/searchActions.json\n # Local overlay: %USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json\n\nEdit those files, then Reload Script from the tray icon.",
+          "message": "Settings\n\n # App settings (name/version/UI/notify): config/configAppSettings.json\n # Menu options: config/searchActions.json\n # Local overlay: %USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json\n\nEdit those files, then use Settings → Reload script (or tray → Reload Script).",
           "context": [],
           "keywords": ["settings", "config", "files", "preferences", "options"]
         },
@@ -74,6 +74,13 @@
               "keywords": ["recents", "recent", "respects", "context", "toggle"]
             }
           ]
+        },
+        {
+          "id": "settings-reload-script",
+          "label": "Reload script",
+          "actionType": "checkVersionAndReload",
+          "context": [],
+          "keywords": ["reload", "restart", "update", "version", "script", "settings"]
         },
         {
           "id": "group-demos-and-tips",

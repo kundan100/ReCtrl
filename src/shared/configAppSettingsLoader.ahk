@@ -55,6 +55,24 @@ class ConfigAppSettings {
         return ConfigAppSettings.APP_NAME " (v" ConfigAppSettings.APP_VERSION ")"
     }
 
+    ; Read APP_VERSION from disk without changing in-memory settings (for reload check).
+    static ReadDiskAppVersion(filePath := unset) {
+        if !IsSet(filePath)
+            filePath := ConfigAppSettings.CONFIG_JSON_PATH
+        if !FileExist(filePath)
+            throw Error("App settings file not found:`n" filePath)
+
+        text := FileRead(filePath, "UTF-8")
+        if (SubStr(text, 1, 1) = Chr(0xFEFF))
+            text := SubStr(text, 2)
+
+        root := JsonParse.Parse(text)
+        if !(root is Map)
+            throw Error("configAppSettings.json root must be a JSON object.")
+        infoMap := ConfigAppSettings.RequireMap(root, "info")
+        return ConfigAppSettings.RequireNonEmptyString(infoMap, "APP_VERSION")
+    }
+
     static AppHeaderHeight() {
         return ConfigAppSettings.WINDOW.SHOW_TITLE_BAR ? 0 : ConfigAppSettings.HEADER.HEIGHT
     }
