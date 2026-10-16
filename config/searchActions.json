@@ -210,6 +210,21 @@
       "keywords": ["pater", "command", "terminal", "npm", "package", "tooling"]
     },
     {
+      "id": "open-oreo-jira-ticket",
+      "label": "oreo jira ticket",
+      "showWhenQueryStartsWith": "WFCNG-",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": [],
+      "keywords": ["open", "WFCNG-", "oreo", "jiraTicket", "jira", "ticket", "browser"]
+    },
+    {
       "id": "open-oreo-jira",
       "label": "Oreo jira",
       "action": {
