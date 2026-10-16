@@ -4,6 +4,7 @@ node_modules/
 __kk__*.*
 __kk__/
 localSearchActions.json
+localSearchActions.txt
 
 # Local environment configuration
 .env
