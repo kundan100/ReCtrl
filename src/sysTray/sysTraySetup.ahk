@@ -21,10 +21,10 @@ SetupTrayIcon() {
 			; set hover tooltip (for system-tray's app-icon)
 			A_IconTip := iconTooltip
 			; MsgBox("iconPath: " iconPath)
-			Notify.Feedback(ConfigAppSettings.APP_NAME, "# iconTooltip: " iconTooltip)
+			Notify.Feedback(ConfigAppSettings.APP_NAME, "# iconTooltip: " iconTooltip, 0, "success")
 		} catch {
 			; TBD (future): find a way to pass "e" and print e.Message
-			Notify.Feedback(ConfigAppSettings.APP_NAME, "Failed to set tray icon!")
+			Notify.Feedback(ConfigAppSettings.APP_NAME, "Failed to set tray icon!", 0, "error")
 		}
 	}
 }
