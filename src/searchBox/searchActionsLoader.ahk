@@ -1,5 +1,7 @@
 #Requires AutoHotkey v2
 
+#Include localSearchActionsMerge.ahk
+
 class SearchActionsConfig {
     ; Path to user-editable JSON (relative to script root / index.ahk folder).
     ; Tunables like DEFAULT_RECENT_LIMIT live only in that JSON (searchConfig).
@@ -7,7 +9,7 @@ class SearchActionsConfig {
 }
 
 class SearchActionsLoader {
-    ; Load JSON object { searchConfig, searchOptions }.
+    ; Load repo searchActions.json, then LocalSearchActionsMerge.Apply (local wins).
     ; Returns Map("searchConfig", Map, "searchOptions", Array).
     static LoadFromFile(filePath := unset) {
         if !IsSet(filePath)
@@ -25,6 +27,9 @@ class SearchActionsLoader {
         if !(root is Map) {
             throw Error("searchActions.json root must be a JSON object with searchConfig and searchOptions.")
         }
+
+        root := LocalSearchActionsMerge.Apply(root)
+
         if !root.Has("searchOptions") || !(root["searchOptions"] is Array) {
             throw Error("searchActions.json must contain a 'searchOptions' array.")
         }
@@ -84,46 +89,10 @@ class SearchActionsLoader {
             config["RECENTS_RESPECTS_CONTEXT"],
             "searchConfig.RECENTS_RESPECTS_CONTEXT"
         )
-        config["HIGHLIGHT_MATCHED_SEARCH_TOKEN"] := SearchActionsLoader.NormalizeHighlightMatchedSearchToken(
-            config.Has("HIGHLIGHT_MATCHED_SEARCH_TOKEN") ? config["HIGHLIGHT_MATCHED_SEARCH_TOKEN"] : ""
-        )
+        ; HIGHLIGHT_MATCHED_SEARCH_TOKEN moved to configAppSettings.json → view.CONTENT.HIGHLIGHT_MATCHED_TOKEN
+        if config.Has("HIGHLIGHT_MATCHED_SEARCH_TOKEN")
+            config.Delete("HIGHLIGHT_MATCHED_SEARCH_TOKEN")
         return config
-    }
-
-    ; Optional searchConfig.HIGHLIGHT_MATCHED_SEARCH_TOKEN — strip under suggestions.
-    static NormalizeHighlightMatchedSearchToken(hintNode) {
-        hint := HighlightMatchedSearchTokenControl.DefaultConfig()
-        if !(hintNode is Map)
-            return hint
-
-        if hintNode.Has("ENABLED") {
-            hint["ENABLED"] := SearchActionsLoader.NormalizeBool(
-                hintNode["ENABLED"],
-                "searchConfig.HIGHLIGHT_MATCHED_SEARCH_TOKEN.ENABLED"
-            )
-        }
-        if hintNode.Has("BG_COLOR") {
-            hint["BG_COLOR"] := SearchActionsLoader.NormalizeColorHex(
-                hintNode["BG_COLOR"],
-                "searchConfig.HIGHLIGHT_MATCHED_SEARCH_TOKEN.BG_COLOR"
-            )
-        }
-        if hintNode.Has("TEXT_COLOR") {
-            hint["TEXT_COLOR"] := SearchActionsLoader.NormalizeColorHex(
-                hintNode["TEXT_COLOR"],
-                "searchConfig.HIGHLIGHT_MATCHED_SEARCH_TOKEN.TEXT_COLOR"
-            )
-        }
-        return hint
-    }
-
-    static NormalizeColorHex(value, fieldName) {
-        hex := StrUpper(Trim(String(value)))
-        hex := RegExReplace(hex, "^#", "")
-        if !RegExMatch(hex, "^[0-9A-F]{6}$") {
-            throw Error(fieldName " must be a 6-digit hex color (e.g. FFFF00).")
-        }
-        return hex
     }
 
     static NormalizeBool(value, fieldName) {

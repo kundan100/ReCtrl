@@ -1,21 +1,49 @@
 {
   "info": {
     "APP_NAME": "ReCtrl",
-    "APP_VERSION": "3.1.0"
+    "APP_VERSION": "3.3.0"
   },
   "view": {
     "WINDOW": {
       "WIDTH": 600,
       "HEIGHT": 70,
-      "SHOW_TITLE_BAR": false,
+      "BG_COLOR": "0xC3C3C3",
       "ALWAYS_ON_TOP": true,
-      "BG_COLOR": "0xC3C3C3"
+      "USE_NATIVE_TITLE_BAR": false,
+      "DROP_SHADOW": {
+        "SHOW": true,
+        "STYLE": "dwm"
+      },
+      "TRANSPARENCY": {
+        "ENABLED": true,
+        "ACTIVE_ALPHA": 255,
+        "INACTIVE_ALPHA": 100,
+        "CHECK_INTERVAL_MS": 120
+      }
     },
     "HEADER": {
+      "SHOW": false,
+      "WIDTH": "100%",
       "HEIGHT": 28,
       "PADDING_X": 1,
+      "PADDING_Y": 0,
       "BG_COLOR": "0xA1A1A1",
+      "ICON": {
+        "SHOW": true,
+        "PATH": "assets/appIcon/favicon_io/favicon.ico",
+        "WIDTH": 16,
+        "HEIGHT": 16,
+        "GAP": 6
+      },
+      "TITLE": {
+        "SHOW": true,
+        "TEXT": "",
+        "FONT": "s10",
+        "FONT_NAME": "Segoe UI",
+        "COLOR": ""
+      },
       "CLOSE_BTN": {
+        "SHOW": true,
         "WIDTH": 20,
         "HEIGHT": 20,
         "COLOR": "0xAAAAAA",
@@ -24,14 +52,46 @@
       }
     },
     "CONTENT": {
+      "SHOW": true,
+      "WIDTH": "100%",
       "BG_COLOR": "0xFFFF00",
-      "DUMMY_TEXT": ""
-    },
-    "TRANSPARENCY": {
-      "ENABLED": true,
-      "ACTIVE_ALPHA": 245,
-      "INACTIVE_ALPHA": 100,
-      "CHECK_INTERVAL_MS": 120
+      "PADDING_X": 0,
+      "PADDING_Y": 0,
+      "DUMMY_TEXT": "",
+      "CONTEXT_TOGGLE": {
+        "SHOW": false,
+        "MARGIN_TOP": 0,
+        "HEIGHT": 20
+      },
+      "SEARCH_BOX": {
+        "SHOW": true,
+        "MARGIN_TOP": 0,
+        "MAX_WIDTH": 0,
+        "HEIGHT": 32,
+        "BG_COLOR": "0x09E3BC",
+        "TEXT_COLOR": "0x000000"
+      },
+      "OPTIONS_LIST": {
+        "SHOW": "auto",
+        "MARGIN_TOP": 1,
+        "MARGIN_BOTTOM": 0,
+        "ITEM_HEIGHT": 22,
+        "MAX_VISIBLE_COUNT": 10,
+        "HEIGHT_PADDING": 0,
+        "MIN_EXTRA_HEIGHT": 0
+      },
+      "HIGHLIGHT_MATCHED_TOKEN": {
+        "SHOW": "false",
+        "MARGIN_TOP": 2,
+        "HEIGHT": 20,
+        "BG_COLOR": "0xFFFF00",
+        "TEXT_COLOR": "0x000000",
+        "BLANK_LIST": {
+          "SHOW": true,
+          "RECENTS_TEXT": "Enter → recent actions",
+          "MENU_TEXT": "Ctrl+Enter → full menu · Esc / Backspace goes up"
+        }
+      }
     }
   },
   "functional": {
@@ -44,7 +104,7 @@
         "MIN_HEIGHT": 72,
         "MARGIN": 16,
         "PADDING": 12,
-        "BG_COLOR": "0x2D2D30",
+        "BG_COLOR": "0x6E6E72",
         "TITLE_COLOR": "0xFFFFFF",
         "BODY_COLOR": "0xD0D0D0",
         "CLOSE_COLOR": "0xC8C8C8",

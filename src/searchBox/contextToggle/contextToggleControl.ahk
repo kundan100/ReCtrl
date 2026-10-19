@@ -1,11 +1,9 @@
 #Requires AutoHotkey v2
 
 ; Modular Context checkbox (above search field).
-; Visibility is controlled by NativeUiConfig.SHOW_CONTEXT_TOGGLE for easy hide/show later.
+; Layout/visibility: ConfigAppSettings.CONTENT.CONTEXT_TOGGLE
 class ContextToggleControl {
     static LABEL := "Context"
-    static HEIGHT := 20
-    static GAP_BELOW := 4
 
     hostGui := ""
     checkbox := ""
@@ -14,14 +12,15 @@ class ContextToggleControl {
 
     __New(hostGui, x, y, w) {
         this.hostGui := hostGui
-        this.isVisible := NativeUiConfig.SHOW_CONTEXT_TOGGLE
+        this.isVisible := ContextToggleControl.IsEnabledByConfig()
         if !this.isVisible
             return
 
+        h := ContextToggleControl.ConfigHeight()
         hostGui.SetFont("s9", "Segoe UI")
         this.checkbox := hostGui.Add(
             "Checkbox",
-            "x" x " y" y " w" w " h" ContextToggleControl.HEIGHT,
+            "x" x " y" y " w" w " h" h,
             ContextToggleControl.LABEL
         )
         this.SyncFromAppContext()
@@ -29,11 +28,16 @@ class ContextToggleControl {
         AppContext.OnEnabledChanged((*) => this.SyncFromAppContext())
     }
 
-    ; Height reserved above the search field (0 when hidden by config).
-    static OccupiedHeight() {
-        if !NativeUiConfig.SHOW_CONTEXT_TOGGLE
-            return 0
-        return ContextToggleControl.HEIGHT + ContextToggleControl.GAP_BELOW
+    static IsEnabledByConfig() {
+        try return !!ConfigAppSettings.CONTENT.CONTEXT_TOGGLE.SHOW
+        catch
+            return !!NativeUiConfig.SHOW_CONTEXT_TOGGLE
+    }
+
+    static ConfigHeight() {
+        try return Integer(ConfigAppSettings.CONTENT.CONTEXT_TOGGLE.HEIGHT)
+        catch
+            return 20
     }
 
     OnClick() {
@@ -53,11 +57,11 @@ class ContextToggleControl {
     Reposition(x, y, w) {
         if !this.checkbox
             return
-        this.checkbox.Move(x, y, w, ContextToggleControl.HEIGHT)
+        this.checkbox.Move(x, y, w, ContextToggleControl.ConfigHeight())
     }
 
     Show() {
-        if !this.checkbox || !NativeUiConfig.SHOW_CONTEXT_TOGGLE
+        if !this.checkbox || !ContextToggleControl.IsEnabledByConfig()
             return
         this.checkbox.Visible := true
         this.isVisible := true

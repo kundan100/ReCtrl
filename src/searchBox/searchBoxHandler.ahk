@@ -22,17 +22,13 @@ class SearchBoxHandler {
             this.menuRoot := loaded["searchOptions"]
             this.recentLimit := loaded["searchConfig"]["DEFAULT_RECENT_LIMIT"]
             AppContext.ApplySearchConfig(loaded["searchConfig"])
-            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig(
-                loaded["searchConfig"]["HIGHLIGHT_MATCHED_SEARCH_TOKEN"]
-            )
+            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig()
             this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
         } catch as err {
             this.menuRoot := []
             this.leafActions := []
             this.recentLimit := 0
-            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig(
-                Map("ENABLED", false)
-            )
+            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig()
             detail := err.Message
             try detail .= "`n(" err.What " @ line " err.Line ")"
             this.ShowOwnedMessage(
@@ -92,7 +88,7 @@ class SearchBoxHandler {
         }
         this.visibleActions := recent
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(recent), 1)
-        this.guiInstance.ClearHighlightMatchedSearchToken()
+        this.guiInstance.ShowHighlightBlankListHint("recents")
     }
 
     ; Ctrl+Enter: show first-level items from JSON only (context-filtered when enabled).
@@ -106,7 +102,7 @@ class SearchBoxHandler {
         this.RefreshContextBeforeFilter()
         this.visibleActions := SearchActionsLoader.FilterByActiveContext(nodes)
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(this.visibleActions), 1)
-        this.guiInstance.ClearHighlightMatchedSearchToken()
+        this.guiInstance.ShowHighlightBlankListHint("menu")
     }
 
     ; Re-detect app under ReCtrl so menus don't stick to a closed/minimized window.
@@ -161,6 +157,12 @@ class SearchBoxHandler {
 
     IsActionMatch(query, action) {
         q := StrLower(query)
+        ; Optional JSON field: show when typed text starts with this prefix (e.g. "WFCNG-").
+        if action.Has("showWhenQueryStartsWith") {
+            prefix := StrLower(Trim(String(action["showWhenQueryStartsWith"])))
+            if (prefix != "" && InStr(q, prefix) = 1)
+                return true
+        }
         haystacks := [StrLower(action["label"])]
         if action.Has("command") {
             haystacks.Push(StrLower(action["command"]))
@@ -293,7 +295,8 @@ class SearchBoxHandler {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
             try {
-                result := BrowserActions.Run(action, ownerHwnd)
+                query := Trim(this.guiInstance.GetSearchText())
+                result := BrowserActions.Run(this.ResolveActionQueryPlaceholders(action, query), ownerHwnd)
                 if !(IsObject(result) && result.Has("silent") && result["silent"])
                     this.ShowActionResult(result)
             } catch as err {
@@ -315,6 +318,13 @@ class SearchBoxHandler {
         } else if (actionType = "clipboardReadText") {
             result := ClipboardActions.LoadClipboardTextFromFile()
             this.ShowActionResult(result)
+        } else if (actionType = "checkVersionAndReload") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            result := ScriptReloadActions.CheckAndPrompt(ownerHwnd)
+            ; Reload exits this instance; only show feedback when not reloading.
+            if !(IsObject(result) && result.Has("reloaded") && result["reloaded"])
+                this.ShowActionResult(result)
         } else {
             this.RunCommandInTerminal(action["command"])
         }
@@ -355,6 +365,30 @@ class SearchBoxHandler {
         if IsObject(menuItem) && menuItem.Has("focusThisWinIfMainOverideALlows")
             return !!menuItem["focusThisWinIfMainOverideALlows"]
         return ""
+    }
+
+    ; Replace "{query}" in string fields (incl. nested action) with the typed search text.
+    ResolveActionQueryPlaceholders(menuItem, query) {
+        if !IsObject(menuItem)
+            return menuItem
+        out := Map()
+        for key, value in menuItem {
+            if (key = "action" && IsObject(value)) {
+                nested := Map()
+                for nestedKey, nestedValue in value {
+                    if (nestedValue is String)
+                        nested[nestedKey] := StrReplace(nestedValue, "{query}", query)
+                    else
+                        nested[nestedKey] := nestedValue
+                }
+                out[key] := nested
+            } else if (value is String) {
+                out[key] := StrReplace(value, "{query}", query)
+            } else {
+                out[key] := value
+            }
+        }
+        return out
     }
 
     ; Prefer nested action.actionType (JSON-driven); fall back to top-level actionType.

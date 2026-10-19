@@ -11,67 +11,121 @@ class AppContentContainer {
     contentBg := ""
     contextToggle := ""
     searchBox := ""
+    cfg := ""
 
     __New(parentGui, headerHeight) {
         this.gui := parentGui
         this.headerHeight := headerHeight
+        this.cfg := ConfigAppSettings.CONTENT
         this.Build()
     }
 
     Build() {
-        cfg := ConfigAppSettings.CONTENT
+        if !this.cfg.SHOW
+            return
+
         w := ConfigAppSettings.WINDOW.WIDTH
         h := ConfigAppSettings.WINDOW.HEIGHT - this.headerHeight
+        padX := this.cfg.PADDING_X
 
         this.contentBg := this.gui.Add("Text",
-            "x0 y" this.headerHeight " w" w " h" h " Background" cfg.BG_COLOR " Center",
-            cfg.DUMMY_TEXT)
+            "x0 y" this.headerHeight " w" w " h" h " Background" this.cfg.BG_COLOR " Center",
+            this.cfg.DUMMY_TEXT)
 
-        searchW := Min(520, w - 40)
-        searchX := Floor((w - searchW) / 2)
-        topPad := NativeUiConfig.CONTENT_TOP_PADDING
-        toggleH := ContextToggleControl.OccupiedHeight()
+        searchCfg := this.cfg.SEARCH_BOX
+        this.CalcSearchLayout(w, padX, searchCfg, &searchX, &searchW)
+        this.CalcVerticalFlow(this.headerHeight, &toggleY, &searchY)
 
-        toggleY := this.headerHeight + topPad
-        this.contextToggle := ContextToggleControl(this.gui, searchX, toggleY, searchW)
+        if this.cfg.CONTEXT_TOGGLE.SHOW {
+            this.contextToggle := ContextToggleControl(this.gui, searchX, toggleY, searchW)
+        }
 
-        searchY := this.headerHeight + topPad + toggleH
-        this.searchBox := SearchBox(this.gui, searchX, searchY, searchW, NativeUiConfig.SEARCH_INPUT_HEIGHT)
+        if searchCfg.SHOW {
+            this.searchBox := SearchBox(this.gui, searchX, searchY, searchW, searchCfg.HEIGHT)
+        }
     }
 
     Reposition(clientW, clientH) {
-        contentH := clientH - this.headerHeight
-        this.contentBg.Move(, this.headerHeight, clientW, contentH)
+        if !this.cfg.SHOW
+            return
 
-        searchW := Min(520, clientW - 40)
-        searchX := Floor((clientW - searchW) / 2)
-        topPad := NativeUiConfig.CONTENT_TOP_PADDING
-        toggleH := ContextToggleControl.OccupiedHeight()
+        padX := this.cfg.PADDING_X
+        contentH := clientH - this.headerHeight
+        if this.contentBg
+            this.contentBg.Move(, this.headerHeight, clientW, contentH)
+
+        searchCfg := this.cfg.SEARCH_BOX
+        this.CalcSearchLayout(clientW, padX, searchCfg, &searchX, &searchW)
+        this.CalcVerticalFlow(this.headerHeight, &toggleY, &searchY)
 
         if this.contextToggle
-            this.contextToggle.Reposition(searchX, this.headerHeight + topPad, searchW)
+            this.contextToggle.Reposition(searchX, toggleY, searchW)
 
-        searchY := this.headerHeight + topPad + toggleH
-        this.searchBox.Reposition(searchX, searchY, searchW, NativeUiConfig.SEARCH_INPUT_HEIGHT)
+        if this.searchBox
+            this.searchBox.Reposition(searchX, searchY, searchW, searchCfg.HEIGHT)
+    }
+
+    ; Inset by PADDING_X first, then fit/center SEARCH_BOX within that padded band.
+    ; MAX_WIDTH <= 0 means fill the padded width (so PADDING_X is the visible side inset).
+    CalcSearchLayout(clientW, padX, searchCfg, &searchX, &searchW) {
+        innerLeft := padX
+        innerW := Max(0, clientW - 2 * padX)
+        maxW := searchCfg.MAX_WIDTH
+        if (maxW <= 0 || maxW > innerW)
+            searchW := innerW
+        else
+            searchW := maxW
+        searchX := innerLeft + Floor((innerW - searchW) / 2)
+    }
+
+    ; Stack content children using each child's MARGIN_TOP from JSON.
+    ; Flow: CONTENT.PADDING_Y → [child.MARGIN_TOP + child]… → CONTENT.PADDING_Y
+    CalcVerticalFlow(headerHeight, &toggleY, &searchY) {
+        cfg := this.cfg
+        y := headerHeight + cfg.PADDING_Y
+        toggleY := y
+        searchY := y
+
+        if cfg.CONTEXT_TOGGLE.SHOW {
+            y += cfg.CONTEXT_TOGGLE.MARGIN_TOP
+            toggleY := y
+            y += cfg.CONTEXT_TOGGLE.HEIGHT
+        }
+
+        if cfg.SEARCH_BOX.SHOW {
+            y += cfg.SEARCH_BOX.MARGIN_TOP
+            searchY := y
+        }
     }
 
     FocusSearchBox() {
-        this.searchBox.Focus()
+        if this.searchBox
+            this.searchBox.Focus()
     }
 
     DismissSuggestionsIfVisible() {
+        if !this.searchBox
+            return false
         return this.searchBox.DismissSuggestionsIfVisible()
     }
 
     HideTransientUi() {
-        this.searchBox.Hide()
+        if this.searchBox
+            this.searchBox.Hide()
     }
 
     ; Preferred content height for collapsed window (header excluded).
     static PreferredContentHeight() {
-        return NativeUiConfig.CONTENT_TOP_PADDING
-            + ContextToggleControl.OccupiedHeight()
-            + NativeUiConfig.SEARCH_INPUT_HEIGHT
-            + NativeUiConfig.CONTENT_BOTTOM_PADDING
+        cfg := ConfigAppSettings.CONTENT
+        if !cfg.SHOW
+            return 0
+
+        h := cfg.PADDING_Y
+        if cfg.CONTEXT_TOGGLE.SHOW
+            h += cfg.CONTEXT_TOGGLE.MARGIN_TOP + cfg.CONTEXT_TOGGLE.HEIGHT
+        if cfg.SEARCH_BOX.SHOW
+            h += cfg.SEARCH_BOX.MARGIN_TOP + cfg.SEARCH_BOX.HEIGHT
+        h += cfg.PADDING_Y
+        return h
     }
 }

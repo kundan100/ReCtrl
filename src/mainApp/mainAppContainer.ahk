@@ -3,6 +3,7 @@
 
 #Requires AutoHotkey v2
 
+#Include ..\shared\windowDropShadow.ahk
 #Include appHeaderContainer.ahk
 #Include appContentContainer.ahk
 
@@ -21,7 +22,7 @@ class MainAppContainer {
         options := "+Border"
         if (ConfigAppSettings.WINDOW.ALWAYS_ON_TOP)
             options .= " +AlwaysOnTop"
-        if !ConfigAppSettings.WINDOW.SHOW_TITLE_BAR
+        if !ConfigAppSettings.WINDOW.USE_NATIVE_TITLE_BAR
             options .= " -Caption"
         this.gui := Gui(options, ConfigAppSettings.WINDOW.TITLE)
         this.gui.Opt("+OwnDialogs")
@@ -33,7 +34,7 @@ class MainAppContainer {
         this.gui.OnEvent("Size", (g, minMax, w, h, *) => this.OnSize(w, h))
 
         headerHeight := ConfigAppSettings.AppHeaderHeight()
-        if !ConfigAppSettings.WINDOW.SHOW_TITLE_BAR
+        if ConfigAppSettings.ShouldShowCustomHeader()
             this.header := AppHeaderContainer(this.gui, ObjBindMethod(this, "Hide"))
         this.content := AppContentContainer(this.gui, headerHeight)
     }
@@ -50,6 +51,7 @@ class MainAppContainer {
         w := ConfigAppSettings.WINDOW.WIDTH
         h := ConfigAppSettings.AppHeaderHeight() + AppContentContainer.PreferredContentHeight()
         this.gui.Show("w" w " h" h " Center")
+        WindowDropShadow.Apply(this.GetHwnd())
         this.gui.GetClientPos(, , &clientW, &clientH)
         this.OnSize(clientW, clientH)
         this.content.FocusSearchBox()
@@ -58,6 +60,7 @@ class MainAppContainer {
 
     Hide() {
         this.content.HideTransientUi()
+        WindowDropShadow.Hide()
         this.gui.Hide()
     }
 
@@ -101,25 +104,27 @@ class MainAppContainer {
     }
 
     SetupTransparencyController() {
-        if !ConfigAppSettings.TRANSPARENCY.ENABLED
+        cfg := ConfigAppSettings.WINDOW.TRANSPARENCY
+        if !cfg.ENABLED
             return
 
-        if (ConfigAppSettings.TRANSPARENCY.CHECK_INTERVAL_MS < 50)
-            ConfigAppSettings.TRANSPARENCY.CHECK_INTERVAL_MS := 50
+        if (cfg.CHECK_INTERVAL_MS < 50)
+            cfg.CHECK_INTERVAL_MS := 50
 
         this.transparencyTimer := ObjBindMethod(this, "ApplyTransparencyForCurrentFocus")
-        SetTimer(this.transparencyTimer, ConfigAppSettings.TRANSPARENCY.CHECK_INTERVAL_MS)
+        SetTimer(this.transparencyTimer, cfg.CHECK_INTERVAL_MS)
     }
 
     ApplyTransparencyForCurrentFocus(*) {
-        if !ConfigAppSettings.TRANSPARENCY.ENABLED
+        cfg := ConfigAppSettings.WINDOW.TRANSPARENCY
+        if !cfg.ENABLED
             return
 
         if !this.IsVisible()
             return
 
-        activeAlpha := this.ClampAlpha(ConfigAppSettings.TRANSPARENCY.ACTIVE_ALPHA)
-        inactiveAlpha := this.ClampAlpha(ConfigAppSettings.TRANSPARENCY.INACTIVE_ALPHA)
+        activeAlpha := this.ClampAlpha(cfg.ACTIVE_ALPHA)
+        inactiveAlpha := this.ClampAlpha(cfg.INACTIVE_ALPHA)
         hwnd := this.GetHwnd()
         if !hwnd
             return
@@ -142,6 +147,10 @@ class MainAppContainer {
             return
         if !DllCall("IsWindowVisible", "Ptr", hwnd)
             return
+        if (alpha >= 255) {
+            try WinSetTransparent("Off", "ahk_id " hwnd)
+            return
+        }
         try WinSetTransparent(alpha, "ahk_id " hwnd)
     }
 

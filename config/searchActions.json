@@ -1,15 +1,13 @@
 {
+  "localConfig": {
+    "LOCAL_SEARCH_ACTIONS_PATH": "%USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json"
+  },
   "searchConfig": {
     "DEFAULT_RECENT_LIMIT": 10,
     "CONTEXT_ENABLED": true,
     "TYPING_RESPECTS_CONTEXT": false,
     "RECENTS_RESPECTS_CONTEXT": false,
-    "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK": false,
-    "HIGHLIGHT_MATCHED_SEARCH_TOKEN": {
-      "ENABLED": true,
-      "BG_COLOR": "FFFF00",
-      "TEXT_COLOR": "000000"
-    }
+    "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK": false
   },
   "searchOptions": [
     {
@@ -26,6 +24,14 @@
       "context": [],
       "keywords": ["settings", "config", "preferences", "options", "menu"],
       "children": [
+        {
+          "id": "settings-config-files",
+          "label": "Config files",
+          "actionType": "messageBox",
+          "message": "Settings\n\n # App UI/appearance (window/header/content/highlight strip): config/configAppSettings.json\n # Menu options: config/searchActions.json\n # Local overlay: %USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json\n\nEdit those files, then use Settings → Reload script (or tray → Reload Script).",
+          "context": [],
+          "keywords": ["settings", "config", "files", "preferences", "options"]
+        },
         {
           "id": "group-settings-context",
           "label": "Context",
@@ -65,12 +71,77 @@
           ]
         },
         {
-          "id": "settings-config-files",
-          "label": "Config files",
-          "actionType": "messageBox",
-          "message": "Settings\n\nApp settings (name/version/UI/notify): config/configAppSettings.json\nMenu options: config/searchActions.json\n\nEdit those files, then Reload Script from the tray icon.",
+          "id": "settings-reload-script",
+          "label": "Reload script",
+          "actionType": "checkVersionAndReload",
           "context": [],
-          "keywords": ["settings", "config", "files", "preferences", "options"]
+          "keywords": ["reload", "restart", "update", "version", "script", "settings"]
+        },
+        {
+          "id": "group-demos-and-tips",
+          "label": "Demos and tips",
+          "context": [],
+          "keywords": ["demos", "tips", "demo", "temporary", "message"],
+          "children": [
+            {
+              "id": "browser-demo",
+              "label": "Browser tip",
+              "action": {
+                "actionType": "browserActions",
+                "operation": "showTip"
+              },
+              "context": ["browser"],
+              "keywords": ["browser", "chrome", "edge", "demo"]
+            },
+            {
+              "id": "notepad-demo",
+              "label": "Notepad tip",
+              "actionType": "messageBox",
+              "message": "This option is visible when Context is enabled and the app under ReCtrl is Notepad.",
+              "context": ["notepad"],
+              "keywords": ["notepad", "demo"]
+            },
+            {
+              "id": "temporary-message",
+              "label": "temporary",
+              "actionType": "messageBox",
+              "message": "temporary",
+              "context": [],
+              "keywords": ["temporary", "temp", "demo"]
+            },
+            {
+              "id": "temporary2-message",
+              "label": "temporary2",
+              "actionType": "messageBox",
+              "message": "temporary2",
+              "context": [],
+              "keywords": ["temporary2", "temp", "demo"]
+            },
+            {
+              "id": "temporary3-message",
+              "label": "temporary3",
+              "actionType": "messageBox",
+              "message": "temporary3",
+              "context": [],
+              "keywords": ["temporary3", "temp", "demo"]
+            },
+            {
+              "id": "temporary4-message",
+              "label": "temporary4",
+              "actionType": "messageBox",
+              "message": "temporary4",
+              "context": [],
+              "keywords": ["temporary4", "temp", "demo"]
+            },
+            {
+              "id": "temporary5-message",
+              "label": "temporary5",
+              "actionType": "messageBox",
+              "message": "temporary5",
+              "context": [],
+              "keywords": ["temporary5", "temp", "demo"]
+            }
+          ]
         }
       ]
     },
@@ -134,13 +205,28 @@
       "keywords": ["pater", "command", "terminal", "npm", "package", "tooling"]
     },
     {
+      "id": "open-oreo-jira-ticket",
+      "label": "oreo jira ticket",
+      "showWhenQueryStartsWith": "WFCNG-",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": [],
+      "keywords": ["open", "WFCNG-", "oreo", "jiraTicket", "jira", "ticket", "browser"]
+    },
+    {
       "id": "open-oreo-jira",
       "label": "Oreo jira",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
         "appIdentifier": "Google Chrome",
-        "multiWinIdentifier": "kkundancybage2.com@gmail.com",
+        "multiWinIdentifier": "",
         "filePath": "",
         "fileTitle": ""
       },
@@ -154,7 +240,7 @@
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
         "appIdentifier": "Google Chrome",
-        "multiWinIdentifier": "kkundancybage2.com@gmail.com",
+        "multiWinIdentifier": "",
         "filePath": "",
         "fileTitle": ""
       },
@@ -168,7 +254,7 @@
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
         "appIdentifier": "Google Chrome",
-        "multiWinIdentifier": "kkundancybage2.com@gmail.com",
+        "multiWinIdentifier": "",
         "filePath": "",
         "fileTitle": ""
       },
@@ -210,7 +296,7 @@
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
         "appIdentifier": "Google Chrome",
-        "multiWinIdentifier": "kkundancybage2.com@gmail.com",
+        "multiWinIdentifier": "",
         "filePath": "",
         "fileTitle": ""
       },
@@ -226,10 +312,10 @@
         "appIdentifier": "Microsoft Edge",
         "multiWinIdentifier": "",
         "filePath": "",
-        "fileTitle": ""
+        "fileTitle": "Figma"
       },
       "context": ["browser__specific"],
-      "keywords": ["open", "oreo", "figma stars", "browser"]
+      "keywords": ["open", "oreo", "fisgma stars", "browser"]
     },
     {
       "id": "login-localhost-shellapp",
@@ -238,7 +324,7 @@
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
         "appIdentifier": "Google Chrome Canary",
-        "multiWinIdentifier": "kumar@CybClients_Apps",
+        "multiWinIdentifier": "",
         "filePath": "",
         "fileTitle": ""
       },
@@ -264,72 +350,6 @@
           "actionType": "clipboardReadText",
           "context": [],
           "keywords": ["clipboard", "read", "load", "text", "file", "latest"]
-        }
-      ]
-    },
-    {
-      "id": "group-demos-and-tips",
-      "label": "demos and tips",
-      "context": [],
-      "keywords": ["demos", "tips", "demo", "temporary", "message"],
-      "children": [
-        {
-          "id": "browser-demo",
-          "label": "Browser tip",
-          "action": {
-            "actionType": "browserActions",
-            "operation": "showTip"
-          },
-          "context": ["browser"],
-          "keywords": ["browser", "chrome", "edge", "demo"]
-        },
-        {
-          "id": "notepad-demo",
-          "label": "Notepad tip",
-          "actionType": "messageBox",
-          "message": "This option is visible when Context is enabled and the app under ReCtrl is Notepad.",
-          "context": ["notepad"],
-          "keywords": ["notepad", "demo"]
-        },
-        {
-          "id": "temporary-message",
-          "label": "temporary",
-          "actionType": "messageBox",
-          "message": "temporary",
-          "context": [],
-          "keywords": ["temporary", "temp", "demo"]
-        },
-        {
-          "id": "temporary2-message",
-          "label": "temporary2",
-          "actionType": "messageBox",
-          "message": "temporary2",
-          "context": [],
-          "keywords": ["temporary2", "temp", "demo"]
-        },
-        {
-          "id": "temporary3-message",
-          "label": "temporary3",
-          "actionType": "messageBox",
-          "message": "temporary3",
-          "context": [],
-          "keywords": ["temporary3", "temp", "demo"]
-        },
-        {
-          "id": "temporary4-message",
-          "label": "temporary4",
-          "actionType": "messageBox",
-          "message": "temporary4",
-          "context": [],
-          "keywords": ["temporary4", "temp", "demo"]
-        },
-        {
-          "id": "temporary5-message",
-          "label": "temporary5",
-          "actionType": "messageBox",
-          "message": "temporary5",
-          "context": [],
-          "keywords": ["temporary5", "temp", "demo"]
         }
       ]
     }
