@@ -142,10 +142,16 @@ class SearchBoxHandler {
             } else {
                 flagKey := this.ResolveSearchConfigFlagKey(action)
                 viewPath := this.ResolveAppViewSettingPath(action)
+                presetId := this.ResolveAppViewPresetId(action)
                 if (flagKey != "") {
                     labels.Push(label " (" (AppContext.GetSearchConfigFlag(flagKey) ? "true" : "false") ")")
                 } else if (viewPath != "") {
                     labels.Push(label " (" (ConfigAppSettings.GetViewSettingEnabled(viewPath) ? "true" : "false") ")")
+                } else if (presetId != "") {
+                    if (presetId = ConfigAppSettings.ACTIVE_PRESET)
+                        labels.Push(label " (active)")
+                    else
+                        labels.Push(label)
                 } else if SearchActionsLoader.IsBranch(action) {
                     labels.Push(label "  >")
                 } else if (action.Has("command") && action["command"] != "") {
@@ -302,6 +308,12 @@ class SearchBoxHandler {
                 throw Error("toggleAppViewSetting requires action.path (e.g. HEADER.SHOW).")
             result := ConfigAppSettings.PromptToggleViewSetting(viewPath, ownerHwnd)
             this.ShowActionResult(result)
+        } else if (actionType = "applyAppViewPreset") {
+            presetId := this.ResolveAppViewPresetId(action)
+            if (presetId = "")
+                throw Error("applyAppViewPreset requires action.preset (e.g. minimalist).")
+            result := ConfigAppSettings.ApplyViewPreset(presetId)
+            this.ShowActionResult(result)
         } else if (actionType = "browserActions") {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
@@ -443,6 +455,21 @@ class SearchBoxHandler {
         }
         if menuItem.Has("path") && Trim(String(menuItem["path"])) != ""
             return Trim(String(menuItem["path"]))
+        return ""
+    }
+
+    ; For applyAppViewPreset: id from configAppSettings.json → view.VIEW_PRESETS.
+    ResolveAppViewPresetId(menuItem) {
+        actionType := this.ResolveActionType(menuItem)
+        if (actionType != "applyAppViewPreset")
+            return ""
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("preset") && Trim(String(nested["preset"])) != ""
+                return Trim(String(nested["preset"]))
+        }
+        if menuItem.Has("preset") && Trim(String(menuItem["preset"])) != ""
+            return Trim(String(menuItem["preset"]))
         return ""
     }
 

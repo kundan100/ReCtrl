@@ -18,6 +18,10 @@ class ConfigAppSettings {
     ; Convenience alias of WINDOW.TRANSPARENCY after Load().
     static TRANSPARENCY := {}
     static FUNCTIONAL := { NOTIFY: {} }
+    ; Snapshot of view (WINDOW/HEADER/CONTENT) after Load — presets merge onto this.
+    static baseViewMap := Map()
+    static ACTIVE_PRESET := ""
+    static viewPresets := Map()
 
     static Load(filePath := unset) {
         if !IsSet(filePath)
@@ -42,17 +46,119 @@ class ConfigAppSettings {
         view := ConfigAppSettings.RequireMap(root, "view")
         ConfigAppSettings.NormalizeViewAliases(view)
         view := ConfigAppSettings.DeepMergeMap(ConfigAppSettings.ViewDefaults(), view)
+        ConfigAppSettings.LoadViewPresetsFromView(view)
 
         ConfigAppSettings.WINDOW := ConfigAppSettings.MapToObject(ConfigAppSettings.RequireMap(view, "WINDOW"))
         ConfigAppSettings.HEADER := ConfigAppSettings.MapToObject(ConfigAppSettings.RequireMap(view, "HEADER"))
         ConfigAppSettings.CONTENT := ConfigAppSettings.MapToObject(ConfigAppSettings.RequireMap(view, "CONTENT"))
         ConfigAppSettings.TRANSPARENCY := ConfigAppSettings.WINDOW.TRANSPARENCY
+        ; Base for preset overlays (show/hide patches only).
+        ConfigAppSettings.baseViewMap := ConfigAppSettings.CloneMap(Map(
+            "WINDOW", view["WINDOW"],
+            "HEADER", view["HEADER"],
+            "CONTENT", view["CONTENT"]
+        ))
 
         functional := ConfigAppSettings.RequireMap(root, "functional")
         ConfigAppSettings.FUNCTIONAL := ConfigAppSettings.MapToObject(functional)
 
         ; Derived — not stored in JSON.
         ConfigAppSettings.WINDOW.TITLE := ConfigAppSettings.DisplayNameWithVersion()
+
+        ; Apply ACTIVE_PRESET show/hide overlay before UI builds (no live refresh yet).
+        if (ConfigAppSettings.ACTIVE_PRESET != "" && ConfigAppSettings.HasViewPreset(ConfigAppSettings.ACTIVE_PRESET))
+            ConfigAppSettings.MergeViewPresetOntoBase(ConfigAppSettings.ACTIVE_PRESET)
+    }
+
+    ; view.VIEW_PRESETS — show/hide overlays only; removed from view before WINDOW/HEADER/CONTENT bind.
+    static LoadViewPresetsFromView(view) {
+        ConfigAppSettings.ACTIVE_PRESET := ""
+        ConfigAppSettings.viewPresets := Map()
+        if !view.Has("VIEW_PRESETS") || !(view["VIEW_PRESETS"] is Map)
+            return
+        presetsRoot := view["VIEW_PRESETS"]
+        view.Delete("VIEW_PRESETS")
+        if presetsRoot.Has("ACTIVE_PRESET")
+            ConfigAppSettings.ACTIVE_PRESET := Trim(String(presetsRoot["ACTIVE_PRESET"]))
+        if presetsRoot.Has("presets") && (presetsRoot["presets"] is Map)
+            ConfigAppSettings.viewPresets := presetsRoot["presets"]
+    }
+
+    static HasViewPreset(presetId) {
+        presetId := Trim(String(presetId))
+        return presetId != "" && ConfigAppSettings.viewPresets.Has(presetId)
+    }
+
+    static GetViewPresetLabel(presetId) {
+        presetId := Trim(String(presetId))
+        if !ConfigAppSettings.HasViewPreset(presetId)
+            return presetId
+        node := ConfigAppSettings.viewPresets[presetId]
+        if (node is Map) && node.Has("label") && Trim(String(node["label"])) != ""
+            return Trim(String(node["label"]))
+        return presetId
+    }
+
+    ; Deep-merge preset patch onto baseViewMap → WINDOW / HEADER / CONTENT.
+    static MergeViewPresetOntoBase(presetId) {
+        presetId := Trim(String(presetId))
+        if !ConfigAppSettings.HasViewPreset(presetId)
+            throw Error("Unknown app view preset: " presetId)
+
+        node := ConfigAppSettings.viewPresets[presetId]
+        if !(node is Map)
+            throw Error("Preset '" presetId "' must be a JSON object.")
+
+        patch := ConfigAppSettings.CloneMap(node)
+        if patch.Has("label")
+            patch.Delete("label")
+
+        merged := ConfigAppSettings.DeepMergeMap(
+            ConfigAppSettings.CloneMap(ConfigAppSettings.baseViewMap),
+            patch
+        )
+        ConfigAppSettings.NormalizeViewAliases(merged)
+        ConfigAppSettings.WINDOW := ConfigAppSettings.MapToObject(ConfigAppSettings.RequireMap(merged, "WINDOW"))
+        ConfigAppSettings.HEADER := ConfigAppSettings.MapToObject(ConfigAppSettings.RequireMap(merged, "HEADER"))
+        ConfigAppSettings.CONTENT := ConfigAppSettings.MapToObject(ConfigAppSettings.RequireMap(merged, "CONTENT"))
+        ConfigAppSettings.TRANSPARENCY := ConfigAppSettings.WINDOW.TRANSPARENCY
+        ConfigAppSettings.WINDOW.TITLE := ConfigAppSettings.DisplayNameWithVersion()
+        ConfigAppSettings.ACTIVE_PRESET := presetId
+    }
+
+    ; Session apply from menu: merge + live UI refresh.
+    static ApplyViewPreset(presetId) {
+        ConfigAppSettings.MergeViewPresetOntoBase(presetId)
+        ConfigAppSettings.ApplyViewPresetLive()
+
+        return Map(
+            "ok", true,
+            "title", ConfigAppSettings.APP_NAME " — App view",
+            "message", "Preset: " ConfigAppSettings.GetViewPresetLabel(presetId)
+                . "`n`nShow/hide overlay applied for this session."
+        )
+    }
+
+    static ApplyViewPresetLive() {
+        try {
+            global mainAppInstance
+            if !IsSet(mainAppInstance) || !mainAppInstance.container
+                return
+            container := mainAppInstance.container
+            ; Chip bar may not exist yet (e.g. started as minimalist).
+            if container.content
+                container.content.ApplyChipBarVisibility()
+            container.ApplyHeaderVisibility()
+            if container.content && container.content.searchBox && container.content.searchBox.gui {
+                sb := container.content.searchBox.gui
+                sb.ApplyHighlightMatchedSearchTokenConfig()
+                sb.ApplySearchEditColors()
+            }
+            if container.IsVisible() {
+                container.gui.GetClientPos(, , &cw, &ch)
+                container.OnSize(cw, ch)
+            }
+        }
     }
 
     ; Built-in view defaults (user JSON overlays these).
@@ -112,10 +218,16 @@ class ConfigAppSettings {
                 "PADDING_X", 20,
                 "PADDING_Y", 8,
                 "DUMMY_TEXT", "",
-                "CONTEXT_TOGGLE", Map(
+                "CHIP_BAR", Map(
                     "SHOW", true,
                     "MARGIN_TOP", 0,
-                    "HEIGHT", 20
+                    "HEIGHT", 22,
+                    "GAP", 8,
+                    "chips", [
+                        Map("id", "context", "type", "context", "SHOW", true, "label", "Context"),
+                        Map("id", "temp1", "type", "temp", "SHOW", false, "label", "Temp 1"),
+                        Map("id", "temp2", "type", "temp", "SHOW", false, "label", "Temp 2")
+                    ]
                 ),
                 "SEARCH_BOX", Map(
                     "SHOW", true,
@@ -185,6 +297,34 @@ class ConfigAppSettings {
             view["HEADER"] := header
         if !header.Has("SHOW") && window.Has("USE_NATIVE_TITLE_BAR")
             header["SHOW"] := !window["USE_NATIVE_TITLE_BAR"]
+
+        ; CONTEXT_TOGGLE → CHIP_BAR (one-release alias).
+        content := view.Has("CONTENT") && (view["CONTENT"] is Map) ? view["CONTENT"] : ""
+        if (content is Map) {
+            if content.Has("CONTEXT_TOGGLE") && !content.Has("CHIP_BAR") {
+                old := content["CONTEXT_TOGGLE"]
+                chipBar := Map(
+                    "SHOW", true,
+                    "MARGIN_TOP", 0,
+                    "HEIGHT", 22,
+                    "GAP", 8,
+                    "chips", [
+                        Map("id", "context", "type", "context", "SHOW", true, "label", "Context")
+                    ]
+                )
+                if (old is Map) {
+                    if old.Has("SHOW")
+                        chipBar["SHOW"] := old["SHOW"]
+                    if old.Has("MARGIN_TOP")
+                        chipBar["MARGIN_TOP"] := old["MARGIN_TOP"]
+                    if old.Has("HEIGHT")
+                        chipBar["HEIGHT"] := old["HEIGHT"]
+                }
+                content["CHIP_BAR"] := chipBar
+            }
+            if content.Has("CONTEXT_TOGGLE")
+                content.Delete("CONTEXT_TOGGLE")
+        }
     }
 
     ; Deep-merge: override values win; nested Maps merge recursively. Arrays replace.

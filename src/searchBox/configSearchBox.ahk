@@ -19,9 +19,9 @@ class NativeUiConfig {
     ; Enter key submission works in both modes.
     static SHOW_SUBMIT_BUTTON := false
 
-    ; Fallback if ConfigAppSettings.CONTENT.CONTEXT_TOGGLE is unavailable.
-    ; Prefer config/configAppSettings.json → view.CONTENT.CONTEXT_TOGGLE.SHOW
-    static SHOW_CONTEXT_TOGGLE := true
+    ; Fallback if ConfigAppSettings.CONTENT.CHIP_BAR is unavailable.
+    ; Prefer config/configAppSettings.json → view.CONTENT.CHIP_BAR.SHOW
+    static SHOW_CHIP_BAR := true
 
     ; Native submit button styling/layout (used when SHOW_SUBMIT_BUTTON = true)
     static SUBMIT_BUTTON_TEXT := "Search"

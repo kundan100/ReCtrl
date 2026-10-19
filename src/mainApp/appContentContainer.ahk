@@ -9,18 +9,24 @@ class AppContentContainer {
     gui := ""
     headerHeight := 0
     contentBg := ""
-    contextToggle := ""
+    chipBar := ""
     searchBox := ""
     cfg := ""
 
     __New(parentGui, headerHeight) {
         this.gui := parentGui
         this.headerHeight := headerHeight
-        this.cfg := ConfigAppSettings.CONTENT
+        this.SyncCfg()
         this.Build()
     }
 
+    ; Preset/toggle replace ConfigAppSettings.CONTENT — keep local alias current.
+    SyncCfg() {
+        this.cfg := ConfigAppSettings.CONTENT
+    }
+
     Build() {
+        this.SyncCfg()
         if !this.cfg.SHOW
             return
 
@@ -34,10 +40,10 @@ class AppContentContainer {
 
         searchCfg := this.cfg.SEARCH_BOX
         this.CalcSearchLayout(w, padX, searchCfg, &searchX, &searchW)
-        this.CalcVerticalFlow(this.headerHeight, &toggleY, &searchY)
+        this.CalcVerticalFlow(this.headerHeight, &chipBarY, &searchY)
 
-        if this.cfg.CONTEXT_TOGGLE.SHOW {
-            this.contextToggle := ContextToggleControl(this.gui, searchX, toggleY, searchW)
+        if this.cfg.CHIP_BAR.SHOW {
+            this.chipBar := ChipBarControl(this.gui, searchX, chipBarY, searchW)
         }
 
         if searchCfg.SHOW {
@@ -46,6 +52,7 @@ class AppContentContainer {
     }
 
     Reposition(clientW, clientH) {
+        this.SyncCfg()
         if !this.cfg.SHOW
             return
 
@@ -56,10 +63,10 @@ class AppContentContainer {
 
         searchCfg := this.cfg.SEARCH_BOX
         this.CalcSearchLayout(clientW, padX, searchCfg, &searchX, &searchW)
-        this.CalcVerticalFlow(this.headerHeight, &toggleY, &searchY)
+        this.CalcVerticalFlow(this.headerHeight, &chipBarY, &searchY)
 
-        if this.contextToggle
-            this.contextToggle.Reposition(searchX, toggleY, searchW)
+        if this.chipBar
+            this.chipBar.Reposition(searchX, chipBarY, searchW)
 
         if this.searchBox
             this.searchBox.Reposition(searchX, searchY, searchW, searchCfg.HEIGHT)
@@ -78,6 +85,25 @@ class AppContentContainer {
         }
     }
 
+    ; Create / show / hide chip bar when VIEW_PRESETS (or toggles) change SHOW.
+    ApplyChipBarVisibility() {
+        this.SyncCfg()
+        want := !!this.cfg.CHIP_BAR.SHOW
+        if want {
+            if !this.chipBar || !this.chipBar.HasControls() {
+                this.gui.GetClientPos(, , &clientW, )
+                padX := this.cfg.PADDING_X
+                searchCfg := this.cfg.SEARCH_BOX
+                this.CalcSearchLayout(clientW, padX, searchCfg, &searchX, &searchW)
+                this.CalcVerticalFlow(this.headerHeight, &chipBarY, &searchY)
+                this.chipBar := ChipBarControl(this.gui, searchX, chipBarY, searchW)
+            }
+            this.chipBar.Show()
+        } else if this.chipBar {
+            this.chipBar.Hide()
+        }
+    }
+
     ; Inset by PADDING_X first, then fit/center SEARCH_BOX within that padded band.
     ; MAX_WIDTH <= 0 means fill the padded width (so PADDING_X is the visible side inset).
     CalcSearchLayout(clientW, padX, searchCfg, &searchX, &searchW) {
@@ -93,16 +119,16 @@ class AppContentContainer {
 
     ; Stack content children using each child's MARGIN_TOP from JSON.
     ; Flow: CONTENT.PADDING_Y → [child.MARGIN_TOP + child]… → CONTENT.PADDING_Y
-    CalcVerticalFlow(headerHeight, &toggleY, &searchY) {
+    CalcVerticalFlow(headerHeight, &chipBarY, &searchY) {
         cfg := this.cfg
         y := headerHeight + cfg.PADDING_Y
-        toggleY := y
+        chipBarY := y
         searchY := y
 
-        if cfg.CONTEXT_TOGGLE.SHOW {
-            y += cfg.CONTEXT_TOGGLE.MARGIN_TOP
-            toggleY := y
-            y += cfg.CONTEXT_TOGGLE.HEIGHT
+        if cfg.CHIP_BAR.SHOW {
+            y += cfg.CHIP_BAR.MARGIN_TOP
+            chipBarY := y
+            y += cfg.CHIP_BAR.HEIGHT
         }
 
         if cfg.SEARCH_BOX.SHOW {
@@ -134,8 +160,8 @@ class AppContentContainer {
             return 0
 
         h := cfg.PADDING_Y
-        if cfg.CONTEXT_TOGGLE.SHOW
-            h += cfg.CONTEXT_TOGGLE.MARGIN_TOP + cfg.CONTEXT_TOGGLE.HEIGHT
+        if cfg.CHIP_BAR.SHOW
+            h += cfg.CHIP_BAR.MARGIN_TOP + cfg.CHIP_BAR.HEIGHT
         if cfg.SEARCH_BOX.SHOW
             h += cfg.SEARCH_BOX.MARGIN_TOP + cfg.SEARCH_BOX.HEIGHT
         h += cfg.PADDING_Y

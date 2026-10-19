@@ -22,10 +22,10 @@
       }
     },
     "HEADER": {
-      "SHOW": false,
+      "SHOW": true,
       "WIDTH": "100%",
       "HEIGHT": 28,
-      "PADDING_X": 1,
+      "PADDING_X": 4,
       "PADDING_Y": 0,
       "BG_COLOR": "0xA1A1A1",
       "ICON": {
@@ -55,33 +55,54 @@
       "SHOW": true,
       "WIDTH": "100%",
       "BG_COLOR": "0xFFFF00",
-      "PADDING_X": 1,
-      "PADDING_Y": 0,
+      "PADDING_X": 4,
+      "PADDING_Y": 4,
       "DUMMY_TEXT": "",
-      "CONTEXT_TOGGLE": {
-        "SHOW": false,
-        "MARGIN_TOP": 0,
-        "HEIGHT": 20
+      "CHIP_BAR": {
+        "SHOW": true,
+        "MARGIN_TOP": 4,
+        "HEIGHT": 22,
+        "GAP": 8,
+        "chips": [
+          {
+            "id": "context",
+            "type": "context",
+            "SHOW": true,
+            "label": "Context"
+          },
+          {
+            "id": "temp1",
+            "type": "temp",
+            "SHOW": false,
+            "label": "Temp 1"
+          },
+          {
+            "id": "temp2",
+            "type": "temp",
+            "SHOW": false,
+            "label": "Temp 2"
+          }
+        ]
       },
       "SEARCH_BOX": {
         "SHOW": true,
         "MARGIN_TOP": 0,
         "MAX_WIDTH": 0,
-        "HEIGHT": 32,
+        "HEIGHT": 36,
         "BG_COLOR": "0x09E3BC",
         "TEXT_COLOR": "0x000000"
       },
       "OPTIONS_LIST": {
         "SHOW": "auto",
         "MARGIN_TOP": 1,
-        "MARGIN_BOTTOM": 0,
+        "MARGIN_BOTTOM": 4,
         "ITEM_HEIGHT": 22,
         "MAX_VISIBLE_COUNT": 10,
         "HEIGHT_PADDING": 0,
         "MIN_EXTRA_HEIGHT": 0
       },
       "HIGHLIGHT_MATCHED_TOKEN": {
-        "SHOW": "false",
+        "SHOW": "auto",
         "MARGIN_TOP": 2,
         "HEIGHT": 20,
         "BG_COLOR": "0xFFFF00",
@@ -90,6 +111,43 @@
           "SHOW": true,
           "RECENTS_TEXT": "Enter → recent actions",
           "MENU_TEXT": "Ctrl+Enter → full menu · Esc / Backspace goes up"
+        }
+      }
+    },
+    "VIEW_PRESETS": {
+      "ACTIVE_PRESET": "default",
+      "presets": {
+        "default": {
+          "label": "Default",
+          "HEADER": { "SHOW": true },
+          "CONTENT": {
+            "CHIP_BAR": { "SHOW": true },
+            "HIGHLIGHT_MATCHED_TOKEN": { "SHOW": "auto" }
+          }
+        },
+        "minimalist": {
+          "label": "Minimalist",
+          "HEADER": { "SHOW": false },
+          "CONTENT": {
+            "CHIP_BAR": { "SHOW": false },
+            "HIGHLIGHT_MATCHED_TOKEN": { "SHOW": false }
+          }
+        },
+        "basic": {
+          "label": "Basic",
+          "HEADER": { "SHOW": true },
+          "CONTENT": {
+            "CHIP_BAR": { "SHOW": false },
+            "HIGHLIGHT_MATCHED_TOKEN": { "SHOW": "auto" }
+          }
+        },
+        "rich": {
+          "label": "Rich",
+          "HEADER": { "SHOW": true },
+          "CONTENT": {
+            "CHIP_BAR": { "SHOW": true },
+            "HIGHLIGHT_MATCHED_TOKEN": { "SHOW": "auto" }
+          }
         }
       }
     }

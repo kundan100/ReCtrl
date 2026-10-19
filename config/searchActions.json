@@ -90,6 +90,54 @@
               "keywords": ["app", "view", "header", "highlight", "appearance", "ui"],
               "children": [
                 {
+                  "id": "group-app-view-presets",
+                  "label": "App view presets",
+                  "context": [],
+                  "keywords": ["preset", "presets", "default", "minimalist", "basic", "rich", "theme"],
+                  "children": [
+                    {
+                      "id": "preset-default",
+                      "label": "App view preset: Default",
+                      "action": {
+                        "actionType": "applyAppViewPreset",
+                        "preset": "default"
+                      },
+                      "context": [],
+                      "keywords": ["preset", "default", "view"]
+                    },
+                    {
+                      "id": "preset-minimalist",
+                      "label": "App view preset: Minimalist",
+                      "action": {
+                        "actionType": "applyAppViewPreset",
+                        "preset": "minimalist"
+                      },
+                      "context": [],
+                      "keywords": ["preset", "minimalist", "minimal", "view"]
+                    },
+                    {
+                      "id": "preset-basic",
+                      "label": "App view preset: Basic",
+                      "action": {
+                        "actionType": "applyAppViewPreset",
+                        "preset": "basic"
+                      },
+                      "context": [],
+                      "keywords": ["preset", "basic", "view"]
+                    },
+                    {
+                      "id": "preset-rich",
+                      "label": "App view preset: Rich",
+                      "action": {
+                        "actionType": "applyAppViewPreset",
+                        "preset": "rich"
+                      },
+                      "context": [],
+                      "keywords": ["preset", "rich", "view"]
+                    }
+                  ]
+                },
+                {
                   "id": "settings-show-header",
                   "label": "Show header",
                   "action": {
