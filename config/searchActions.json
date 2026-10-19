@@ -78,6 +78,42 @@
           "keywords": ["reload", "restart", "update", "version", "script", "settings"]
         },
         {
+          "id": "group-this-app",
+          "label": "This app",
+          "context": [],
+          "keywords": ["this", "app", "view", "appearance", "header", "highlight", "settings"],
+          "children": [
+            {
+              "id": "group-app-view",
+              "label": "App view",
+              "context": [],
+              "keywords": ["app", "view", "header", "highlight", "appearance", "ui"],
+              "children": [
+                {
+                  "id": "settings-show-header",
+                  "label": "Show header",
+                  "action": {
+                    "actionType": "toggleAppViewSetting",
+                    "path": "HEADER.SHOW"
+                  },
+                  "context": [],
+                  "keywords": ["show", "header", "title", "bar", "view"]
+                },
+                {
+                  "id": "settings-show-highlight-matched-token",
+                  "label": "Show highlight-matched-token",
+                  "action": {
+                    "actionType": "toggleAppViewSetting",
+                    "path": "HIGHLIGHT_MATCHED_TOKEN.SHOW"
+                  },
+                  "context": [],
+                  "keywords": ["show", "highlight", "matched", "token", "hint", "view"]
+                }
+              ]
+            }
+          ]
+        },
+        {
           "id": "group-demos-and-tips",
           "label": "Demos and tips",
           "context": [],

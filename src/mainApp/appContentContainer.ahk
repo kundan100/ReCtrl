@@ -65,6 +65,19 @@ class AppContentContainer {
             this.searchBox.Reposition(searchX, searchY, searchW, searchCfg.HEIGHT)
     }
 
+    ; Live header show/hide: shift content band and search UI.
+    SetHeaderHeight(headerHeight) {
+        this.headerHeight := Max(0, Integer(headerHeight))
+        if !this.gui
+            return
+        this.gui.GetClientPos(, , &clientW, &clientH)
+        this.Reposition(clientW, clientH)
+        try {
+            if this.searchBox && this.searchBox.gui
+                this.searchBox.gui.embeddedBaseClientHeight := 0
+        }
+    }
+
     ; Inset by PADDING_X first, then fit/center SEARCH_BOX within that padded band.
     ; MAX_WIDTH <= 0 means fill the padded width (so PADDING_X is the visible side inset).
     CalcSearchLayout(clientW, padX, searchCfg, &searchX, &searchW) {

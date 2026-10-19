@@ -45,6 +45,40 @@ class MainAppContainer {
         this.content.Reposition(clientW, clientH)
     }
 
+    ; Apply ConfigAppSettings.HEADER.SHOW live (create header on first show if needed).
+    ApplyHeaderVisibility() {
+        want := ConfigAppSettings.ShouldShowCustomHeader()
+        if want {
+            if !this.header
+                this.header := AppHeaderContainer(this.gui, ObjBindMethod(this, "Hide"))
+            this.header.SetVisible(true)
+            this.gui.GetClientPos(, , &clientW, )
+            this.header.Reposition(clientW)
+        } else if this.header {
+            this.header.SetVisible(false)
+        }
+
+        newHeaderH := ConfigAppSettings.AppHeaderHeight()
+        this.content.SetHeaderHeight(newHeaderH)
+
+        if !this.IsVisible()
+            return
+
+        this.gui.GetPos(&x, &y, &windowW, &windowH)
+        this.gui.GetClientPos(, , , &clientH)
+        frameH := windowH - clientH
+        targetClientH := newHeaderH + AppContentContainer.PreferredContentHeight()
+        this.gui.Show("x" x " y" y " w" windowW " h" (targetClientH + frameH) " NA")
+        this.gui.GetClientPos(, , &cw, &ch)
+        this.OnSize(cw, ch)
+
+        try {
+            sbGui := this.content.searchBox.gui
+            if sbGui.suggestionCount > 0
+                sbGui.UpdateEmbeddedHostHeight(true)
+        }
+    }
+
     Show() {
         ; Capture the app underneath before this window takes focus.
         this.CaptureUnderlyingContext()

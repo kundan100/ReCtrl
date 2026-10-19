@@ -108,6 +108,18 @@ class AppHeaderContainer {
         return ConfigAppSettings.HEADER.HEIGHT
     }
 
+    SetVisible(show) {
+        show := !!show
+        if this.headerBg
+            this.headerBg.Visible := show
+        if this.icon
+            this.icon.Visible := show
+        if this.titleText
+            this.titleText.Visible := show
+        if this.closeBtn
+            this.closeBtn.Visible := show
+    }
+
     Reposition(clientW) {
         cfg := ConfigAppSettings.HEADER
         padX := cfg.PADDING_X

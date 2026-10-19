@@ -286,6 +286,93 @@ class ConfigAppSettings {
         return true
     }
 
+    ; Paths used by Settings → This app → App view toggles.
+    static GetViewSettingEnabled(path) {
+        path := Trim(String(path))
+        switch path {
+            case "HEADER.SHOW":
+                return !!ConfigAppSettings.HEADER.SHOW
+            case "HIGHLIGHT_MATCHED_TOKEN.SHOW":
+                return ConfigAppSettings.IsShowFlagEnabled(
+                    ConfigAppSettings.CONTENT.HIGHLIGHT_MATCHED_TOKEN.SHOW, true)
+            default:
+                throw Error("Unknown app view setting: " path)
+        }
+    }
+
+    static SetViewSettingEnabled(path, enabled) {
+        path := Trim(String(path))
+        enabled := !!enabled
+        switch path {
+            case "HEADER.SHOW":
+                ConfigAppSettings.HEADER.SHOW := enabled
+            case "HIGHLIGHT_MATCHED_TOKEN.SHOW":
+                ; Prefer "auto" when turning on (match-only strip); false when off.
+                ConfigAppSettings.CONTENT.HIGHLIGHT_MATCHED_TOKEN.SHOW := enabled ? "auto" : false
+            default:
+                throw Error("Unknown app view setting: " path)
+        }
+        ConfigAppSettings.ApplyViewSettingLive(path)
+    }
+
+    ; Live apply for App view toggles.
+    static ApplyViewSettingLive(path) {
+        path := Trim(String(path))
+        try {
+            global mainAppInstance
+            if !IsSet(mainAppInstance) || !mainAppInstance.container
+                return
+            container := mainAppInstance.container
+            if (path = "HEADER.SHOW") {
+                container.ApplyHeaderVisibility()
+                return
+            }
+            if (path = "HIGHLIGHT_MATCHED_TOKEN.SHOW") {
+                if container.content && container.content.searchBox && container.content.searchBox.gui
+                    container.content.searchBox.gui.ApplyHighlightMatchedSearchTokenConfig()
+            }
+        }
+    }
+
+    ; Session toggle (does not write JSON). Same confirm gate as searchConfig toggles.
+    static PromptToggleViewSetting(path, ownerHwnd := 0) {
+        path := Trim(String(path))
+        current := ConfigAppSettings.GetViewSettingEnabled(path)
+        currentText := current ? "true" : "false"
+        nextText := current ? "false" : "true"
+        label := path
+
+        if ConfigAppSettings.FUNCTIONAL.NOTIFY.PROMPT_BEFORE_TOGGLE {
+            prompt :=
+                label ": " currentText "`n`n"
+                . "Set it to " nextText " for this session?`n"
+                . "(Resets to config/configAppSettings.json when you relaunch "
+                . ConfigAppSettings.APP_NAME ".)"
+
+            options := "YesNo"
+            if ownerHwnd
+                options .= " Owner" ownerHwnd
+
+            answer := MsgBox(prompt, ConfigAppSettings.APP_NAME " — Settings", options)
+            if (answer != "Yes") {
+                return Map(
+                    "ok", true,
+                    "title", ConfigAppSettings.APP_NAME " — Settings",
+                    "message", label " left as " currentText
+                )
+            }
+        }
+
+        ConfigAppSettings.SetViewSettingEnabled(path, !current)
+        nowText := ConfigAppSettings.GetViewSettingEnabled(path) ? "true" : "false"
+        return Map(
+            "ok", true,
+            "title", ConfigAppSettings.APP_NAME " — Settings",
+            "message", label " is now " nowText
+                . "`n`nThis lasts until you relaunch " ConfigAppSettings.APP_NAME "."
+        )
+    }
+
     static OptionsListEnabled() {
         try return ConfigAppSettings.IsShowFlagEnabled(ConfigAppSettings.CONTENT.OPTIONS_LIST.SHOW, true)
         catch

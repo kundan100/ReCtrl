@@ -141,8 +141,11 @@ class SearchBoxHandler {
                 labels.Push(label)
             } else {
                 flagKey := this.ResolveSearchConfigFlagKey(action)
+                viewPath := this.ResolveAppViewSettingPath(action)
                 if (flagKey != "") {
                     labels.Push(label " (" (AppContext.GetSearchConfigFlag(flagKey) ? "true" : "false") ")")
+                } else if (viewPath != "") {
+                    labels.Push(label " (" (ConfigAppSettings.GetViewSettingEnabled(viewPath) ? "true" : "false") ")")
                 } else if SearchActionsLoader.IsBranch(action) {
                     labels.Push(label "  >")
                 } else if (action.Has("command") && action["command"] != "") {
@@ -291,6 +294,14 @@ class SearchBoxHandler {
                 flagKey := "CONTEXT_ENABLED"
             result := AppContext.PromptToggleSearchConfigFlag(flagKey, ownerHwnd)
             this.ShowActionResult(result)
+        } else if (actionType = "toggleAppViewSetting") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            viewPath := this.ResolveAppViewSettingPath(action)
+            if (viewPath = "")
+                throw Error("toggleAppViewSetting requires action.path (e.g. HEADER.SHOW).")
+            result := ConfigAppSettings.PromptToggleViewSetting(viewPath, ownerHwnd)
+            this.ShowActionResult(result)
         } else if (actionType = "browserActions") {
             ownerHwnd := 0
             try ownerHwnd := this.guiInstance.GetOwnerHwnd()
@@ -417,6 +428,21 @@ class SearchBoxHandler {
         }
         if menuItem.Has("key") && Trim(String(menuItem["key"])) != ""
             return Trim(String(menuItem["key"]))
+        return ""
+    }
+
+    ; For toggleAppViewSetting: path into configAppSettings view (e.g. HEADER.SHOW).
+    ResolveAppViewSettingPath(menuItem) {
+        actionType := this.ResolveActionType(menuItem)
+        if (actionType != "toggleAppViewSetting")
+            return ""
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("path") && Trim(String(nested["path"])) != ""
+                return Trim(String(nested["path"]))
+        }
+        if menuItem.Has("path") && Trim(String(menuItem["path"])) != ""
+            return Trim(String(menuItem["path"]))
         return ""
     }
 

@@ -55,7 +55,7 @@
       "SHOW": true,
       "WIDTH": "100%",
       "BG_COLOR": "0xFFFF00",
-      "PADDING_X": 0,
+      "PADDING_X": 1,
       "PADDING_Y": 0,
       "DUMMY_TEXT": "",
       "CONTEXT_TOGGLE": {
