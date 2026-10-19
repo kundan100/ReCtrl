@@ -1,5 +1,7 @@
 #Requires AutoHotkey v2
 
+#Include localSearchActionsMerge.ahk
+
 class SearchActionsConfig {
     ; Path to user-editable JSON (relative to script root / index.ahk folder).
     ; Tunables like DEFAULT_RECENT_LIMIT live only in that JSON (searchConfig).
@@ -7,7 +9,7 @@ class SearchActionsConfig {
 }
 
 class SearchActionsLoader {
-    ; Load JSON object { searchConfig, searchOptions }.
+    ; Load repo searchActions.json, then LocalSearchActionsMerge.Apply (local wins).
     ; Returns Map("searchConfig", Map, "searchOptions", Array).
     static LoadFromFile(filePath := unset) {
         if !IsSet(filePath)
@@ -25,6 +27,9 @@ class SearchActionsLoader {
         if !(root is Map) {
             throw Error("searchActions.json root must be a JSON object with searchConfig and searchOptions.")
         }
+
+        root := LocalSearchActionsMerge.Apply(root)
+
         if !root.Has("searchOptions") || !(root["searchOptions"] is Array) {
             throw Error("searchActions.json must contain a 'searchOptions' array.")
         }

@@ -3,6 +3,8 @@ node_modules/
 *.bak
 __kk__*.*
 __kk__/
+localSearchActions.json
+localSearchActions.txt
 
 # Local environment configuration
 .env
