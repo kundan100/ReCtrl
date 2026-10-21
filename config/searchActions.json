@@ -430,7 +430,7 @@
       "label": "Oreo login shellapp localhost",
       "action": {
         "actionType": "browserActions",
-        "operation": "openOrFocusByTitle",
+        "operation": "openOrFocusByTitleAndUrl",
         "appIdentifier": "Google Chrome Canary",
         "multiWinIdentifier": "",
         "filePath": "",
@@ -438,6 +438,62 @@
       },
       "context": ["browser__specific"],
       "keywords": ["oreo", "login", "shellapp", "localhost", "browser"]
+    },
+    {
+      "id": "oreo-login-shellapp-dev",
+      "label": "Oreo login shellapp dev",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitleAndUrl",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
+      },
+      "context": ["browser__specific"],
+      "keywords": ["oreo", "login", "shellapp", "dev", "browser"]
+    },
+    {
+      "id": "oreo-login-shellapp-dev2",
+      "label": "Oreo login shellapp dev2",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitleAndUrl",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
+      },
+      "context": ["browser__specific"],
+      "keywords": ["oreo", "login", "shellapp", "dev2", "browser"]
+    },
+    {
+      "id": "oreo-login-shellapp-ist",
+      "label": "Oreo login shellapp ist",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitleAndUrl",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
+      },
+      "context": ["browser__specific"],
+      "keywords": ["oreo", "login", "shellapp", "ist", "int", "browser"]
+    },
+    {
+      "id": "oreo-login-shellapp-uat",
+      "label": "Oreo login shellapp uat",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitleAndUrl",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
+      },
+      "context": ["browser__specific"],
+      "keywords": ["oreo", "login", "shellapp", "uat", "browser"]
     },
     {
       "id": "group-clipboard",
