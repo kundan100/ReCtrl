@@ -244,7 +244,10 @@ class ConfigAppSettings {
                     "ITEM_HEIGHT", 22,
                     "MAX_VISIBLE_COUNT", 10,
                     "HEIGHT_PADDING", 0,
-                    "MIN_EXTRA_HEIGHT", 0
+                    "MIN_EXTRA_HEIGHT", 0,
+                    "HOTKEY_HINT", Map(
+                        "SHOW", "always"
+                    )
                 ),
                 "HIGHLIGHT_MATCHED_TOKEN", Map(
                     "SHOW", "auto",
@@ -475,14 +478,15 @@ class ConfigAppSettings {
     }
 
     ; Session toggle (does not write JSON). Same confirm gate as searchConfig toggles.
-    static PromptToggleViewSetting(path, ownerHwnd := 0) {
+    ; forceImmediate: skip confirm (e.g. JSON hotkey while ReCtrl is focused).
+    static PromptToggleViewSetting(path, ownerHwnd := 0, forceImmediate := false) {
         path := Trim(String(path))
         current := ConfigAppSettings.GetViewSettingEnabled(path)
         currentText := current ? "true" : "false"
         nextText := current ? "false" : "true"
         label := path
 
-        if ConfigAppSettings.FUNCTIONAL.NOTIFY.PROMPT_BEFORE_TOGGLE {
+        if !forceImmediate && ConfigAppSettings.FUNCTIONAL.NOTIFY.PROMPT_BEFORE_TOGGLE {
             prompt :=
                 label ": " currentText "`n`n"
                 . "Set it to " nextText " for this session?`n"
@@ -527,6 +531,17 @@ class ConfigAppSettings {
             return Integer(cfg.%key%)
         } catch
             return fallback
+    }
+
+    ; OPTIONS_LIST.HOTKEY_HINT.SHOW → "always" | "no" ("selected" reserved for later).
+    static HotkeyHintShowMode() {
+        try {
+            cfg := ConfigAppSettings.CONTENT.OPTIONS_LIST.HOTKEY_HINT
+            mode := StrLower(Trim(String(cfg.SHOW)))
+            if (mode = "always" || mode = "no")
+                return mode
+        }
+        return "always"
     }
 
     ; Recursively turn JSON Maps into objects (dot-access friendly).

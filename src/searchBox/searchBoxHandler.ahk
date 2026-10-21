@@ -24,10 +24,19 @@ class SearchBoxHandler {
             AppContext.ApplySearchConfig(loaded["searchConfig"])
             this.guiInstance.ApplyHighlightMatchedSearchTokenConfig()
             this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
+            try {
+                SearchActionsHotkeys.Register(this.leafActions, this)
+            } catch as hkErr {
+                this.ShowOwnedMessage(
+                    "Failed to register searchActions hotkeys:`n" hkErr.Message,
+                    ConfigAppSettings.APP_NAME
+                )
+            }
         } catch as err {
             this.menuRoot := []
             this.leafActions := []
             this.recentLimit := 0
+            SearchActionsHotkeys.UnregisterAll()
             this.guiInstance.ApplyHighlightMatchedSearchTokenConfig()
             detail := err.Message
             try detail .= "`n(" err.What " @ line " err.Line ")"
@@ -36,6 +45,20 @@ class SearchBoxHandler {
                 ConfigAppSettings.APP_NAME
             )
         }
+    }
+
+    ; Run a leaf action by id (used by JSON hotkeys). fromHotkey ⇒ skip toggle confirm.
+    ExecuteActionById(actionId, fromHotkey := false) {
+        actionId := Trim(String(actionId))
+        if (actionId = "")
+            return
+        for action in this.leafActions {
+            if (String(action["id"]) = actionId) {
+                this.ExecuteAction(action, fromHotkey)
+                return
+            }
+        }
+        throw Error("No enabled action found for hotkey id '" actionId "'.")
     }
 
     SetupHandlers() {
@@ -144,24 +167,41 @@ class SearchBoxHandler {
                 viewPath := this.ResolveAppViewSettingPath(action)
                 presetId := this.ResolveAppViewPresetId(action)
                 if (flagKey != "") {
-                    labels.Push(label " (" (AppContext.GetSearchConfigFlag(flagKey) ? "true" : "false") ")")
+                    labels.Push(this.AppendHotkeyHint(
+                        label " (" (AppContext.GetSearchConfigFlag(flagKey) ? "true" : "false") ")",
+                        action
+                    ))
                 } else if (viewPath != "") {
-                    labels.Push(label " (" (ConfigAppSettings.GetViewSettingEnabled(viewPath) ? "true" : "false") ")")
+                    labels.Push(this.AppendHotkeyHint(
+                        label " (" (ConfigAppSettings.GetViewSettingEnabled(viewPath) ? "true" : "false") ")",
+                        action
+                    ))
                 } else if (presetId != "") {
                     if (presetId = ConfigAppSettings.ACTIVE_PRESET)
-                        labels.Push(label " (active)")
+                        labels.Push(this.AppendHotkeyHint(label " (active)", action))
                     else
-                        labels.Push(label)
+                        labels.Push(this.AppendHotkeyHint(label, action))
                 } else if SearchActionsLoader.IsBranch(action) {
                     labels.Push(label "  >")
                 } else if (action.Has("command") && action["command"] != "") {
-                    labels.Push(label "  [" action["command"] "]")
+                    labels.Push(this.AppendHotkeyHint(label "  [" action["command"] "]", action))
                 } else {
-                    labels.Push(label)
+                    labels.Push(this.AppendHotkeyHint(label, action))
                 }
             }
         }
         return labels
+    }
+
+    AppendHotkeyHint(label, action) {
+        if (ConfigAppSettings.HotkeyHintShowMode() != "always")
+            return label
+        if !(action is Map) || !action.Has("hotkey")
+            return label
+        hk := Trim(String(action["hotkey"]))
+        if (hk = "")
+            return label
+        return label "  " hk
     }
 
     IsActionMatch(query, action) {
@@ -284,7 +324,7 @@ class SearchBoxHandler {
         this.guiInstance.SetSuggestionOptions([])
     }
 
-    ExecuteAction(action) {
+    ExecuteAction(action, fromHotkey := false) {
         this.MarkActionAsRecent(action["id"])
         actionType := this.ResolveActionType(action)
         result := ""
@@ -298,7 +338,7 @@ class SearchBoxHandler {
             flagKey := this.ResolveSearchConfigFlagKey(action)
             if (flagKey = "")
                 flagKey := "CONTEXT_ENABLED"
-            result := AppContext.PromptToggleSearchConfigFlag(flagKey, ownerHwnd)
+            result := AppContext.PromptToggleSearchConfigFlag(flagKey, ownerHwnd, fromHotkey)
             this.ShowActionResult(result)
         } else if (actionType = "toggleAppViewSetting") {
             ownerHwnd := 0
@@ -306,7 +346,7 @@ class SearchBoxHandler {
             viewPath := this.ResolveAppViewSettingPath(action)
             if (viewPath = "")
                 throw Error("toggleAppViewSetting requires action.path (e.g. HEADER.SHOW).")
-            result := ConfigAppSettings.PromptToggleViewSetting(viewPath, ownerHwnd)
+            result := ConfigAppSettings.PromptToggleViewSetting(viewPath, ownerHwnd, fromHotkey)
             this.ShowActionResult(result)
         } else if (actionType = "applyAppViewPreset") {
             presetId := this.ResolveAppViewPresetId(action)

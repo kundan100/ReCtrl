@@ -41,12 +41,13 @@
             {
               "id": "settings-context-enabled",
               "label": "Context",
+              "hotkey": "Ctrl+Alt+C",
               "action": {
                 "actionType": "toggleSearchConfig",
                 "key": "CONTEXT_ENABLED"
               },
               "context": [],
-              "keywords": ["context", "enabled", "toggle", "app", "window"]
+              "keywords": ["context", "enabled", "toggle", "app", "window", "hotkey"]
             },
             {
               "id": "settings-typing-respects-context",

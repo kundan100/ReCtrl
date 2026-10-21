@@ -4,6 +4,7 @@
 #Include configSearchBox.ahk
 #Include highlightMatchedSearchToken\highlightMatchedSearchTokenControl.ahk
 #Include searchActionsLoader.ahk
+#Include searchActionsHotkeys.ahk
 #Include chipBar\chipBarControl.ahk
 #Include actions\clipboardActions.ahk
 #Include actions\appUpdate\scriptReloadActions.ahk

@@ -99,7 +99,10 @@
         "ITEM_HEIGHT": 22,
         "MAX_VISIBLE_COUNT": 10,
         "HEIGHT_PADDING": 0,
-        "MIN_EXTRA_HEIGHT": 0
+        "MIN_EXTRA_HEIGHT": 0,
+        "HOTKEY_HINT": {
+          "SHOW": "no"
+        }
       },
       "HIGHLIGHT_MATCHED_TOKEN": {
         "SHOW": "auto",
