@@ -17,29 +17,36 @@ class ScriptReloadActions {
         }
 
         title := ConfigAppSettings.APP_NAME " — Reload"
-        if (running = disk) {
-            return Map(
-                "ok", true,
-                "title", title,
-                "message", "You are running the latest loaded version (v" running ").`n`nNo reload needed."
-            )
-        }
-
-        prompt :=
-            "A newer version is on disk.`n`n"
-            . "Running:  v" running "`n"
-            . "On disk:  v" disk "`n`n"
-            . "Reload script now?`n(Same as tray → Reload Script.)"
         options := "YesNo Iconi"
         if ownerHwnd
             options .= " Owner" ownerHwnd
-        answer := MsgBox(prompt, title, options)
-        if (answer != "Yes") {
-            return Map(
-                "ok", true,
-                "title", title,
-                "message", "Reload cancelled.`n`nRunning: v" running "`nOn disk: v" disk
-            )
+
+        if (running = disk) {
+            prompt :=
+                "Version is unchanged (v" running ").`n`n"
+                . "Force reload anyway?`n(Same as tray → Reload Script.)"
+            answer := MsgBox(prompt, title, options)
+            if (answer != "Yes") {
+                return Map(
+                    "ok", true,
+                    "title", title,
+                    "message", "Force reload cancelled.`n`nRunning: v" running
+                )
+            }
+        } else {
+            prompt :=
+                "A newer version is on disk.`n`n"
+                . "Running:  v" running "`n"
+                . "On disk:  v" disk "`n`n"
+                . "Reload script now?`n(Same as tray → Reload Script.)"
+            answer := MsgBox(prompt, title, options)
+            if (answer != "Yes") {
+                return Map(
+                    "ok", true,
+                    "title", title,
+                    "message", "Reload cancelled.`n`nRunning: v" running "`nOn disk: v" disk
+                )
+            }
         }
 
         Reload

@@ -236,49 +236,57 @@
       "context": []
     },
     {
-      "id": "open-cursor-ide",
-      "label": "Cursor IDE",
-      "action": {
-        "actionType": "desktopAppActions",
-        "operation": "openOrFocus",
-        "appIdentifier": "Cursor",
-        "multiWinIdentifier": "ide",
-        "fileTitle": "",
-        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
-        "focusThisWinIfMainOverideALlows": true
-      },
+      "id": "group-desktop-apps",
+      "label": "Desktop Apps",
       "context": [],
-      "keywords": ["cursor", "ide", "editor", "open", "app"]
-    },
-    {
-      "id": "open-cursor-agent",
-      "label": "Cursor Agent",
-      "action": {
-        "actionType": "desktopAppActions",
-        "operation": "openOrFocus",
-        "appIdentifier": "Cursor",
-        "multiWinIdentifier": "agent",
-        "fileTitle": "",
-        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
-        "focusThisWinIfMainOverideALlows": true
-      },
-      "context": [],
-      "keywords": ["cursor", "agent", "open", "app"]
-    },
-    {
-      "id": "open-ms-teams",
-      "label": "MS Teams",
-      "action": {
-        "actionType": "desktopAppActions",
-        "operation": "openOrFocus",
-        "appIdentifier": "Microsoft Teams",
-        "multiWinIdentifier": "",
-        "fileTitle": "",
-        "filePath": "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\ms-teams.exe",
-        "focusThisWinIfMainOverideALlows": true
-      },
-      "context": [],
-      "keywords": ["teams", "ms", "chat", "open", "app"]
+      "keywords": ["desktop", "apps", "application", "open", "app"],
+      "children": [
+        {
+          "id": "open-cursor-ide",
+          "label": "Cursor IDE",
+          "action": {
+            "actionType": "desktopAppActions",
+            "operation": "openOrFocus",
+            "appIdentifier": "Cursor",
+            "multiWinIdentifier": "ide",
+            "fileTitle": "",
+            "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
+            "focusThisWinIfMainOverideALlows": true
+          },
+          "context": [],
+          "keywords": ["cursor", "ide", "editor", "open", "app"]
+        },
+        {
+          "id": "open-cursor-agent",
+          "label": "Cursor Agent",
+          "action": {
+            "actionType": "desktopAppActions",
+            "operation": "openOrFocus",
+            "appIdentifier": "Cursor",
+            "multiWinIdentifier": "agent",
+            "fileTitle": "",
+            "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
+            "focusThisWinIfMainOverideALlows": true
+          },
+          "context": [],
+          "keywords": ["cursor", "agent", "open", "app"]
+        },
+        {
+          "id": "open-ms-teams",
+          "label": "MS Teams",
+          "action": {
+            "actionType": "desktopAppActions",
+            "operation": "openOrFocus",
+            "appIdentifier": "Microsoft Teams",
+            "multiWinIdentifier": "",
+            "fileTitle": "",
+            "filePath": "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\ms-teams.exe",
+            "focusThisWinIfMainOverideALlows": true
+          },
+          "context": [],
+          "keywords": ["teams", "ms", "chat", "open", "app"]
+        }
+      ]
     },
     {
       "id": "run-pater",
@@ -290,7 +298,7 @@
     },
     {
       "id": "open-oreo-jira-ticket",
-      "label": "oreo jira ticket",
+      "label": "Oreo jira ticket",
       "showWhenQueryStartsWith": "WFCNG-",
       "action": {
         "actionType": "browserActions",
@@ -306,6 +314,7 @@
     {
       "id": "open-oreo-jira",
       "label": "Oreo jira",
+      "enabled": false,
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -332,8 +341,8 @@
       "keywords": ["open", "oreo", "scrumBoard", "sprintBoard", "browser", "jira"]
     },
     {
-      "id": "open-oreo-roadmap",
-      "label": "Oreo roadmap",
+      "id": "open-oreo-roadmap-PI3.26",
+      "label": "Oreo roadmap (PI3.26)",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -343,7 +352,21 @@
         "fileTitle": ""
       },
       "context": ["browser__specific"],
-      "keywords": ["open", "oreo", "roadmap", "browser", "jira"]
+      "keywords": ["open", "oreo", "roadmap PI3.26", "browser", "jira"]
+    },
+    {
+      "id": "open-oreo-roadmap-PI4.26",
+      "label": "Oreo roadmap (PI4.26)",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "roadmap PI4.26", "browser", "jira"]
     },
     {
       "id": "open-oreo-ATL",

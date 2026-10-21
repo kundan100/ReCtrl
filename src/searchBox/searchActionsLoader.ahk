@@ -110,10 +110,40 @@ class SearchActionsLoader {
         throw Error(fieldName " must be a boolean (true/false).")
     }
 
+    ; Missing "enabled" ⇒ true. false/"false"/"0" drops the node (and its children) from processing.
+    static IsNodeEnabled(node) {
+        if !(node is Map) || !node.Has("enabled")
+            return true
+        return SearchActionsLoader.NormalizeBool(node["enabled"], "Menu item 'enabled'")
+    }
+
+    static HasLeafAction(node) {
+        if !(node is Map)
+            return false
+        if node.Has("actionType") && Trim(String(node["actionType"])) != ""
+            return true
+        if node.Has("action") && IsObject(node["action"]) {
+            act := node["action"]
+            if act.Has("actionType") && Trim(String(act["actionType"])) != ""
+                return true
+        }
+        return false
+    }
+
     static NormalizeNodes(nodes) {
         out := []
         for node in nodes {
-            out.Push(SearchActionsLoader.NormalizeNode(node))
+            if !SearchActionsLoader.IsNodeEnabled(node)
+                continue
+            normalized := SearchActionsLoader.NormalizeNode(node)
+            ; Folder whose children were all disabled and that has no leaf action → drop.
+            if normalized.Has("children") && (normalized["children"] is Array)
+                && normalized["children"].Length = 0
+                && !SearchActionsLoader.HasLeafAction(normalized)
+                && !SearchActionsLoader.IsSeparator(normalized) {
+                continue
+            }
+            out.Push(normalized)
         }
         return out
     }
@@ -158,7 +188,9 @@ class SearchActionsLoader {
         }
 
         if node.Has("children") && (node["children"] is Array) && node["children"].Length > 0 {
-            normalized["children"] := SearchActionsLoader.NormalizeNodes(node["children"])
+            children := SearchActionsLoader.NormalizeNodes(node["children"])
+            if children.Length > 0
+                normalized["children"] := children
         }
         return normalized
     }
