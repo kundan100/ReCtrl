@@ -320,7 +320,7 @@ class SearchBoxHandler {
     ClearSuggestions() {
         this.ExitBrowseMode()
         this.visibleActions := []
-        this.guiInstance.ClearHighlightMatchedSearchToken()
+        ; this.guiInstance.ClearHighlightMatchedSearchToken()
         this.guiInstance.SetSuggestionOptions([])
     }
 

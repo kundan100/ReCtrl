@@ -75,7 +75,7 @@ class HighlightMatchedSearchTokenControl {
         this.textCtrl.SetFont("c" this.textColor " s9", "Segoe UI")
     }
 
-    ; Show "query  →  in  matchedToken" for the selected action (typing mode).
+    ; Show "query  →  found in  'matchedToken'" for the selected action (typing mode).
     ShowFor(query, action) {
         if !this.enabled || !this.textCtrl {
             this.Clear()

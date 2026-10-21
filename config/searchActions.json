@@ -426,18 +426,18 @@
       "keywords": ["open", "oreo", "fisgma stars", "browser"]
     },
     {
-      "id": "login-localhost-shellapp",
-      "label": "login localhost shellapp",
+      "id": "oreo-login-shellapp-localhost",
+      "label": "Oreo login shellapp localhost",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
         "appIdentifier": "Google Chrome Canary",
         "multiWinIdentifier": "",
         "filePath": "",
-        "fileTitle": ""
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
       },
       "context": ["browser__specific"],
-      "keywords": ["login", "localhost", "shellapp", "browser"]
+      "keywords": ["oreo", "login", "shellapp", "localhost", "browser"]
     },
     {
       "id": "group-clipboard",

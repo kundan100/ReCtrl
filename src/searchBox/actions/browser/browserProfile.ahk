@@ -110,7 +110,8 @@ class BrowserProfile {
         if (exeName = "")
             throw Error("Unsupported browser for profile resolve: " browserName)
 
-        userDataDir := BrowserProfile.DefaultUserDataDir(exeName)
+        ; Must use browserName (not exe alone): chrome.exe is shared by Stable/Beta/Dev/Canary.
+        userDataDir := BrowserProfile.UserDataDirForBrowserName(browserName)
         if (userDataDir = "" || !DirExist(userDataDir))
             throw Error("Browser User Data folder not found for: " browserName)
 
@@ -123,6 +124,39 @@ class BrowserProfile {
         }
 
         throw Error("No profile matches primary label:`n" wanted)
+    }
+
+    ; User Data root for a browser product name (Stable vs Canary vs Edge, etc.).
+    static UserDataDirForBrowserName(browserName) {
+        localApp := EnvGet("LOCALAPPDATA")
+        if (localApp = "")
+            return ""
+        switch browserName {
+            case "Google Chrome":
+                return localApp "\Google\Chrome\User Data"
+            case "Google Chrome Beta":
+                return localApp "\Google\Chrome Beta\User Data"
+            case "Google Chrome Dev":
+                return localApp "\Google\Chrome Dev\User Data"
+            case "Google Chrome Canary":
+                return localApp "\Google\Chrome SxS\User Data"
+            case "Microsoft Edge":
+                return localApp "\Microsoft\Edge\User Data"
+            case "Microsoft Edge Beta":
+                return localApp "\Microsoft\Edge Beta\User Data"
+            case "Microsoft Edge Dev":
+                return localApp "\Microsoft\Edge Dev\User Data"
+            case "Microsoft Edge Canary":
+                return localApp "\Microsoft\Edge SxS\User Data"
+            case "Brave":
+                return localApp "\BraveSoftware\Brave-Browser\User Data"
+            case "Vivaldi":
+                return localApp "\Vivaldi\User Data"
+            case "Opera":
+                return localApp "\Opera Software\Opera Stable"
+            default:
+                return BrowserProfile.DefaultUserDataDir(BrowserWindows.ExeFilterForBrowserName(browserName))
+        }
     }
 
     static ListProfileDirectories(userDataDir) {
