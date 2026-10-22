@@ -554,6 +554,20 @@
       "keywords": ["oreo", "login", "shellapp", "uat", "browser"]
     },
     {
+      "id": "open-Daily_Log_Track.json",
+      "label": "open Daily_Log_Track.json",
+      "action": {
+        "actionType": "desktopAppActions",
+        "operation": "openFile",
+        "appIdentifier": "Notepad++",
+        "fileTitle": "",
+        "filePath": "",
+        "focusThisWinIfMainOverideALlows": true
+      },
+      "context": [],
+      "keywords": ["json", "notepad++"]
+    },
+    {
       "id": "group-clipboard",
       "label": "Clipboard",
       "context": [],

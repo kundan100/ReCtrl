@@ -520,16 +520,17 @@ class SearchBoxHandler {
         }
         title := result.Has("title") ? result["title"] : ConfigAppSettings.APP_NAME
         text := result.Has("message") ? result["message"] : "Done."
-        this.ShowResultFeedback(text, title)
+        type := result.Has("type") ? result["type"] : "info"
+        this.ShowResultFeedback(text, title, type)
     }
 
     ; Route action result via ConfigAppSettings.FUNCTIONAL.NOTIFY.RESULT_FEEDBACK (popup vs toast).
-    ShowResultFeedback(text, title := unset) {
+    ShowResultFeedback(text, title := unset, type := "info") {
         if !IsSet(title)
             title := ConfigAppSettings.APP_NAME
         ownerHwnd := 0
         try ownerHwnd := this.guiInstance.GetOwnerHwnd()
-        Notify.Feedback(title, text, ownerHwnd)
+        Notify.Feedback(title, text, ownerHwnd, type)
     }
 
     ShowOwnedMessage(text, title := unset) {
