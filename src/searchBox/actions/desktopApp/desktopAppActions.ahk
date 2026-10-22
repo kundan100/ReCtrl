@@ -2,14 +2,53 @@
 
 ; High-level desktop-app API (actionType: desktopAppActions).
 ; Menu params come from searchActions.json → menuItem["action"].
+; action.operation: string or array of strings (run in order).
 ; Same JSON field names as browserActions where possible:
 ;   appIdentifier, multiWinIdentifier, fileTitle, filePath
 class DesktopAppActions {
     ; Entry from searchBoxHandler for actionType "desktopAppActions".
     static Run(menuItem, ownerHwnd := 0) {
         cfg := DesktopAppActions.GetActionConfig(menuItem)
-        operation := cfg.Has("operation") ? Trim(String(cfg["operation"])) : ""
+        ops := DesktopAppActions.NormalizeOperations(cfg, "")
+        if (ops.Length = 0)
+            throw Error("desktopAppActions requires a non-empty action.operation.")
 
+        last := Map("ok", true, "silent", true)
+        for op in ops {
+            last := DesktopAppActions.RunOne(op, cfg, ownerHwnd)
+        }
+        if !last.Has("silent")
+            last["silent"] := true
+        return last
+    }
+
+    static NormalizeOperations(cfg, defaultOp := "") {
+        if !IsObject(cfg) || !cfg.Has("operation") {
+            if (defaultOp != "")
+                return [defaultOp]
+            return []
+        }
+
+        raw := cfg["operation"]
+        ops := []
+        if (raw is Array) {
+            for item in raw {
+                op := Trim(String(item))
+                if (op != "")
+                    ops.Push(op)
+            }
+            return ops
+        }
+
+        op := Trim(String(raw))
+        if (op != "")
+            return [op]
+        if (defaultOp != "")
+            return [defaultOp]
+        return []
+    }
+
+    static RunOne(operation, cfg, ownerHwnd := 0) {
         switch operation {
             case "openOrFocus":
                 appIdentifier := DesktopAppActions.CfgStr(cfg, "appIdentifier")
