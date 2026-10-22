@@ -15,23 +15,42 @@ class BrowserActions {
                 return Map("ok", true, "silent", true)
 
             case "openOrFocusByTitle":
-                browserName := BrowserActions.CfgStr(cfg, "appIdentifier")
-                primaryLabel := BrowserActions.CfgStr(cfg, "multiWinIdentifier")
-                tabTitle := BrowserActions.CfgStr(cfg, "fileTitle")
-                filePath := BrowserActions.CfgStr(cfg, "filePath")
+                result := BrowserActions.RunOpenOrFocus(cfg, false)
+                result["silent"] := true
+                return result
 
-                if (browserName = "")
-                    throw Error("browserActions openOrFocusByTitle requires action.appIdentifier.")
-                if (tabTitle = "" && filePath = "")
-                    throw Error("browserActions openOrFocusByTitle requires action.fileTitle and/or action.filePath.")
-
-                result := BrowserActions.OpenOrFocusByTitle(tabTitle, filePath, browserName, primaryLabel)
+            case "openOrFocusByTitleAndUrl":
+                result := BrowserActions.RunOpenOrFocus(cfg, true)
                 result["silent"] := true
                 return result
 
             default:
                 throw Error("Unknown browserActions operation: " operation)
         }
+    }
+
+    ; Shared open/focus for title-only vs title+URL operations.
+    ; matchUrl=true → focus confirms with filePath via UIA; both fileTitle and filePath required.
+    static RunOpenOrFocus(cfg, matchUrl) {
+        opName := matchUrl ? "openOrFocusByTitleAndUrl" : "openOrFocusByTitle"
+        browserName := BrowserActions.CfgStr(cfg, "appIdentifier")
+        primaryLabel := BrowserActions.CfgStr(cfg, "multiWinIdentifier")
+        tabTitle := BrowserActions.CfgStr(cfg, "fileTitle")
+        filePath := BrowserActions.CfgStr(cfg, "filePath")
+
+        if (browserName = "")
+            throw Error("browserActions " opName " requires action.appIdentifier.")
+
+        if matchUrl {
+            if (tabTitle = "")
+                throw Error("browserActions " opName " requires action.fileTitle.")
+            if (filePath = "")
+                throw Error("browserActions " opName " requires action.filePath.")
+        } else if (tabTitle = "" && filePath = "") {
+            throw Error("browserActions " opName " requires action.fileTitle and/or action.filePath.")
+        }
+
+        return BrowserActions.OpenOrFocus(tabTitle, filePath, browserName, primaryLabel, matchUrl)
     }
 
     ; Nested action object from JSON, or empty Map.
@@ -67,10 +86,11 @@ class BrowserActions {
         BrowserLaunch.OpenUrl(url, browserName, primaryLabel)
     }
 
-    ; Focus matching tab by title; if not found, open url in that browser/profile.
+    ; Focus by title; if matchUrl, also require URL match (UIA). Else open url.
     ; Returns Map: ok, focused (bool), opened (bool).
-    static OpenOrFocusByTitle(tabTitle, url, browserName, primaryLabel := "") {
-        if (tabTitle != "" && BrowserActions.FocusTabByTitle(tabTitle, browserName, primaryLabel))
+    static OpenOrFocus(tabTitle, url, browserName, primaryLabel := "", matchUrl := false) {
+        urlNeedle := matchUrl ? url : ""
+        if (tabTitle != "" && BrowserTabs.FocusByTitle(tabTitle, browserName, primaryLabel, urlNeedle))
             return Map("ok", true, "focused", true, "opened", false)
 
         if (url = "")
@@ -80,7 +100,13 @@ class BrowserActions {
         return Map("ok", true, "focused", false, "opened", true)
     }
 
-    ; --- Future high-level API (not implemented yet) ---
-    ; static FindTabByUrl(url, browserName, primaryLabel := "") { ... }
-    ; static FocusTabByUrl(url, browserName, primaryLabel := "") { ... }
+    ; Title-only focus, then open. Kept for callers / readability.
+    static OpenOrFocusByTitle(tabTitle, url, browserName, primaryLabel := "") {
+        return BrowserActions.OpenOrFocus(tabTitle, url, browserName, primaryLabel, false)
+    }
+
+    ; Title + URL focus, then open.
+    static OpenOrFocusByTitleAndUrl(tabTitle, url, browserName, primaryLabel := "") {
+        return BrowserActions.OpenOrFocus(tabTitle, url, browserName, primaryLabel, true)
+    }
 }

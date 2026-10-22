@@ -263,13 +263,14 @@ class AppContext {
 
     ; Toggle a searchConfig session flag (does not write JSON; resets on relaunch).
     ; Yes/No confirm is gated by ConfigAppSettings.FUNCTIONAL.NOTIFY.PROMPT_BEFORE_TOGGLE (code kept when false).
-    static PromptToggleSearchConfigFlag(key, ownerHwnd := 0) {
+    ; forceImmediate: skip confirm (e.g. JSON hotkey while ReCtrl is focused).
+    static PromptToggleSearchConfigFlag(key, ownerHwnd := 0, forceImmediate := false) {
         key := Trim(String(key))
         current := AppContext.GetSearchConfigFlag(key)
         currentText := current ? "true" : "false"
         nextText := current ? "false" : "true"
 
-        if ConfigAppSettings.FUNCTIONAL.NOTIFY.PROMPT_BEFORE_TOGGLE {
+        if !forceImmediate && ConfigAppSettings.FUNCTIONAL.NOTIFY.PROMPT_BEFORE_TOGGLE {
             prompt :=
                 key ": " currentText "`n`n"
                 . "Set it to " nextText " for this session?`n"
@@ -297,7 +298,7 @@ class AppContext {
             )
         }
 
-        ; Confirm gate off: flip immediately, then let caller show result feedback.
+        ; Confirm gate off (or hotkey): flip immediately, then let caller show result feedback.
         AppContext.SetSearchConfigFlag(key, !current)
         return Map(
             "ok", true,

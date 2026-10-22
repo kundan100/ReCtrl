@@ -7,12 +7,7 @@
     "CONTEXT_ENABLED": true,
     "TYPING_RESPECTS_CONTEXT": false,
     "RECENTS_RESPECTS_CONTEXT": false,
-    "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK": false,
-    "HIGHLIGHT_MATCHED_SEARCH_TOKEN": {
-      "ENABLED": true,
-      "BG_COLOR": "FFFF00",
-      "TEXT_COLOR": "000000"
-    }
+    "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK": false
   },
   "searchOptions": [
     {
@@ -33,7 +28,7 @@
           "id": "settings-config-files",
           "label": "Config files",
           "actionType": "messageBox",
-          "message": "Settings\n\n # App settings (name/version/UI/notify): config/configAppSettings.json\n # Menu options: config/searchActions.json\n # Local overlay: %USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json\n\nEdit those files, then use Settings → Reload script (or tray → Reload Script).",
+          "message": "Settings\n\n # App UI/appearance (window/header/content/highlight strip): config/configAppSettings.json\n # Menu options: config/searchActions.json\n # Local overlay: %USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json\n\nEdit those files, then use Settings → Reload script (or tray → Reload Script).",
           "context": [],
           "keywords": ["settings", "config", "files", "preferences", "options"]
         },
@@ -46,12 +41,13 @@
             {
               "id": "settings-context-enabled",
               "label": "Context",
+              "hotkey": "Ctrl+Alt+C",
               "action": {
                 "actionType": "toggleSearchConfig",
                 "key": "CONTEXT_ENABLED"
               },
               "context": [],
-              "keywords": ["context", "enabled", "toggle", "app", "window"]
+              "keywords": ["context", "enabled", "toggle", "app", "window", "hotkey"]
             },
             {
               "id": "settings-typing-respects-context",
@@ -81,6 +77,90 @@
           "actionType": "checkVersionAndReload",
           "context": [],
           "keywords": ["reload", "restart", "update", "version", "script", "settings"]
+        },
+        {
+          "id": "group-this-app",
+          "label": "This app",
+          "context": [],
+          "keywords": ["this", "app", "view", "appearance", "header", "highlight", "settings"],
+          "children": [
+            {
+              "id": "group-app-view",
+              "label": "App view",
+              "context": [],
+              "keywords": ["app", "view", "header", "highlight", "appearance", "ui"],
+              "children": [
+                {
+                  "id": "group-app-view-presets",
+                  "label": "App view presets",
+                  "context": [],
+                  "keywords": ["preset", "presets", "default", "minimalist", "basic", "rich", "theme"],
+                  "children": [
+                    {
+                      "id": "preset-default",
+                      "label": "App view preset: Default",
+                      "action": {
+                        "actionType": "applyAppViewPreset",
+                        "preset": "default"
+                      },
+                      "context": [],
+                      "keywords": ["preset", "default", "view"]
+                    },
+                    {
+                      "id": "preset-minimalist",
+                      "label": "App view preset: Minimalist",
+                      "action": {
+                        "actionType": "applyAppViewPreset",
+                        "preset": "minimalist"
+                      },
+                      "context": [],
+                      "keywords": ["preset", "minimalist", "minimal", "view"]
+                    },
+                    {
+                      "id": "preset-basic",
+                      "label": "App view preset: Basic",
+                      "action": {
+                        "actionType": "applyAppViewPreset",
+                        "preset": "basic"
+                      },
+                      "context": [],
+                      "keywords": ["preset", "basic", "view"]
+                    },
+                    {
+                      "id": "preset-rich",
+                      "label": "App view preset: Rich",
+                      "action": {
+                        "actionType": "applyAppViewPreset",
+                        "preset": "rich"
+                      },
+                      "context": [],
+                      "keywords": ["preset", "rich", "view"]
+                    }
+                  ]
+                },
+                {
+                  "id": "settings-show-header",
+                  "label": "Show header",
+                  "action": {
+                    "actionType": "toggleAppViewSetting",
+                    "path": "HEADER.SHOW"
+                  },
+                  "context": [],
+                  "keywords": ["show", "header", "title", "bar", "view"]
+                },
+                {
+                  "id": "settings-show-highlight-matched-token",
+                  "label": "Show highlight-matched-token",
+                  "action": {
+                    "actionType": "toggleAppViewSetting",
+                    "path": "HIGHLIGHT_MATCHED_TOKEN.SHOW"
+                  },
+                  "context": [],
+                  "keywords": ["show", "highlight", "matched", "token", "hint", "view"]
+                }
+              ]
+            }
+          ]
         },
         {
           "id": "group-demos-and-tips",
@@ -157,49 +237,57 @@
       "context": []
     },
     {
-      "id": "open-cursor-ide",
-      "label": "Cursor IDE",
-      "action": {
-        "actionType": "desktopAppActions",
-        "operation": "openOrFocus",
-        "appIdentifier": "Cursor",
-        "multiWinIdentifier": "ide",
-        "fileTitle": "",
-        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
-        "focusThisWinIfMainOverideALlows": true
-      },
+      "id": "group-desktop-apps",
+      "label": "Desktop Apps",
       "context": [],
-      "keywords": ["cursor", "ide", "editor", "open", "app"]
-    },
-    {
-      "id": "open-cursor-agent",
-      "label": "Cursor Agent",
-      "action": {
-        "actionType": "desktopAppActions",
-        "operation": "openOrFocus",
-        "appIdentifier": "Cursor",
-        "multiWinIdentifier": "agent",
-        "fileTitle": "",
-        "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
-        "focusThisWinIfMainOverideALlows": true
-      },
-      "context": [],
-      "keywords": ["cursor", "agent", "open", "app"]
-    },
-    {
-      "id": "open-ms-teams",
-      "label": "MS Teams",
-      "action": {
-        "actionType": "desktopAppActions",
-        "operation": "openOrFocus",
-        "appIdentifier": "Microsoft Teams",
-        "multiWinIdentifier": "",
-        "fileTitle": "",
-        "filePath": "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\ms-teams.exe",
-        "focusThisWinIfMainOverideALlows": true
-      },
-      "context": [],
-      "keywords": ["teams", "ms", "chat", "open", "app"]
+      "keywords": ["desktop", "apps", "application", "open", "app"],
+      "children": [
+        {
+          "id": "open-cursor-ide",
+          "label": "Cursor IDE",
+          "action": {
+            "actionType": "desktopAppActions",
+            "operation": "openOrFocus",
+            "appIdentifier": "Cursor",
+            "multiWinIdentifier": "ide",
+            "fileTitle": "",
+            "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
+            "focusThisWinIfMainOverideALlows": true
+          },
+          "context": [],
+          "keywords": ["cursor", "ide", "editor", "open", "app"]
+        },
+        {
+          "id": "open-cursor-agent",
+          "label": "Cursor Agent",
+          "action": {
+            "actionType": "desktopAppActions",
+            "operation": "openOrFocus",
+            "appIdentifier": "Cursor",
+            "multiWinIdentifier": "agent",
+            "fileTitle": "",
+            "filePath": "%LOCALAPPDATA%\\Programs\\cursor\\Cursor.exe",
+            "focusThisWinIfMainOverideALlows": true
+          },
+          "context": [],
+          "keywords": ["cursor", "agent", "open", "app"]
+        },
+        {
+          "id": "open-ms-teams",
+          "label": "MS Teams",
+          "action": {
+            "actionType": "desktopAppActions",
+            "operation": "openOrFocus",
+            "appIdentifier": "Microsoft Teams",
+            "multiWinIdentifier": "",
+            "fileTitle": "",
+            "filePath": "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\ms-teams.exe",
+            "focusThisWinIfMainOverideALlows": true
+          },
+          "context": [],
+          "keywords": ["teams", "ms", "chat", "open", "app"]
+        }
+      ]
     },
     {
       "id": "run-pater",
@@ -211,7 +299,7 @@
     },
     {
       "id": "open-oreo-jira-ticket",
-      "label": "oreo jira ticket",
+      "label": "Oreo jira ticket",
       "showWhenQueryStartsWith": "WFCNG-",
       "action": {
         "actionType": "browserActions",
@@ -227,6 +315,7 @@
     {
       "id": "open-oreo-jira",
       "label": "Oreo jira",
+      "enabled": false,
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -253,8 +342,8 @@
       "keywords": ["open", "oreo", "scrumBoard", "sprintBoard", "browser", "jira"]
     },
     {
-      "id": "open-oreo-roadmap",
-      "label": "Oreo roadmap",
+      "id": "open-oreo-roadmap-PI3.26",
+      "label": "Oreo roadmap (PI3.26)",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
@@ -264,7 +353,21 @@
         "fileTitle": ""
       },
       "context": ["browser__specific"],
-      "keywords": ["open", "oreo", "roadmap", "browser", "jira"]
+      "keywords": ["open", "oreo", "roadmap PI3.26", "browser", "jira"]
+    },
+    {
+      "id": "open-oreo-roadmap-PI4.26",
+      "label": "Oreo roadmap (PI4.26)",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "roadmap PI4.26", "browser", "jira"]
     },
     {
       "id": "open-oreo-ATL",
@@ -323,18 +426,74 @@
       "keywords": ["open", "oreo", "fisgma stars", "browser"]
     },
     {
-      "id": "login-localhost-shellapp",
-      "label": "login localhost shellapp",
+      "id": "oreo-login-shellapp-localhost",
+      "label": "Oreo login shellapp localhost",
       "action": {
         "actionType": "browserActions",
-        "operation": "openOrFocusByTitle",
+        "operation": "openOrFocusByTitleAndUrl",
         "appIdentifier": "Google Chrome Canary",
         "multiWinIdentifier": "",
         "filePath": "",
-        "fileTitle": ""
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
       },
       "context": ["browser__specific"],
-      "keywords": ["login", "localhost", "shellapp", "browser"]
+      "keywords": ["oreo", "login", "shellapp", "localhost", "browser"]
+    },
+    {
+      "id": "oreo-login-shellapp-dev",
+      "label": "Oreo login shellapp dev",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitleAndUrl",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
+      },
+      "context": ["browser__specific"],
+      "keywords": ["oreo", "login", "shellapp", "dev", "browser"]
+    },
+    {
+      "id": "oreo-login-shellapp-dev2",
+      "label": "Oreo login shellapp dev2",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitleAndUrl",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
+      },
+      "context": ["browser__specific"],
+      "keywords": ["oreo", "login", "shellapp", "dev2", "browser"]
+    },
+    {
+      "id": "oreo-login-shellapp-ist",
+      "label": "Oreo login shellapp ist",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitleAndUrl",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
+      },
+      "context": ["browser__specific"],
+      "keywords": ["oreo", "login", "shellapp", "ist", "int", "browser"]
+    },
+    {
+      "id": "oreo-login-shellapp-uat",
+      "label": "Oreo login shellapp uat",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitleAndUrl",
+        "appIdentifier": "Google Chrome Canary",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": "SyncWeb Dashboard – One Frontend, Many Pods"
+      },
+      "context": ["browser__specific"],
+      "keywords": ["oreo", "login", "shellapp", "uat", "browser"]
     },
     {
       "id": "group-clipboard",

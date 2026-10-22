@@ -22,17 +22,22 @@ class SearchBoxHandler {
             this.menuRoot := loaded["searchOptions"]
             this.recentLimit := loaded["searchConfig"]["DEFAULT_RECENT_LIMIT"]
             AppContext.ApplySearchConfig(loaded["searchConfig"])
-            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig(
-                loaded["searchConfig"]["HIGHLIGHT_MATCHED_SEARCH_TOKEN"]
-            )
+            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig()
             this.leafActions := SearchActionsLoader.FlattenLeaves(this.menuRoot)
+            try {
+                SearchActionsHotkeys.Register(this.leafActions, this)
+            } catch as hkErr {
+                this.ShowOwnedMessage(
+                    "Failed to register searchActions hotkeys:`n" hkErr.Message,
+                    ConfigAppSettings.APP_NAME
+                )
+            }
         } catch as err {
             this.menuRoot := []
             this.leafActions := []
             this.recentLimit := 0
-            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig(
-                Map("ENABLED", false)
-            )
+            SearchActionsHotkeys.UnregisterAll()
+            this.guiInstance.ApplyHighlightMatchedSearchTokenConfig()
             detail := err.Message
             try detail .= "`n(" err.What " @ line " err.Line ")"
             this.ShowOwnedMessage(
@@ -40,6 +45,20 @@ class SearchBoxHandler {
                 ConfigAppSettings.APP_NAME
             )
         }
+    }
+
+    ; Run a leaf action by id (used by JSON hotkeys). fromHotkey ⇒ skip toggle confirm.
+    ExecuteActionById(actionId, fromHotkey := false) {
+        actionId := Trim(String(actionId))
+        if (actionId = "")
+            return
+        for action in this.leafActions {
+            if (String(action["id"]) = actionId) {
+                this.ExecuteAction(action, fromHotkey)
+                return
+            }
+        }
+        throw Error("No enabled action found for hotkey id '" actionId "'.")
     }
 
     SetupHandlers() {
@@ -92,7 +111,7 @@ class SearchBoxHandler {
         }
         this.visibleActions := recent
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(recent), 1)
-        this.guiInstance.ClearHighlightMatchedSearchToken()
+        this.guiInstance.ShowHighlightBlankListHint("recents")
     }
 
     ; Ctrl+Enter: show first-level items from JSON only (context-filtered when enabled).
@@ -106,7 +125,7 @@ class SearchBoxHandler {
         this.RefreshContextBeforeFilter()
         this.visibleActions := SearchActionsLoader.FilterByActiveContext(nodes)
         this.guiInstance.SetSuggestionOptions(this.BuildOptionLabels(this.visibleActions), 1)
-        this.guiInstance.ClearHighlightMatchedSearchToken()
+        this.guiInstance.ShowHighlightBlankListHint("menu")
     }
 
     ; Re-detect app under ReCtrl so menus don't stick to a closed/minimized window.
@@ -145,18 +164,44 @@ class SearchBoxHandler {
                 labels.Push(label)
             } else {
                 flagKey := this.ResolveSearchConfigFlagKey(action)
+                viewPath := this.ResolveAppViewSettingPath(action)
+                presetId := this.ResolveAppViewPresetId(action)
                 if (flagKey != "") {
-                    labels.Push(label " (" (AppContext.GetSearchConfigFlag(flagKey) ? "true" : "false") ")")
+                    labels.Push(this.AppendHotkeyHint(
+                        label " (" (AppContext.GetSearchConfigFlag(flagKey) ? "true" : "false") ")",
+                        action
+                    ))
+                } else if (viewPath != "") {
+                    labels.Push(this.AppendHotkeyHint(
+                        label " (" (ConfigAppSettings.GetViewSettingEnabled(viewPath) ? "true" : "false") ")",
+                        action
+                    ))
+                } else if (presetId != "") {
+                    if (presetId = ConfigAppSettings.ACTIVE_PRESET)
+                        labels.Push(this.AppendHotkeyHint(label " (active)", action))
+                    else
+                        labels.Push(this.AppendHotkeyHint(label, action))
                 } else if SearchActionsLoader.IsBranch(action) {
                     labels.Push(label "  >")
                 } else if (action.Has("command") && action["command"] != "") {
-                    labels.Push(label "  [" action["command"] "]")
+                    labels.Push(this.AppendHotkeyHint(label "  [" action["command"] "]", action))
                 } else {
-                    labels.Push(label)
+                    labels.Push(this.AppendHotkeyHint(label, action))
                 }
             }
         }
         return labels
+    }
+
+    AppendHotkeyHint(label, action) {
+        if (ConfigAppSettings.HotkeyHintShowMode() != "always")
+            return label
+        if !(action is Map) || !action.Has("hotkey")
+            return label
+        hk := Trim(String(action["hotkey"]))
+        if (hk = "")
+            return label
+        return label "  " hk
     }
 
     IsActionMatch(query, action) {
@@ -275,11 +320,11 @@ class SearchBoxHandler {
     ClearSuggestions() {
         this.ExitBrowseMode()
         this.visibleActions := []
-        this.guiInstance.ClearHighlightMatchedSearchToken()
+        ; this.guiInstance.ClearHighlightMatchedSearchToken()
         this.guiInstance.SetSuggestionOptions([])
     }
 
-    ExecuteAction(action) {
+    ExecuteAction(action, fromHotkey := false) {
         this.MarkActionAsRecent(action["id"])
         actionType := this.ResolveActionType(action)
         result := ""
@@ -293,7 +338,21 @@ class SearchBoxHandler {
             flagKey := this.ResolveSearchConfigFlagKey(action)
             if (flagKey = "")
                 flagKey := "CONTEXT_ENABLED"
-            result := AppContext.PromptToggleSearchConfigFlag(flagKey, ownerHwnd)
+            result := AppContext.PromptToggleSearchConfigFlag(flagKey, ownerHwnd, fromHotkey)
+            this.ShowActionResult(result)
+        } else if (actionType = "toggleAppViewSetting") {
+            ownerHwnd := 0
+            try ownerHwnd := this.guiInstance.GetOwnerHwnd()
+            viewPath := this.ResolveAppViewSettingPath(action)
+            if (viewPath = "")
+                throw Error("toggleAppViewSetting requires action.path (e.g. HEADER.SHOW).")
+            result := ConfigAppSettings.PromptToggleViewSetting(viewPath, ownerHwnd, fromHotkey)
+            this.ShowActionResult(result)
+        } else if (actionType = "applyAppViewPreset") {
+            presetId := this.ResolveAppViewPresetId(action)
+            if (presetId = "")
+                throw Error("applyAppViewPreset requires action.preset (e.g. minimalist).")
+            result := ConfigAppSettings.ApplyViewPreset(presetId)
             this.ShowActionResult(result)
         } else if (actionType = "browserActions") {
             ownerHwnd := 0
@@ -421,6 +480,36 @@ class SearchBoxHandler {
         }
         if menuItem.Has("key") && Trim(String(menuItem["key"])) != ""
             return Trim(String(menuItem["key"]))
+        return ""
+    }
+
+    ; For toggleAppViewSetting: path into configAppSettings view (e.g. HEADER.SHOW).
+    ResolveAppViewSettingPath(menuItem) {
+        actionType := this.ResolveActionType(menuItem)
+        if (actionType != "toggleAppViewSetting")
+            return ""
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("path") && Trim(String(nested["path"])) != ""
+                return Trim(String(nested["path"]))
+        }
+        if menuItem.Has("path") && Trim(String(menuItem["path"])) != ""
+            return Trim(String(menuItem["path"]))
+        return ""
+    }
+
+    ; For applyAppViewPreset: id from configAppSettings.json → view.VIEW_PRESETS.
+    ResolveAppViewPresetId(menuItem) {
+        actionType := this.ResolveActionType(menuItem)
+        if (actionType != "applyAppViewPreset")
+            return ""
+        if IsObject(menuItem) && menuItem.Has("action") && IsObject(menuItem["action"]) {
+            nested := menuItem["action"]
+            if nested.Has("preset") && Trim(String(nested["preset"])) != ""
+                return Trim(String(nested["preset"]))
+        }
+        if menuItem.Has("preset") && Trim(String(menuItem["preset"])) != ""
+            return Trim(String(menuItem["preset"]))
         return ""
     }
 

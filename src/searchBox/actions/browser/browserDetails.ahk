@@ -176,7 +176,7 @@ class BrowserDetails {
         return info
     }
 
-    ; Activate browser → Ctrl+L (address bar) → Ctrl+C → read clipboard → restore focus/clipboard.
+    ; Prefer quiet UIA Value read (document / omnibox); fall back to Ctrl+L / Ctrl+C.
     static CollectBrowserUrl(hwnd, restoreHwnd := 0) {
         result := Map(
             "url", "",
@@ -188,13 +188,25 @@ class BrowserDetails {
             return result
         }
 
+        try {
+            uiaUrl := BrowserTabs.ReadActiveUrlViaUia(hwnd)
+            if (uiaUrl != "") {
+                result["url"] := uiaUrl
+                result["source"] := "uia (document/omnibox Value)"
+                result["note"] := ""
+                return result
+            }
+        } catch {
+            ; fall through to clipboard path
+        }
+
         clipSaved := ClipboardAll()
         A_Clipboard := ""
 
         try {
             WinActivate("ahk_id " hwnd)
             if !WinWaitActive("ahk_id " hwnd, , 1.5) {
-                result["note"] := "Could not activate browser to read URL."
+                result["note"] := "Could not activate browser to read URL (UIA empty)."
                 return result
             }
 

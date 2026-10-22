@@ -6,15 +6,15 @@
 #Include ..\shared\dragWin.ahk
 
 class AppHeaderContainer {
-    static _ICON_SIZE := 16
-    static _ICON_GAP := 6
-
     gui := ""
     onClose := ""
     headerBg := ""
     icon := ""
     titleText := ""
     closeBtn := ""
+    iconCfg := ""
+    titleCfg := ""
+    closeCfg := ""
 
     __New(parentGui, onClose) {
         this.gui := parentGui
@@ -24,51 +24,70 @@ class AppHeaderContainer {
 
     Build() {
         cfg := ConfigAppSettings.HEADER
-        btnCfg := cfg.CLOSE_BTN
+        this.iconCfg := cfg.ICON
+        this.titleCfg := cfg.TITLE
+        this.closeCfg := cfg.CLOSE_BTN
         w := ConfigAppSettings.WINDOW.WIDTH
-        pad := cfg.PADDING_X
-        btnY := (cfg.HEIGHT - btnCfg.HEIGHT) // 2
-        contentX := pad
-        closeX := w - btnCfg.WIDTH - pad
+        padX := cfg.PADDING_X
+        padY := cfg.PADDING_Y
+        innerH := Max(0, cfg.HEIGHT - 2 * padY)
+        contentX := padX
+        closeW := this.closeCfg.SHOW ? this.closeCfg.WIDTH : 0
+        closeX := w - closeW - padX
 
-        this.headerBg := this.gui.Add("Text", "x" pad " y0 w" (w - 2 * pad) " h" cfg.HEIGHT " Background" cfg.BG_COLOR, "")
+        this.headerBg := this.gui.Add("Text",
+            "x" padX " y" padY " w" (w - 2 * padX) " h" innerH " Background" cfg.BG_COLOR, "")
 
-        iconPath := A_ScriptDir "\assets\appIcon\favicon_io\favicon.ico"
-        if FileExist(iconPath) {
-            iconY := (cfg.HEIGHT - AppHeaderContainer._ICON_SIZE) // 2
-            this.icon := this.gui.Add("Picture",
-                "x" pad " y" iconY " w" AppHeaderContainer._ICON_SIZE " h" AppHeaderContainer._ICON_SIZE,
-                iconPath)
-            contentX := pad + AppHeaderContainer._ICON_SIZE + AppHeaderContainer._ICON_GAP
+        if this.iconCfg.SHOW {
+            iconPath := ConfigAppSettings.ResolveAssetPath(this.iconCfg.PATH)
+            if FileExist(iconPath) {
+                iconY := padY + (innerH - this.iconCfg.HEIGHT) // 2
+                this.icon := this.gui.Add("Picture",
+                    "x" padX " y" iconY " w" this.iconCfg.WIDTH " h" this.iconCfg.HEIGHT,
+                    iconPath)
+                contentX := padX + this.iconCfg.WIDTH + this.iconCfg.GAP
+            }
         }
 
-        maxTitleW := closeX - contentX
-        if (maxTitleW < 0)
-            maxTitleW := 0
+        if this.titleCfg.SHOW {
+            maxTitleW := closeX - contentX
+            if (maxTitleW < 0)
+                maxTitleW := 0
 
-        this.titleText := this.gui.Add("Text",
-            "x" contentX " y0 w" maxTitleW " BackgroundTrans",
-            ConfigAppSettings.WINDOW.TITLE)
-        this.titleText.SetFont("s10", "Segoe UI")
-        this.ApplyTitleLayout(contentX, maxTitleW, cfg.HEIGHT)
+            titleOpts := "x" contentX " y" padY " w" maxTitleW " BackgroundTrans"
+            if Trim(String(this.titleCfg.COLOR)) != ""
+                titleOpts .= " c" this.titleCfg.COLOR
 
-        this.closeBtn := this.gui.Add("Text",
-            "x" closeX " y" btnY " w" btnCfg.WIDTH " h" btnCfg.HEIGHT " Border Center 0x200 Background" btnCfg.COLOR,
-            btnCfg.TEXT)
-        this.closeBtn.SetFont(btnCfg.FONT_SIZE)
-        this.closeBtn.OnEvent("Click", (*) => this.onClose.Call())
+            this.titleText := this.gui.Add("Text", titleOpts, ConfigAppSettings.HeaderTitleText())
+            this.titleText.SetFont(this.titleCfg.FONT, this.titleCfg.FONT_NAME)
+            this.ApplyTitleLayout(contentX, maxTitleW, padY, innerH)
+        }
 
+        if this.closeCfg.SHOW {
+            btnY := padY + (innerH - this.closeCfg.HEIGHT) // 2
+            this.closeBtn := this.gui.Add("Text",
+                "x" closeX " y" btnY " w" this.closeCfg.WIDTH " h" this.closeCfg.HEIGHT
+                    . " Border Center 0x200 Background" this.closeCfg.COLOR,
+                this.closeCfg.TEXT)
+            this.closeBtn.SetFont(this.closeCfg.FONT_SIZE)
+            this.closeBtn.OnEvent("Click", (*) => this.onClose.Call())
+        }
+
+        dragArgs := [this.gui, this.headerBg]
+        if this.closeBtn
+            dragArgs.Push(this.closeBtn)
         if this.icon
-            DragWin.Enable(this.gui, this.headerBg, this.closeBtn, this.icon)
-        else
-            DragWin.Enable(this.gui, this.headerBg, this.closeBtn)
+            dragArgs.Push(this.icon)
+        DragWin.Enable(dragArgs*)
     }
 
-    ApplyTitleLayout(x, w, headerHeight) {
+    ApplyTitleLayout(x, w, padY, innerH) {
+        if !this.titleText
+            return
         lineH := this.GetFontLineHeight(this.titleText.Hwnd)
-        if (lineH <= 0 || lineH > headerHeight)
-            lineH := headerHeight
-        y := (headerHeight - lineH) // 2
+        if (lineH <= 0 || lineH > innerH)
+            lineH := innerH
+        y := padY + (innerH - lineH) // 2
         this.titleText.Move(x, y, w, lineH)
     }
 
@@ -89,27 +108,45 @@ class AppHeaderContainer {
         return ConfigAppSettings.HEADER.HEIGHT
     }
 
+    SetVisible(show) {
+        show := !!show
+        if this.headerBg
+            this.headerBg.Visible := show
+        if this.icon
+            this.icon.Visible := show
+        if this.titleText
+            this.titleText.Visible := show
+        if this.closeBtn
+            this.closeBtn.Visible := show
+    }
+
     Reposition(clientW) {
         cfg := ConfigAppSettings.HEADER
-        btnCfg := cfg.CLOSE_BTN
-        pad := cfg.PADDING_X
-        btnY := (cfg.HEIGHT - btnCfg.HEIGHT) // 2
-        contentX := pad
-        closeX := clientW - btnCfg.WIDTH - pad
+        padX := cfg.PADDING_X
+        padY := cfg.PADDING_Y
+        innerH := Max(0, cfg.HEIGHT - 2 * padY)
+        contentX := padX
+        closeW := this.closeCfg.SHOW && this.closeBtn ? this.closeCfg.WIDTH : 0
+        closeX := clientW - closeW - padX
 
-        this.headerBg.Move(pad, , clientW - 2 * pad)
+        this.headerBg.Move(padX, padY, clientW - 2 * padX, innerH)
 
         if this.icon {
-            iconY := (cfg.HEIGHT - AppHeaderContainer._ICON_SIZE) // 2
-            this.icon.Move(pad, iconY)
-            contentX := pad + AppHeaderContainer._ICON_SIZE + AppHeaderContainer._ICON_GAP
+            iconY := padY + (innerH - this.iconCfg.HEIGHT) // 2
+            this.icon.Move(padX, iconY)
+            contentX := padX + this.iconCfg.WIDTH + this.iconCfg.GAP
         }
 
-        maxTitleW := closeX - contentX
-        if (maxTitleW < 0)
-            maxTitleW := 0
-        this.ApplyTitleLayout(contentX, maxTitleW, cfg.HEIGHT)
+        if this.titleText {
+            maxTitleW := closeX - contentX
+            if (maxTitleW < 0)
+                maxTitleW := 0
+            this.ApplyTitleLayout(contentX, maxTitleW, padY, innerH)
+        }
 
-        this.closeBtn.Move(closeX, btnY)
+        if this.closeBtn {
+            btnY := padY + (innerH - this.closeCfg.HEIGHT) // 2
+            this.closeBtn.Move(closeX, btnY)
+        }
     }
 }

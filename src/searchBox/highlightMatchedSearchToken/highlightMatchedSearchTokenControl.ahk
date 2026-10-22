@@ -1,57 +1,81 @@
 #Requires AutoHotkey v2
 
-; Yellow strip under suggestion list: shows which token matched the typed query.
-; Config: searchConfig.HIGHLIGHT_MATCHED_SEARCH_TOKEN
+; Strip under suggestion list: match hint while typing, or blank-list hints (Enter / Ctrl+Enter).
+; Config: ConfigAppSettings.CONTENT.HIGHLIGHT_MATCHED_TOKEN
 class HighlightMatchedSearchTokenControl {
-    static GAP := 2
-    static HEIGHT := 20
-
     hostGui := ""
     textCtrl := ""
     enabled := true
+    marginTop := 2
+    height := 20
     bgColor := "FFFF00"
     textColor := "000000"
+    blankListEnabled := true
+    blankRecentsText := "Enter → recent actions"
+    blankMenuText := "Ctrl+Enter → full menu · Esc / Backspace goes up"
 
     __New(hostGui, x, y, w) {
         this.hostGui := hostGui
+        this.ApplyFromAppSettings()
         hostGui.SetFont("s9", "Segoe UI")
         this.textCtrl := hostGui.Add("Text",
-            "x" x " y" y " w" w " h" HighlightMatchedSearchTokenControl.HEIGHT
+            "x" x " y" y " w" w " h" this.height
             " Hidden Background" this.bgColor " c" this.textColor
             " 0x200", "")
         this.textCtrl.SetFont("s9", "Segoe UI")
     }
 
-    static DefaultConfig() {
-        return Map(
-            "ENABLED", true,
-            "BG_COLOR", "FFFF00",
-            "TEXT_COLOR", "000000"
-        )
+    static Cfg() {
+        return ConfigAppSettings.CONTENT.HIGHLIGHT_MATCHED_TOKEN
     }
 
-    ApplyConfig(config) {
-        if !IsObject(config) {
-            return
-        }
-        if config.Has("ENABLED")
-            this.enabled := !!config["ENABLED"]
-        if config.Has("BG_COLOR")
-            this.bgColor := config["BG_COLOR"]
-        if config.Has("TEXT_COLOR")
-            this.textColor := config["TEXT_COLOR"]
+    static IsEnabledByConfig() {
+        try return ConfigAppSettings.IsShowFlagEnabled(
+            ConfigAppSettings.CONTENT.HIGHLIGHT_MATCHED_TOKEN.SHOW, true)
+        catch
+            return true
+    }
 
-        if !this.textCtrl {
+    static ColorToGui(color) {
+        hex := StrUpper(Trim(String(color)))
+        hex := RegExReplace(hex, "^0X", "")
+        hex := RegExReplace(hex, "^#", "")
+        return hex
+    }
+
+    ApplyFromAppSettings() {
+        if !HighlightMatchedSearchTokenControl.IsEnabledByConfig() {
+            this.enabled := false
+            this.Clear()
             return
         }
+
+        this.enabled := true
+        try {
+            cfg := HighlightMatchedSearchTokenControl.Cfg()
+            this.marginTop := Integer(cfg.MARGIN_TOP)
+            this.height := Integer(cfg.HEIGHT)
+            this.bgColor := HighlightMatchedSearchTokenControl.ColorToGui(cfg.BG_COLOR)
+            this.textColor := HighlightMatchedSearchTokenControl.ColorToGui(cfg.TEXT_COLOR)
+            if cfg.HasOwnProp("BLANK_LIST") && IsObject(cfg.BLANK_LIST) {
+                blank := cfg.BLANK_LIST
+                this.blankListEnabled := ConfigAppSettings.IsShowFlagEnabled(blank.SHOW, true)
+                if blank.HasOwnProp("RECENTS_TEXT") && Trim(String(blank.RECENTS_TEXT)) != ""
+                    this.blankRecentsText := String(blank.RECENTS_TEXT)
+                if blank.HasOwnProp("MENU_TEXT") && Trim(String(blank.MENU_TEXT)) != ""
+                    this.blankMenuText := String(blank.MENU_TEXT)
+            }
+        } catch {
+            ; keep previous / defaults
+        }
+
+        if !this.textCtrl
+            return
         this.textCtrl.Opt("Background" this.bgColor)
         this.textCtrl.SetFont("c" this.textColor " s9", "Segoe UI")
-        if !this.enabled {
-            this.Clear()
-        }
     }
 
-    ; Show "query  →  in  matchedToken" for the selected action.
+    ; Show "query  →  found in  'matchedToken'" for the selected action (typing mode).
     ShowFor(query, action) {
         if !this.enabled || !this.textCtrl {
             this.Clear()
@@ -69,14 +93,31 @@ class HighlightMatchedSearchTokenControl {
             return false
         }
 
-        ; Text control has no rich bold — bold only the matched slice via Unicode.
         highlightedToken := this.FormatTokenWithBoldMatch(matchedToken, query)
         this.textCtrl.Value := query "  →  found in  '" highlightedToken "'"
         this.textCtrl.Visible := true
         return true
     }
 
-    ; e.g. query "bro" + token "browser" => "𝗯𝗿𝗼wser"
+    ; kind: "recents" (blank Enter) | "menu" (Ctrl+Enter / browse)
+    ShowBlankListHint(kind := "recents") {
+        if !this.enabled || !this.textCtrl || !this.blankListEnabled {
+            this.Clear()
+            return false
+        }
+        text := (StrLower(Trim(String(kind))) = "menu")
+            ? this.blankMenuText
+            : this.blankRecentsText
+        text := Trim(text)
+        if (text = "") {
+            this.Clear()
+            return false
+        }
+        this.textCtrl.Value := text
+        this.textCtrl.Visible := true
+        return true
+    }
+
     FormatTokenWithBoldMatch(token, query) {
         pos := InStr(token, query, false)
         if !pos {
@@ -113,24 +154,26 @@ class HighlightMatchedSearchTokenControl {
         this.textCtrl.Visible := false
     }
 
+    IsShowing() {
+        return this.textCtrl && this.textCtrl.Visible
+    }
+
     LayoutBelow(listX, listY, listW, listH) {
         if !this.textCtrl || !this.textCtrl.Visible {
             return
         }
-        hintY := listY + listH + HighlightMatchedSearchTokenControl.GAP
-        this.textCtrl.Move(listX, hintY, listW, HighlightMatchedSearchTokenControl.HEIGHT)
+        hintY := listY + listH + this.marginTop
+        this.textCtrl.Move(listX, hintY, listW, this.height)
     }
 
-    ; Height reserved under the list while suggestions are open (0 if feature disabled).
-    ; Always reserved when enabled — does not grow/shrink with show/clear of hint text.
+    ; Reserve space only while the strip is actually visible.
     OccupiedHeight() {
-        if !this.enabled {
+        if !this.enabled || !this.IsShowing() {
             return 0
         }
-        return HighlightMatchedSearchTokenControl.GAP + HighlightMatchedSearchTokenControl.HEIGHT
+        return this.marginTop + this.height
     }
 
-    ; Prefer the word/keyword that contains the query (not the whole label).
     FindMatchedSearchToken(query, action) {
         q := StrLower(Trim(query))
         if (q = "") {
