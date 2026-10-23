@@ -86,7 +86,9 @@ ReCtrl/
 3. Facade routes by JSON operation
 	- `browserActions.ahk` > `BrowserActions.Run`
 	- `browserActions.ahk` > `GetActionConfig / CfgStr`
-	- `browserActions.ahk` > `OpenOrFocusByTitle` or `OpenOrFocusByTitleAndUrl`
+	- `browserActions.ahk` > `operation` (string or array) → `RunOne` / `OpenOrFocus…` / `login`
+	- `browserLogin.ahk` > `loginSteps` (often via `reusables.reusable__…`) + `localConfig.LOGIN_DEPENDENCY_PATH` (env id → credential array; 2+ → pick list)
+	- `browserLoginUia.ahk` > find / textfieldEntry / click (UIA)
 4. Focus tab (if found)
 	- `browserTabs.ahk` > `BrowserTabs.FocusByTitle` (optional urlNeedle for title+URL)
 	- `browserWindows.ahk` > `ListByBrowserAndLabel`

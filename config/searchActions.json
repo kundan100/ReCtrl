@@ -1,6 +1,7 @@
 {
   "localConfig": {
-    "LOCAL_SEARCH_ACTIONS_PATH": "%USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json"
+    "LOCAL_SEARCH_ACTIONS_PATH": "%USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json",
+    "LOGIN_DEPENDENCY_PATH": "%USERPROFILE%\\__cyk\\ahk\\ReCtrl\\oreoLogins.json"
   },
   "searchConfig": {
     "DEFAULT_RECENT_LIMIT": 10,
@@ -8,6 +9,63 @@
     "TYPING_RESPECTS_CONTEXT": false,
     "RECENTS_RESPECTS_CONTEXT": false,
     "FOCUS_OVERRIDE_ALLOWED_BY_INDIVIDUAL_TASK": false
+  },
+  "reusables": {
+    "reusable__oreo-login-shellapp": {
+      "operation": "login",
+      "loginSteps": [
+        {
+          "note": "enter tenantId",
+          "waitMs_maxTimeForFieldToShowUp": 3000,
+          "waitMs_afterAction": 200,
+          "skippable": false,
+          "messageChannel": "show-in-notification",
+          "fieldIdentifier": { "type": "input", "key": "id", "value": "login-tenant-input" },
+          "fieldValueFromKeyInLoginDependency": "tenantId",
+          "fieldAction": "textfieldEntry"
+        },
+        {
+          "note": "click Sign In (tenant)",
+          "waitMs_maxTimeForFieldToShowUp": 3500,
+          "waitMs_afterAction": 2000,
+          "skippable": false,
+          "messageChannel": "show-in-notification",
+          "fieldIdentifier": { "type": "button", "key": "containsText", "value": "Sign In" },
+          "fieldValueFromKeyInLoginDependency": "NA",
+          "fieldAction": "click"
+        },
+        {
+          "note": "enter username",
+          "waitMs_maxTimeForFieldToShowUp": 10000,
+          "waitMs_afterAction": 200,
+          "skippable": false,
+          "messageChannel": "show-in-notification",
+          "fieldIdentifier": { "type": "input", "key": "id", "value": "username" },
+          "fieldValueFromKeyInLoginDependency": "username",
+          "fieldAction": "textfieldEntry"
+        },
+        {
+          "note": "enter password",
+          "waitMs_maxTimeForFieldToShowUp": 3000,
+          "waitMs_afterAction": 200,
+          "skippable": false,
+          "messageChannel": "show-in-notification",
+          "fieldIdentifier": { "type": "input", "key": "id", "value": "password" },
+          "fieldValueFromKeyInLoginDependency": "password",
+          "fieldAction": "textfieldEntry"
+        },
+        {
+          "note": "click Sign In (credentials)",
+          "waitMs_maxTimeForFieldToShowUp": 3000,
+          "waitMs_afterAction": 500,
+          "skippable": false,
+          "messageChannel": "show-in-notification",
+          "fieldIdentifier": { "type": "button", "key": "containsText", "value": "Sign In" },
+          "fieldValueFromKeyInLoginDependency": "NA",
+          "fieldAction": "click"
+        }
+      ]
+    }
   },
   "searchOptions": [
     {
@@ -430,7 +488,7 @@
       "label": "Oreo login shellapp localhost",
       "action": {
         "actionType": "browserActions",
-        "operation": "openOrFocusByTitleAndUrl",
+        "operation": ["openOrFocusByTitleAndUrl", "reusable__oreo-login-shellapp"],
         "appIdentifier": "Google Chrome Canary",
         "multiWinIdentifier": "",
         "filePath": "",
@@ -444,7 +502,7 @@
       "label": "Oreo login shellapp dev",
       "action": {
         "actionType": "browserActions",
-        "operation": "openOrFocusByTitleAndUrl",
+        "operation": ["openOrFocusByTitleAndUrl", "reusable__oreo-login-shellapp"],
         "appIdentifier": "Google Chrome Canary",
         "multiWinIdentifier": "",
         "filePath": "",
@@ -458,7 +516,7 @@
       "label": "Oreo login shellapp dev2",
       "action": {
         "actionType": "browserActions",
-        "operation": "openOrFocusByTitleAndUrl",
+        "operation": ["openOrFocusByTitleAndUrl", "reusable__oreo-login-shellapp"],
         "appIdentifier": "Google Chrome Canary",
         "multiWinIdentifier": "",
         "filePath": "",
@@ -472,7 +530,7 @@
       "label": "Oreo login shellapp ist",
       "action": {
         "actionType": "browserActions",
-        "operation": "openOrFocusByTitleAndUrl",
+        "operation": ["openOrFocusByTitleAndUrl", "reusable__oreo-login-shellapp"],
         "appIdentifier": "Google Chrome Canary",
         "multiWinIdentifier": "",
         "filePath": "",
@@ -486,7 +544,7 @@
       "label": "Oreo login shellapp uat",
       "action": {
         "actionType": "browserActions",
-        "operation": "openOrFocusByTitleAndUrl",
+        "operation": ["openOrFocusByTitleAndUrl", "reusable__oreo-login-shellapp"],
         "appIdentifier": "Google Chrome Canary",
         "multiWinIdentifier": "",
         "filePath": "",
@@ -494,6 +552,20 @@
       },
       "context": ["browser__specific"],
       "keywords": ["oreo", "login", "shellapp", "uat", "browser"]
+    },
+    {
+      "id": "open-Daily_Log_Track.json",
+      "label": "open Daily_Log_Track.json",
+      "action": {
+        "actionType": "desktopAppActions",
+        "operation": "openFile",
+        "appIdentifier": "Notepad++",
+        "fileTitle": "",
+        "filePath": "",
+        "focusThisWinIfMainOverideALlows": true
+      },
+      "context": [],
+      "keywords": ["json", "notepad++"]
     },
     {
       "id": "group-clipboard",

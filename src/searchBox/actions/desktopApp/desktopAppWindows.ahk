@@ -61,8 +61,10 @@ class DesktopAppWindows {
                 return "ms-teams.exe"
             case "Outlook", "Microsoft Outlook":
                 return "OUTLOOK.EXE"
+            case "Notepad++", "notepad++":
+                return "notepad++.exe"
             default:
-                ; Allow raw exe name in JSON: "appIdentifier": "notepad.exe"
+                ; Allow raw exe name in JSON: "appIdentifier": "notepad++.exe"
                 name := Trim(appIdentifier)
                 if (name != "" && RegExMatch(name, "i)\.exe$"))
                     return name

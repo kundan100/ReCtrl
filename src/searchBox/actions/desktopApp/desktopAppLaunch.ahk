@@ -1,6 +1,7 @@
 #Requires AutoHotkey v2
 
 ; Launch a desktop app from JSON filePath (or known defaults for appIdentifier).
+; OpenDocument: open a document path with that app (e.g. JSON in Notepad++).
 class DesktopAppLaunch {
     static Open(appIdentifier, filePath := "", launchArgs := "") {
         exePath := DesktopAppLaunch.ResolveExe(appIdentifier, filePath)
@@ -12,6 +13,21 @@ class DesktopAppLaunch {
             Run(Format('"{1}" {2}', exePath, args))
         else
             Run(Format('"{1}"', exePath))
+    }
+
+    ; Open documentPath with appIdentifier (exe resolved separately; path is the document).
+    static OpenDocument(appIdentifier, documentPath) {
+        exePath := DesktopAppLaunch.ResolveExe(appIdentifier, "")
+        if (exePath = "")
+            throw Error("Could not find executable for: " appIdentifier)
+
+        doc := DesktopAppLaunch.ResolveDocumentPath(documentPath)
+        if (doc = "")
+            throw Error("desktopAppActions openFile requires a non-empty action.filePath.")
+        if !FileExist(doc)
+            throw Error("File not found:`n" doc)
+
+        Run(Format('"{1}" "{2}"', exePath, doc))
     }
 
     static ResolveExe(appIdentifier, filePath := "") {
@@ -38,6 +54,19 @@ class DesktopAppLaunch {
                 return expanded
         }
         return ""
+    }
+
+    ; Expand env vars; resolve relative paths against A_ScriptDir.
+    static ResolveDocumentPath(path) {
+        path := DesktopAppLaunch.ExpandPath(Trim(path))
+        if (path = "")
+            return ""
+        path := StrReplace(path, "/", "\")
+        if RegExMatch(path, "i)^[a-z]:\\") || SubStr(path, 1, 2) = "\\"
+            return path
+        if SubStr(path, 1, 1) = "\"
+            return A_ScriptDir path
+        return A_ScriptDir "\" path
     }
 
     static ExpandPath(path) {
@@ -72,6 +101,12 @@ class DesktopAppLaunch {
                 return [
                     pf "\Microsoft Office\root\Office16\OUTLOOK.EXE",
                     pf86 "\Microsoft Office\root\Office16\OUTLOOK.EXE"
+                ]
+            case "Notepad++", "notepad++":
+                return [
+                    pf "\Notepad++\notepad++.exe",
+                    pf86 "\Notepad++\notepad++.exe",
+                    localApp "\Programs\Notepad++\notepad++.exe"
                 ]
             default:
                 return []

@@ -6,11 +6,16 @@ class SearchActionsConfig {
     ; Path to user-editable JSON (relative to script root / index.ahk folder).
     ; Tunables like DEFAULT_RECENT_LIMIT live only in that JSON (searchConfig).
     static ACTIONS_JSON_PATH := A_ScriptDir "\config\searchActions.json"
+    ; Populated by SearchActionsLoader.LoadFromFile after local merge (LOGIN_DEPENDENCY_PATH, …).
+    static LocalConfig := Map()
+    ; Shared operation bundles (e.g. reusable__oreo-login-shellapp); not searchable menu items.
+    static Reusables := Map()
 }
 
 class SearchActionsLoader {
     ; Load repo searchActions.json, then LocalSearchActionsMerge.Apply (local wins).
     ; Returns Map("searchConfig", Map, "searchOptions", Array).
+    ; Also stores merged localConfig / reusables on SearchActionsConfig.
     static LoadFromFile(filePath := unset) {
         if !IsSet(filePath)
             filePath := SearchActionsConfig.ACTIONS_JSON_PATH
@@ -29,6 +34,16 @@ class SearchActionsLoader {
         }
 
         root := LocalSearchActionsMerge.Apply(root)
+
+        if root.Has("localConfig") && (root["localConfig"] is Map)
+            SearchActionsConfig.LocalConfig := root["localConfig"]
+        else
+            SearchActionsConfig.LocalConfig := Map()
+
+        if root.Has("reusables") && (root["reusables"] is Map)
+            SearchActionsConfig.Reusables := root["reusables"]
+        else
+            SearchActionsConfig.Reusables := Map()
 
         if !root.Has("searchOptions") || !(root["searchOptions"] is Array) {
             throw Error("searchActions.json must contain a 'searchOptions' array.")

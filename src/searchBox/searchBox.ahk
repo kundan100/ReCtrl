@@ -13,6 +13,8 @@
 #Include actions\browser\browserTabs.ahk
 #Include actions\browser\browserLaunch.ahk
 #Include actions\browser\browserDetails.ahk
+#Include actions\browser\browserLoginUia.ahk
+#Include actions\browser\browserLogin.ahk
 #Include actions\browser\browserActions.ahk
 #Include actions\desktopApp\desktopAppWindows.ahk
 #Include actions\desktopApp\desktopAppLaunch.ahk
