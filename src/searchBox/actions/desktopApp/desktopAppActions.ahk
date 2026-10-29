@@ -7,6 +7,7 @@
 ;   appIdentifier, multiWinIdentifier, fileTitle, filePath
 ; openOrFocus: filePath = app exe (optional if known default).
 ; openFile:    filePath = document path (opened with appIdentifier, e.g. Notepad++).
+; showTip:     details about the app window under ReCtrl (DesktopAppTip module).
 class DesktopAppActions {
     ; Entry from searchBoxHandler for actionType "desktopAppActions".
     static Run(menuItem, ownerHwnd := 0) {
@@ -76,6 +77,9 @@ class DesktopAppActions {
                     throw Error("desktopAppActions openFile requires action.filePath (document path).")
 
                 return DesktopAppActions.OpenOrFocusFile(appIdentifier, filePath, fileTitle)
+
+            case "showTip":
+                return DesktopAppTip.Show(ownerHwnd)
 
             default:
                 throw Error("Unknown desktopAppActions operation: " operation)

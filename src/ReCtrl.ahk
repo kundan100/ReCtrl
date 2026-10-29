@@ -24,6 +24,7 @@ try {
 #Include sysTray\sysTraySetup.ahk
 ; Toast API (uses ConfigAppSettings.FUNCTIONAL). Must load before mainApp so searchActions local-overlay toast works.
 #Include shared\notify\notify.ahk
+#Include shared\customPopup.ahk
 ; #Include currentWin\currentWinInfo.ahk  ; Disconnected - keeping for future reference
 ; #Include mainSearchBox\mainSearchBox.ahk
 #Include mainApp\mainApp.ahk

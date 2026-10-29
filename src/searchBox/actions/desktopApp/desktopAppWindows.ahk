@@ -61,6 +61,8 @@ class DesktopAppWindows {
                 return "ms-teams.exe"
             case "Outlook", "Microsoft Outlook":
                 return "OUTLOOK.EXE"
+            case "OneNote", "Microsoft OneNote":
+                return "ONENOTE.EXE"
             case "Notepad++", "notepad++":
                 return "notepad++.exe"
             default:

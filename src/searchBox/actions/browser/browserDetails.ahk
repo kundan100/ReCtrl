@@ -243,6 +243,7 @@ class BrowserDetails {
         return result
     }
 
+    ; Full text for standalone browser tip (all sections).
     static FormatBrowserDetails(details) {
         if !IsObject(details) {
             return "Unable to collect browser details."
@@ -261,29 +262,49 @@ class BrowserDetails {
             return BrowserDetails.JoinLines(lines)
         }
 
-        lines.Push("")
-        lines.Push("--- Target window ---")
-        lines.Push("Title: " BrowserDetails.StrOr(details, "titleLive", BrowserDetails.StrOr(details, "title")))
-        lines.Push("HWND: " BrowserDetails.StrOr(details, "hwnd"))
-        lines.Push("Window PID: " BrowserDetails.StrOr(details, "pid"))
-        mainPid := BrowserDetails.StrOr(details, "profileMainPid", "")
-        if (mainPid != "" && mainPid != BrowserDetails.StrOr(details, "pid"))
-            lines.Push("Browser main PID: " mainPid)
+        ; Window sections from DesktopAppDetails; URL stays under Identity for this tip.
+        DesktopAppDetails.AppendTargetWindowSection(lines, details)
+        DesktopAppDetails.AppendIdentitySection(lines, details)
+        BrowserDetails.AppendUrlLines(lines, details)
+        BrowserDetails.AppendProfileSection(lines, details)
+        DesktopAppDetails.AppendWindowStateSection(lines, details)
+        DesktopAppDetails.AppendGeometrySection(lines, details)
+        DesktopAppDetails.AppendControlsSection(lines, details)
+        return BrowserDetails.JoinLines(lines)
+    }
 
+    ; Browser-only bits for Tip "Additional details (browser)".
+    static AppendBrowserOnlySections(lines, details) {
+        lines.Push("Browser: " BrowserDetails.StrOr(details, "browserName", "(unknown)"))
+        BrowserDetails.AppendUrlSection(lines, details)
+        BrowserDetails.AppendProfileSection(lines, details)
+    }
+
+    static AppendSectionHeader(lines, title) {
         lines.Push("")
-        lines.Push("--- Identity ---")
-        lines.Push("Exe: " BrowserDetails.StrOr(details, "exeLive", BrowserDetails.StrOr(details, "exe")))
-        lines.Push("Path: " BrowserDetails.StrOr(details, "processPath"))
-        lines.Push("Class: " BrowserDetails.StrOr(details, "classLive", BrowserDetails.StrOr(details, "class")))
+        lines.Push("--- " title " ---")
+    }
+
+    static AppendUrlSection(lines, details) {
+        BrowserDetails.AppendSectionHeader(lines, "URL")
+        BrowserDetails.AppendUrlLines(lines, details)
+    }
+
+    static AppendUrlLines(lines, details) {
         urlText := details.Has("url") ? Trim(String(details["url"])) : ""
         lines.Push("URL: " (urlText != "" ? urlText : "(not available)"))
         if (urlText != "" && details.Has("urlSource") && details["urlSource"] != "")
             lines.Push("URL source: " details["urlSource"])
         if (urlText = "" && details.Has("urlNote") && details["urlNote"] != "")
             lines.Push("URL note: " details["urlNote"])
+    }
 
-        lines.Push("")
-        lines.Push("--- Profile ---")
+    static AppendProfileSection(lines, details) {
+        BrowserDetails.AppendSectionHeader(lines, "Profile")
+        mainPid := BrowserDetails.StrOr(details, "profileMainPid", "")
+        if (mainPid != "" && mainPid != BrowserDetails.StrOr(details, "pid"))
+            lines.Push("Browser main PID: " mainPid)
+
         signedIn := details.Has("profileSignedIn") && details["profileSignedIn"]
         lines.Push("Signed in: " (signedIn ? "yes" : "no"))
         if signedIn {
@@ -303,36 +324,10 @@ class BrowserDetails {
         if details.Has("profileNote") && details["profileNote"] != ""
             lines.Push("Profile note: " details["profileNote"])
         cmd := details.Has("profileCommandLine") ? String(details["profileCommandLine"]) : ""
-        if (cmd != "") {
+        if (cmd != "")
             lines.Push("Profile switches: " BrowserProfile.SummarizeProfileSwitches(cmd))
-        } else {
+        else
             lines.Push("Profile switches: (command line unavailable)")
-        }
-
-        lines.Push("")
-        lines.Push("--- Window state ---")
-        lines.Push("Valid: " BrowserDetails.BoolStr(details, "windowValid"))
-        lines.Push("Visible: " BrowserDetails.BoolStr(details, "isVisible"))
-        lines.Push("Minimized: " BrowserDetails.BoolStr(details, "isMinimized"))
-        lines.Push("Maximized: " BrowserDetails.BoolStr(details, "isZoomed"))
-        lines.Push("MinMax: " BrowserDetails.StrOr(details, "minMax") " (" BrowserDetails.StrOr(details, "minMaxLabel") ")")
-        lines.Push("Transparent: " BrowserDetails.StrOr(details, "transparent", "(opaque/default)"))
-        lines.Push("Style: " BrowserDetails.StrOr(details, "style"))
-        lines.Push("ExStyle: " BrowserDetails.StrOr(details, "exStyle"))
-
-        lines.Push("")
-        lines.Push("--- Geometry ---")
-        lines.Push("Pos: " BrowserDetails.StrOr(details, "x") ", " BrowserDetails.StrOr(details, "y"))
-        lines.Push("Size: " BrowserDetails.StrOr(details, "width") " x " BrowserDetails.StrOr(details, "height"))
-        lines.Push("Client pos: " BrowserDetails.StrOr(details, "clientX") ", " BrowserDetails.StrOr(details, "clientY"))
-        lines.Push("Client size: " BrowserDetails.StrOr(details, "clientWidth") " x " BrowserDetails.StrOr(details, "clientHeight"))
-
-        lines.Push("")
-        lines.Push("--- Controls ---")
-        lines.Push("Control count: " BrowserDetails.StrOr(details, "controlCount"))
-        lines.Push("Active control: " BrowserDetails.StrOr(details, "activeControl", "(none)"))
-
-        return BrowserDetails.JoinLines(lines)
     }
 
     static MinMaxLabel(minMax) {

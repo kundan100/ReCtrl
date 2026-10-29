@@ -102,6 +102,12 @@ class DesktopAppLaunch {
                     pf "\Microsoft Office\root\Office16\OUTLOOK.EXE",
                     pf86 "\Microsoft Office\root\Office16\OUTLOOK.EXE"
                 ]
+            case "OneNote", "Microsoft OneNote":
+                return [
+                    pf "\Microsoft Office\root\Office16\ONENOTE.EXE",
+                    pf86 "\Microsoft Office\root\Office16\ONENOTE.EXE",
+                    localApp "\Microsoft\WindowsApps\onenote.exe"
+                ]
             case "Notepad++", "notepad++":
                 return [
                     pf "\Notepad++\notepad++.exe",

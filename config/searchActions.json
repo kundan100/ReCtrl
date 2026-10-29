@@ -227,6 +227,16 @@
           "keywords": ["demos", "tips", "demo", "temporary", "message"],
           "children": [
             {
+              "id": "desktop-app-tip",
+              "label": "Tip",
+              "action": {
+                "actionType": "desktopAppActions",
+                "operation": "showTip"
+              },
+              "context": [],
+              "keywords": ["tip", "desktop", "app", "details", "info"]
+            },
+            {
               "id": "browser-demo",
               "label": "Browser tip",
               "action": {
@@ -332,7 +342,7 @@
         },
         {
           "id": "open-ms-teams",
-          "label": "MS Teams",
+          "label": "Open MS-Teams",
           "action": {
             "actionType": "desktopAppActions",
             "operation": "openOrFocus",
@@ -344,6 +354,21 @@
           },
           "context": [],
           "keywords": ["teams", "ms", "chat", "open", "app"]
+        },
+        {
+          "id": "open-ms-onenote",
+          "label": "Open MS-OneNote",
+          "action": {
+            "actionType": "desktopAppActions",
+            "operation": "openOrFocus",
+            "appIdentifier": "OneNote",
+            "multiWinIdentifier": "",
+            "fileTitle": "",
+            "filePath": "%ProgramFiles%\\Microsoft Office\\root\\Office16\\ONENOTE.EXE",
+            "focusThisWinIfMainOverideALlows": true
+          },
+          "context": [],
+          "keywords": ["onenote", "ms", "open", "app"]
         }
       ]
     },
