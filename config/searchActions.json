@@ -534,7 +534,7 @@
         "fileTitle": "Figma"
       },
       "context": ["browser__specific"],
-      "keywords": ["open", "oreo", "fisgma stars", "browser"]
+      "keywords": ["open", "oreo", "figma stars", "browser"]
     },
     {
       "id": "oreo-login-shellapp-localhost",
@@ -618,7 +618,7 @@
         "focusThisWinIfMainOverideALlows": true
       },
       "context": [],
-      "keywords": ["json", "notepad++"]
+      "keywords": ["open file json", "notepad++", "daily log track"]
     },
     {
       "id": "group-clipboard",
