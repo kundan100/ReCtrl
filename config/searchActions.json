@@ -481,6 +481,20 @@
       "keywords": ["open", "oreo", "release", "timeline", "browser"]
     },
     {
+      "id": "open-oreo-release-notes",
+      "label": "Oreo release notes",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Microsoft Edge",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "release notes", "browser"]
+    },
+    {
       "id": "open-oreo-tracker",
       "label": "Oreo tracker",
       "action": {
@@ -493,6 +507,20 @@
       },
       "context": ["browser__specific"],
       "keywords": ["open", "oreo", "tracker", "browser"]
+    },
+    {
+      "id": "open-oreo-tracker-kk",
+      "label": "Oreo tracker (kk)",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "tracker", "browser", "kk"]
     },
     {
       "id": "open-oreo-figma-stars",
