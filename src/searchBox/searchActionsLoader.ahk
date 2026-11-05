@@ -6,7 +6,7 @@ class SearchActionsConfig {
     ; Path to user-editable JSON (relative to script root / index.ahk folder).
     ; Tunables like DEFAULT_RECENT_LIMIT live only in that JSON (searchConfig).
     static ACTIONS_JSON_PATH := A_ScriptDir "\config\searchActions.json"
-    ; Populated by SearchActionsLoader.LoadFromFile after local merge (LOGIN_DEPENDENCY_PATH, …).
+    ; Populated by SearchActionsLoader.LoadFromFile after local merge (LOCAL_LOGIN_DEPENDENCY_PATH, …).
     static LocalConfig := Map()
     ; Shared operation bundles (e.g. reusable__oreo-login-shellapp); not searchable menu items.
     static Reusables := Map()

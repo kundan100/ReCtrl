@@ -5,7 +5,7 @@
 ; action.operation: string or array of strings (run in order).
 ;   Builtin: showTip | openOrFocusByTitle | openOrFocusByTitleAndUrl | login
 ;   Reusable: "reusable__…" → look up searchActions.reusables[id] (loginSteps etc.).
-;   Caller action id is kept for LOGIN_DEPENDENCY_PATH lookup (env-specific creds).
+;   Caller action id is kept for LOCAL_LOGIN_DEPENDENCY_PATH lookup (env-specific creds).
 ; Implementations live in sibling modules: browserDetails / browserTabs / browserLaunch / etc.
 class BrowserActions {
     ; Entry from searchBoxHandler for actionType "browserActions".

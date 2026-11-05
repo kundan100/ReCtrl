@@ -87,7 +87,7 @@ ReCtrl/
 	- `browserActions.ahk` > `BrowserActions.Run`
 	- `browserActions.ahk` > `GetActionConfig / CfgStr`
 	- `browserActions.ahk` > `operation` (string or array) → `RunOne` / `OpenOrFocus…` / `login`
-	- `browserLogin.ahk` > `loginSteps` (often via `reusables.reusable__…`) + `localConfig.LOGIN_DEPENDENCY_PATH` (env id → credential array; 2+ → pick list)
+	- `browserLogin.ahk` > `loginSteps` (often via `reusables.reusable__…`) + `localConfig.LOCAL_LOGIN_DEPENDENCY_PATH` (env id → credential array; 2+ → pick list)
 	- `browserLoginUia.ahk` > find / textfieldEntry / click (UIA)
 4. Focus tab (if found)
 	- `browserTabs.ahk` > `BrowserTabs.FocusByTitle` (optional urlNeedle for title+URL)

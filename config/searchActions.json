@@ -1,7 +1,7 @@
 {
   "localConfig": {
     "LOCAL_SEARCH_ACTIONS_PATH": "%USERPROFILE%\\__cyk\\ahk\\ReCtrl\\localSearchActions.json",
-    "LOGIN_DEPENDENCY_PATH": "%USERPROFILE%\\__cyk\\ahk\\ReCtrl\\oreoLogins.json"
+    "LOCAL_LOGIN_DEPENDENCY_PATH": ""
   },
   "searchConfig": {
     "DEFAULT_RECENT_LIMIT": 10,

@@ -1,9 +1,9 @@
 #Requires AutoHotkey v2
 
-; Declarative login via loginSteps + localConfig.LOGIN_DEPENDENCY_PATH.
+; Declarative login via loginSteps + localConfig.LOCAL_LOGIN_DEPENDENCY_PATH.
 ;
 ; localConfig:
-;   "LOGIN_DEPENDENCY_PATH": "%USERPROFILE%\\__cyk\\ahk\\ReCtrl\\oreoLogins.json"
+;   "LOCAL_LOGIN_DEPENDENCY_PATH": "%USERPROFILE%\\__cyk\\ahk\\ReCtrl\\oreoLogins.json"
 ; Prefer shared steps under root reusables (e.g. reusable__oreo-login-shellapp), referenced from
 ; action.operation. Inline action.loginSteps still works for one-offs.
 ;
@@ -199,18 +199,18 @@ class BrowserLogin {
         return (k = "" || k = "NA" || k = "N/A" || k = "NOTAPPLICABLE")
     }
 
-    ; Resolve localConfig.LOGIN_DEPENDENCY_PATH → one credential Map for this actionId.
+    ; Resolve localConfig.LOCAL_LOGIN_DEPENDENCY_PATH → one credential Map for this actionId.
     ; Entry must be a non-empty array of credential objects.
     ; required=false → returns "" when path/entry missing or user cancels the picker.
     static LoadLoginDependency(actionId, required := true) {
         actionId := Trim(actionId)
         depPath := ""
         lc := SearchActionsConfig.LocalConfig
-        if (lc is Map) && lc.Has("LOGIN_DEPENDENCY_PATH")
-            depPath := Trim(String(lc["LOGIN_DEPENDENCY_PATH"]))
+        if (lc is Map) && lc.Has("LOCAL_LOGIN_DEPENDENCY_PATH")
+            depPath := Trim(String(lc["LOCAL_LOGIN_DEPENDENCY_PATH"]))
         if (depPath = "") {
             if required
-                throw Error("browserActions login requires localConfig.LOGIN_DEPENDENCY_PATH (path to oreoLogins.json).")
+                throw Error("browserActions login requires localConfig.LOCAL_LOGIN_DEPENDENCY_PATH (path to oreoLogins.json).")
             return ""
         }
         if (actionId = "") {
@@ -222,7 +222,7 @@ class BrowserLogin {
         path := LocalSearchActionsMerge.ExpandEnvPath(depPath)
         if (path = "" || !FileExist(path)) {
             if required
-                throw Error("browserActions login: LOGIN_DEPENDENCY_PATH file not found:`n" path)
+                throw Error("browserActions login: LOCAL_LOGIN_DEPENDENCY_PATH file not found:`n" path)
             return ""
         }
 
@@ -233,7 +233,7 @@ class BrowserLogin {
             root := JsonParse.Parse(text)
         } catch as err {
             if required
-                throw Error("browserActions login: failed to load LOGIN_DEPENDENCY_PATH:`n" path "`n`n" err.Message)
+                throw Error("browserActions login: failed to load LOCAL_LOGIN_DEPENDENCY_PATH:`n" path "`n`n" err.Message)
             return ""
         }
 
