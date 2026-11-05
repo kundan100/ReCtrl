@@ -410,19 +410,34 @@
       "context": ["browser__specific"],
       "keywords": ["open", "oreo", "jiraTicket", "browser", "jira"]
     },
+    
     {
-      "id": "open-oreo-scrumBoard",
-      "label": "Oreo scrumBoard",
+      "id": "open-oreo-release-plan",
+      "label": "Oreo release plan",
       "action": {
         "actionType": "browserActions",
         "operation": "openOrFocusByTitle",
-        "appIdentifier": "Google Chrome",
+        "appIdentifier": "Microsoft Edge",
         "multiWinIdentifier": "",
         "filePath": "",
         "fileTitle": ""
       },
       "context": ["browser__specific"],
-      "keywords": ["open", "oreo", "scrumBoard", "sprintBoard", "browser", "jira"]
+      "keywords": ["open", "oreo", "release", "timeline", "browser"]
+    },
+    {
+      "id": "open-oreo-release-notes",
+      "label": "Oreo release notes",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Microsoft Edge",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "release notes", "browser"]
     },
     {
       "id": "open-oreo-roadmap-PI3.26",
@@ -453,6 +468,20 @@
       "keywords": ["open", "oreo", "roadmap PI4.26", "browser", "jira"]
     },
     {
+      "id": "open-oreo-scrumBoard",
+      "label": "Oreo scrumBoard",
+      "action": {
+        "actionType": "browserActions",
+        "operation": "openOrFocusByTitle",
+        "appIdentifier": "Google Chrome",
+        "multiWinIdentifier": "",
+        "filePath": "",
+        "fileTitle": ""
+      },
+      "context": ["browser__specific"],
+      "keywords": ["open", "oreo", "scrumBoard", "sprintBoard", "browser", "jira"]
+    },
+    {
       "id": "open-oreo-ATL",
       "label": "Oreo ATL",
       "action": {
@@ -465,34 +494,6 @@
       },
       "context": ["browser__specific"],
       "keywords": ["open", "oreo", "atl", "browser", "jira"]
-    },
-    {
-      "id": "open-oreo-release-plan",
-      "label": "Oreo release plan",
-      "action": {
-        "actionType": "browserActions",
-        "operation": "openOrFocusByTitle",
-        "appIdentifier": "Microsoft Edge",
-        "multiWinIdentifier": "",
-        "filePath": "",
-        "fileTitle": ""
-      },
-      "context": ["browser__specific"],
-      "keywords": ["open", "oreo", "release", "timeline", "browser"]
-    },
-    {
-      "id": "open-oreo-release-notes",
-      "label": "Oreo release notes",
-      "action": {
-        "actionType": "browserActions",
-        "operation": "openOrFocusByTitle",
-        "appIdentifier": "Microsoft Edge",
-        "multiWinIdentifier": "",
-        "filePath": "",
-        "fileTitle": ""
-      },
-      "context": ["browser__specific"],
-      "keywords": ["open", "oreo", "release notes", "browser"]
     },
     {
       "id": "open-oreo-tracker",
